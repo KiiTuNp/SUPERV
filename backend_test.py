@@ -2339,8 +2339,7 @@ class VoteSecretTester:
                 # Create and complete a poll
                 poll_data = {
                     "question": "Test sans scrutateurs ?",
-                    "options": ["Oui", "Non"],
-                    "show_results_real_time": True
+                    "options": ["Oui", "Non"]
                 }
                 
                 response = self.session.post(f"{BASE_URL}/meetings/{no_scrutator_meeting['id']}/polls", json=poll_data)
