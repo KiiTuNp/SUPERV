@@ -2023,7 +2023,7 @@ function App() {
         if (!isScrutator) {
           alert(`✅ Génération du rapport approuvée par les scrutateurs !\n\n${data.yes_votes} votes positifs sur ${data.majority_needed} requis.`);
           // Déclencher automatiquement le téléchargement
-          downloadReportDirect();
+          window.location.href = `${API}/meetings/${meeting.id}/report`;
         }
       }
       
