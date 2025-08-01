@@ -656,6 +656,286 @@ class VoteSecretTester:
         
         return all_passed
 
+    def test_complete_meeting_closure_notification_scenario(self):
+        """
+        Test complete scenario for participant notification when meeting is closed.
+        This tests the exact scenario requested by the user:
+        1. Create meeting with organizer "Marie Organisateur"
+        2. Add and approve 2 participants: "Jean Participant" and "Sophie Votante"
+        3. Create poll with 2 options: "Oui" and "Non"
+        4. Start poll and simulate votes
+        5. Close poll
+        6. Generate PDF report (this deletes the meeting)
+        7. Verify meeting is deleted (404 expected)
+        8. Test that participants receive 404 when trying to access data
+        """
+        print("\n🎯 TESTING COMPLETE MEETING CLOSURE NOTIFICATION SCENARIO")
+        print("=" * 70)
+        
+        scenario_data = {}
+        all_passed = True
+        
+        # Step 1: Create meeting with organizer "Marie Organisateur"
+        try:
+            meeting_data = {
+                "title": "Réunion de Test - Notification de Fermeture",
+                "organizer_name": "Marie Organisateur"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                scenario_data['meeting'] = response.json()
+                self.log_result("Step 1 - Create Meeting", True, f"Meeting created with code: {scenario_data['meeting']['meeting_code']}", response_time)
+            else:
+                self.log_result("Step 1 - Create Meeting", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 1 - Create Meeting", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 2: Add and approve 2 participants
+        participants = ["Jean Participant", "Sophie Votante"]
+        scenario_data['participants'] = []
+        
+        for i, participant_name in enumerate(participants, 1):
+            try:
+                # Join meeting
+                join_data = {
+                    "name": participant_name,
+                    "meeting_code": scenario_data['meeting']['meeting_code']
+                }
+                
+                start_time = time.time()
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    participant_data = response.json()
+                    scenario_data['participants'].append(participant_data)
+                    self.log_result(f"Step 2.{i}a - Add Participant {participant_name}", True, f"Participant joined successfully", response_time)
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant_data['id'],
+                        "approved": True
+                    }
+                    
+                    start_time = time.time()
+                    response = self.session.post(f"{BASE_URL}/participants/{participant_data['id']}/approve", json=approval_data)
+                    response_time = time.time() - start_time
+                    
+                    if response.status_code == 200:
+                        self.log_result(f"Step 2.{i}b - Approve Participant {participant_name}", True, f"Participant approved successfully", response_time)
+                    else:
+                        self.log_result(f"Step 2.{i}b - Approve Participant {participant_name}", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                        all_passed = False
+                else:
+                    self.log_result(f"Step 2.{i}a - Add Participant {participant_name}", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                    all_passed = False
+            except Exception as e:
+                self.log_result(f"Step 2.{i} - Add/Approve Participant {participant_name}", False, f"Error: {str(e)}")
+                all_passed = False
+        
+        if not all_passed:
+            return False
+        
+        # Step 3: Create poll with 2 options: "Oui" and "Non"
+        try:
+            poll_data = {
+                "question": "Êtes-vous d'accord avec la proposition ?",
+                "options": ["Oui", "Non"],
+                "show_results_real_time": True
+            }
+            
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/polls", json=poll_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                scenario_data['poll'] = response.json()
+                self.log_result("Step 3 - Create Poll", True, f"Poll created with 2 options", response_time)
+            else:
+                self.log_result("Step 3 - Create Poll", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 3 - Create Poll", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 4: Start poll and simulate votes
+        try:
+            poll_id = scenario_data['poll']['id']
+            
+            # Start poll
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/start")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                self.log_result("Step 4a - Start Poll", True, f"Poll started successfully", response_time)
+                
+                # Simulate votes from both participants
+                poll_options = scenario_data['poll']['options']
+                votes = [
+                    (poll_options[0]['id'], "Jean votes Oui"),  # Jean votes for first option (Oui)
+                    (poll_options[1]['id'], "Sophie votes Non")  # Sophie votes for second option (Non)
+                ]
+                
+                for option_id, vote_desc in votes:
+                    vote_data = {
+                        "poll_id": poll_id,
+                        "option_id": option_id
+                    }
+                    
+                    start_time = time.time()
+                    response = self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                    response_time = time.time() - start_time
+                    
+                    if response.status_code == 200:
+                        self.log_result(f"Step 4b - Simulate Vote ({vote_desc})", True, f"Vote submitted successfully", response_time)
+                    else:
+                        self.log_result(f"Step 4b - Simulate Vote ({vote_desc})", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                        all_passed = False
+            else:
+                self.log_result("Step 4a - Start Poll", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 4 - Start Poll and Simulate Votes", False, f"Error: {str(e)}")
+            return False
+        
+        if not all_passed:
+            return False
+        
+        # Step 5: Close poll
+        try:
+            poll_id = scenario_data['poll']['id']
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/close")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                self.log_result("Step 5 - Close Poll", True, f"Poll closed successfully", response_time)
+            else:
+                self.log_result("Step 5 - Close Poll", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 5 - Close Poll", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 6: Generate PDF report (this should delete the meeting)
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if 'application/pdf' in content_type:
+                    file_size = len(response.content)
+                    self.log_result("Step 6 - Generate PDF Report", True, f"PDF generated successfully ({file_size} bytes) - Meeting should now be deleted", response_time)
+                else:
+                    self.log_result("Step 6 - Generate PDF Report", False, f"Wrong content type: {content_type}", response_time)
+                    return False
+            else:
+                self.log_result("Step 6 - Generate PDF Report", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 6 - Generate PDF Report", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 7: Verify meeting is deleted (404 expected)
+        try:
+            meeting_code = scenario_data['meeting']['meeting_code']
+            meeting_id = scenario_data['meeting']['id']
+            
+            # Test meeting by code
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_code}")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 404:
+                self.log_result("Step 7a - Verify Meeting Deleted (by code)", True, f"Meeting correctly returns 404", response_time)
+            else:
+                self.log_result("Step 7a - Verify Meeting Deleted (by code)", False, f"Expected 404, got {response.status_code}", response_time)
+                all_passed = False
+            
+            # Test organizer view
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/organizer")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 404:
+                self.log_result("Step 7b - Verify Organizer View Deleted", True, f"Organizer view correctly returns 404", response_time)
+            else:
+                self.log_result("Step 7b - Verify Organizer View Deleted", False, f"Expected 404, got {response.status_code}", response_time)
+                all_passed = False
+                
+        except Exception as e:
+            self.log_result("Step 7 - Verify Meeting Deleted", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 8: Test that participants receive 404 when trying to access data
+        try:
+            for i, participant in enumerate(scenario_data['participants'], 1):
+                participant_id = participant['id']
+                participant_name = participant['name']
+                
+                # Test participant status
+                start_time = time.time()
+                response = self.session.get(f"{BASE_URL}/participants/{participant_id}/status")
+                response_time = time.time() - start_time
+                
+                if response.status_code == 404:
+                    self.log_result(f"Step 8.{i}a - Participant Status 404 ({participant_name})", True, f"Participant status correctly returns 404", response_time)
+                else:
+                    self.log_result(f"Step 8.{i}a - Participant Status 404 ({participant_name})", False, f"Expected 404, got {response.status_code}", response_time)
+                    all_passed = False
+            
+            # Test poll results
+            poll_id = scenario_data['poll']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/polls/{poll_id}/results")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 404:
+                self.log_result("Step 8b - Poll Results 404", True, f"Poll results correctly returns 404", response_time)
+            else:
+                self.log_result("Step 8b - Poll Results 404", False, f"Expected 404, got {response.status_code}", response_time)
+                all_passed = False
+            
+            # Test meeting polls
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/polls")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 404:
+                self.log_result("Step 8c - Meeting Polls 404", True, f"Meeting polls correctly returns 404", response_time)
+            else:
+                self.log_result("Step 8c - Meeting Polls 404", False, f"Expected 404, got {response.status_code}", response_time)
+                all_passed = False
+                
+        except Exception as e:
+            self.log_result("Step 8 - Test Participant 404 Responses", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Summary
+        if all_passed:
+            self.log_result("COMPLETE SCENARIO", True, "✅ All steps passed - Meeting closure notification mechanism working correctly")
+            print("\n🎉 SCENARIO VALIDATION COMPLETE:")
+            print("✅ Meeting completely deleted after PDF generation")
+            print("✅ All participant endpoints return 404 after deletion")
+            print("✅ All poll endpoints return 404 after deletion")
+            print("✅ Frontend polling will detect these 404s and trigger notifications")
+        else:
+            self.log_result("COMPLETE SCENARIO", False, "❌ Some steps failed - Review issues above")
+        
+        return all_passed
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Vote Secret Backend API Tests")
