@@ -1291,49 +1291,49 @@ function App() {
               const showResults = hasVoted || (poll.show_results_real_time && poll.status !== "draft");
               
               return (
-                <Card key={poll.id} className="glass-card border-0 shadow-lg">
-                  <CardHeader className={`rounded-t-xl text-white ${
+                <div key={poll.id} className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+                  <div className={`p-6 text-white ${
                     poll.status === "active" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
                     poll.status === "closed" ? "bg-gradient-to-r from-slate-500 to-slate-600" :
                     "bg-gradient-to-r from-blue-400 to-blue-500"
                   }`}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <CardTitle className="text-lg">{poll.question}</CardTitle>
+                      <h2 className="text-lg font-semibold">{poll.question}</h2>
                       <div className="flex items-center gap-2">
                         {poll.status === "active" && (
-                          <Badge className="bg-white bg-opacity-20 text-white">
-                            <Clock className="w-3 h-3 mr-1" />
+                          <div className="bg-green-500 text-white px-2 py-1 rounded-full text-sm flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
                             En cours
-                          </Badge>
+                          </div>
                         )}
                         {poll.status === "closed" && (
-                          <Badge className="bg-white bg-opacity-20 text-white">
+                          <div className="bg-slate-500 text-white px-2 py-1 rounded-full text-sm">
                             Fermé
-                          </Badge>
+                          </div>
                         )}
                         {poll.status === "draft" && (
-                          <Badge className="bg-white bg-opacity-20 text-white">
+                          <div className="bg-white bg-opacity-20 text-white px-2 py-1 rounded-full text-sm">
                             À venir
-                          </Badge>
+                          </div>
                         )}
                       </div>
                     </div>
                     {canVote && (
-                      <CardDescription className="text-blue-100 font-medium">
+                      <p className="text-blue-100 font-medium mt-2">
                         🔒 Votez pour voir les résultats
-                      </CardDescription>
+                      </p>
                     )}
                     {hasVoted && (
-                      <CardDescription className="text-blue-100 font-medium">
+                      <p className="text-blue-100 font-medium mt-2">
                         ✅ Vous avez voté - Résultats {poll.show_results_real_time ? "en temps réel" : "finaux"}
-                      </CardDescription>
+                      </p>
                     )}
                     {!canVote && !hasVoted && poll.status !== "active" && (
-                      <CardDescription className="text-blue-100">
+                      <p className="text-blue-100 mt-2">
                         {poll.status === "closed" ? "Sondage terminé" : "Sondage pas encore lancé"}
-                      </CardDescription>
+                      </p>
                     )}
-                  </CardHeader>
+                  </div>
                   <CardContent className="p-6">
                     {canVote ? (
                       <div className="space-y-3">
