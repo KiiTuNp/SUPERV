@@ -286,16 +286,37 @@ SSL_EMAIL=your-email@domain.com
 
 ### Problèmes Communs et Solutions
 
+#### 🔧 Diagnostic Automatique (Recommandé)
+```bash
+# Diagnostic complet et solutions automatiques
+python3 diagnostic.py --fix
+```
+
 #### Service ne démarre pas
 ```bash
-# Vérifier status
-sudo systemctl status vote-secret
+# 1. Vérifier l'environnement et statut services
+python3 service_manager.py status
 
-# Voir logs détaillés  
+# 2. Dans environnement SystemD
+sudo systemctl status vote-secret
 sudo journalctl -xeu vote-secret
 
-# Tester configuration gunicorn
-sudo -u vote-secret /opt/vote-secret/venv/bin/gunicorn --check-config --config /opt/vote-secret/config/gunicorn.conf.py server:app
+# 3. Dans environnement Supervisor (conteneurisé)  
+supervisorctl status backend frontend
+python3 service_manager.py logs
+
+# 4. Redémarrer selon l'environnement
+python3 service_manager.py restart
+```
+
+#### Erreurs de démarrage service
+```bash
+# Erreur: "Job for vote-secret.service failed"
+# → Environnement conteneurisé utilisant Supervisor au lieu de SystemD
+
+# Solution automatique
+python3 service_manager.py status     # Vérifier statut réel
+python3 diagnostic.py --fix           # Corrections automatiques
 ```
 
 #### Erreurs Nginx
