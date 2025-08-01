@@ -717,7 +717,6 @@ function App() {
                   );
                 })}
               </div>
-              </div>
             ) : (
               <Card className="glass-card border-0 shadow-lg">
                 <CardContent className="text-center py-16">
