@@ -1120,7 +1120,7 @@ function App() {
                             </div>
                           </Button>
                         ))}
-                        <div className="mt-6 glass-card bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 p-4 rounded-xl">
+                        <div className="mt-6 glass-card bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-4 rounded-xl">
                           <p className="text-sm text-blue-700 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
                             <span className="font-semibold">Vote secret:</span> 
