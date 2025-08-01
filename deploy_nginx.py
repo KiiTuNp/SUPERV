@@ -265,7 +265,7 @@ class NginxSSLSetup:
             return prompt_continue()
 
     def _setup_letsencrypt(self) -> bool:
-        """Configuration Let's Encrypt"""
+        """Configuration Let's Encrypt avec approche en deux phases"""
         print_info("Configuration Let's Encrypt...")
         
         domain = self.config.get('DOMAIN')
@@ -299,17 +299,24 @@ class NginxSSLSetup:
             return False
         
         for command, description in install_commands:
-            success, _, _ = run_command(command, description, check_success=False)
+            # Les installations peuvent nécessiter interaction
+            interactive = any(cmd in command for cmd in ['apt install', 'yum install', 'dnf install'])
+            success, _, _ = run_command(command, description, check_success=False, interactive=interactive)
             if not success:
                 print_warning(f"Erreur: {description}")
         
-        # Vérification que Nginx fonctionne
+        # Créer le répertoire pour le challenge ACME
+        success, _, _ = run_command("sudo mkdir -p /var/www/html", "Création répertoire challenge")
+        if not success:
+            print_warning("Impossible de créer le répertoire challenge")
+        
+        # Vérifier que Nginx fonctionne avec la configuration HTTP
         success, _, _ = run_command("sudo systemctl reload nginx", "Rechargement Nginx")
         if not success:
-            print_error("Nginx ne fonctionne pas correctement")
+            print_error("Nginx ne fonctionne pas correctement avec la configuration HTTP")
             return False
         
-        # Obtention du certificat
+        # Obtention du certificat SANS modification automatique de la configuration
         print_info(f"Obtention du certificat SSL pour {domain}...")
         print_warning("Assurez-vous que le domaine pointe vers ce serveur !")
         
@@ -317,7 +324,8 @@ class NginxSSLSetup:
             print_error("Configuration DNS requise avant de continuer")
             return False
         
-        certbot_command = f"sudo certbot --nginx -d {domain} --email {email} --agree-tos --non-interactive"
+        # Utiliser certbot certonly (sans --nginx) pour éviter la modification automatique
+        certbot_command = f"sudo certbot certonly --webroot -w /var/www/html -d {domain} --email {email} --agree-tos --non-interactive"
         success, stdout, stderr = run_command(certbot_command, "Obtention certificat SSL")
         
         if not success:
@@ -327,12 +335,57 @@ class NginxSSLSetup:
             print("1. Le domaine pointe vers ce serveur")
             print("2. Les ports 80 et 443 sont ouverts")
             print("3. Aucun autre service n'utilise ces ports")
+            print("4. Nginx est accessible en HTTP")
+            return False
+        
+        # Maintenant, reconfigurer Nginx avec SSL en utilisant la configuration SSL générée
+        print_info("Configuration Nginx avec SSL...")
+        
+        # Charger la configuration avec SSL depuis deploy_environment.py
+        try:
+            import sys
+            sys.path.append(str(self.project_root))
+            from deploy_environment import EnvironmentSetup
+            
+            env_setup = EnvironmentSetup()
+            env_setup.config = self.config
+            ssl_config_content = env_setup._generate_nginx_config_ssl()
+            
+            # Écrire la configuration SSL
+            ssl_config_file = self.project_root / 'config' / 'nginx-ssl.conf'
+            ssl_config_file.parent.mkdir(exist_ok=True)
+            ssl_config_file.write_text(ssl_config_content)
+            
+            # Copier la nouvelle configuration
+            success, _, _ = run_command(
+                f"sudo cp {ssl_config_file} /etc/nginx/sites-available/vote-secret",
+                "Mise à jour configuration SSL"
+            )
+            if not success:
+                return False
+            
+            # Tester la nouvelle configuration
+            success, stdout, stderr = run_command("sudo nginx -t", "Test configuration SSL")
+            if not success:
+                print_error("Configuration SSL invalide:")
+                print(f"{Colors.FAIL}{stderr}{Colors.ENDC}")
+                return False
+            
+            # Recharger Nginx avec SSL
+            success, _, _ = run_command("sudo systemctl reload nginx", "Rechargement Nginx avec SSL")
+            if not success:
+                print_error("Échec rechargement Nginx avec SSL")
+                return False
+            
+        except Exception as e:
+            print_error(f"Erreur configuration SSL: {str(e)}")
             return False
         
         # Configuration du renouvellement automatique
         success, _, _ = run_command("sudo systemctl enable certbot.timer", "Activation renouvellement auto", check_success=False)
         
-        print_success("Certificat SSL Let's Encrypt configuré")
+        print_success("Certificat SSL Let's Encrypt configuré avec succès")
+        print_info("HTTPS est maintenant actif et HTTP redirige vers HTTPS")
         return True
 
     def _setup_existing_certs(self) -> bool:
