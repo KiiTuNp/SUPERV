@@ -14,7 +14,7 @@ import random
 import string
 
 # Configuration
-BACKEND_URL = "https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api"
+BACKEND_URL = "https://3c6ecb49-af37-4490-af0a-a5ffdd6ab63e.preview.emergentagent.com/api"
 
 class ExtremeLoadTester:
     def __init__(self):
