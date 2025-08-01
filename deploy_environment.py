@@ -201,7 +201,7 @@ class ProductionEnvironmentSetup:
         # URLs finales
         protocol = "https" if self.config.get('SSL_MODE') != 'none' else "http"
         self.config['FRONTEND_URL'] = f"{protocol}://{self.config['DOMAIN']}"
-        self.config['BACKEND_URL'] = f"{protocol}://{self.config['DOMAIN']}/api"
+        self.config['BACKEND_URL'] = f"{protocol}://{self.config['DOMAIN']}"
         
         print_success(f"Frontend: {self.config['FRONTEND_URL']}")
         print_success(f"Backend: {self.config['BACKEND_URL']}")
