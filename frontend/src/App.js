@@ -506,15 +506,10 @@ function App() {
     const downloadReport = async () => {
       if (!meeting?.id) return;
       
+      setDownloadingReport(true);
+      
       try {
-        const confirmed = window.confirm(
-          "⚠️ ATTENTION: Cette action va télécharger le rapport PDF et supprimer définitivement toutes les données de la réunion.\n\nCette action est IRRÉVERSIBLE.\n\nÊtes-vous sûr de vouloir continuer ?"
-        );
-        
-        if (!confirmed) return;
-        
-        // Show loading message
-        console.log("Génération du rapport PDF...");
+        console.log("🔄 Début de la génération du rapport PDF...");
         
         // Make API call to generate and download PDF
         const response = await fetch(`${API}/meetings/${meeting.id}/report`, {
@@ -524,19 +519,25 @@ function App() {
           },
         });
         
+        console.log("📡 Réponse API reçue:", response.status);
+        
         if (!response.ok) {
           const errorText = await response.text();
+          console.error("❌ Erreur API:", errorText);
           throw new Error(`Erreur ${response.status}: ${errorText}`);
         }
         
         // Get the PDF blob
         const blob = await response.blob();
+        console.log("📄 PDF blob reçu, taille:", blob.size, "bytes");
         
         // Create download link
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `Rapport_${meeting.title.replace(/[^a-zA-Z0-9]/g, '_')}_${meeting.meeting_code}.pdf`;
+        
+        // Force download
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -544,16 +545,32 @@ function App() {
         // Clean up the blob URL
         window.URL.revokeObjectURL(downloadUrl);
         
-        // Show success message and redirect
+        console.log("✅ Téléchargement PDF réussi");
+        
+        // Close modal and show success message
+        setShowReportModal(false);
+        setDownloadingReport(false);
+        
+        // Show success message and redirect after a brief delay
         setTimeout(() => {
           alert("✅ Rapport téléchargé avec succès!\n\n📝 Toutes les données de la réunion ont été supprimées.\n\n🏠 Retour à l'accueil...");
+          
+          // Clear all local state and return to home
           setCurrentView("home");
           setMeeting(null);
-        }, 1000);
+          setParticipants([]);
+          setPolls([]);
+          setParticipant(null);
+          setVotedPolls(new Set());
+        }, 500);
         
       } catch (error) {
-        console.error("Error downloading report:", error);
-        alert("❌ Erreur lors du téléchargement du rapport: " + (error.message || "Erreur inconnue"));
+        console.error("❌ Erreur lors du téléchargement:", error);
+        setDownloadingReport(false);
+        
+        alert("❌ Erreur lors du téléchargement du rapport:\n\n" + 
+              error.message + 
+              "\n\nVeuillez réessayer ou contacter le support technique.");
       }
     };
 
