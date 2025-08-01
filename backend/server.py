@@ -1092,6 +1092,18 @@ async def generate_meeting_report(meeting_id: str):
         except:
             pass  # Collection might not exist
         
+        # Notify all participants that the meeting is closed before deleting
+        await manager.send_to_meeting({
+            "type": "meeting_closed",
+            "reason": "report_downloaded",
+            "meeting_title": meeting['title'],
+            "organizer_name": meeting['organizer_name'],
+            "message": "La réunion a été fermée après téléchargement du rapport final. Toutes les données ont été supprimées."
+        }, meeting_id)
+        
+        # Wait a moment to ensure WebSocket message is sent
+        await asyncio.sleep(0.5)
+        
         # Finally delete the meeting itself
         delete_meeting_result = await db.meetings.delete_one({"id": meeting_id})
         logger.info(f"Deleted meeting {meeting_id}")
