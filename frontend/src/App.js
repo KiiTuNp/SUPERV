@@ -2469,11 +2469,12 @@ function App() {
                       <h4 className="font-semibold text-slate-800">Organisateur</h4>
                     </div>
                     <ul className="space-y-2 text-sm text-slate-700">
-                      <li>• Crée et configure la réunion</li>
-                      <li>• Approuve les participants</li>
-                      <li>• Gère les sondages et votes</li>
-                      <li>• Génère le rapport final</li>
-                      <li>• Invite des scrutateurs (optionnel)</li>
+                      <li>• Crée et configure la réunion avec codes uniques</li>
+                      <li>• Approuve manuellement chaque participant</li>
+                      <li>• Crée des sondages (immutables une fois publiés)</li>
+                      <li>• Contrôle l'ouverture/fermeture des votes</li>
+                      <li>• Génère le rapport final officiel</li>
+                      <li>• Invite des scrutateurs indépendants (optionnel)</li>
                     </ul>
                   </div>
 
