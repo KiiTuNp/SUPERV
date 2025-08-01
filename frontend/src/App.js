@@ -2938,6 +2938,134 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Modal de récupération */}
+      {showRecoveryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="w-5 h-5" />
+                  Récupérer une réunion
+                </CardTitle>
+                <Button
+                  onClick={() => setShowRecoveryModal(false)}
+                  variant="outline"
+                  size="sm"
+                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-slate-700">
+                    URL de récupération
+                  </label>
+                  <Input
+                    type="text"
+                    value={recoveryUrl}
+                    onChange={(e) => setRecoveryUrl(e.target.value)}
+                    placeholder="/recover/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    className="input-modern"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-slate-700">
+                    Mot de passe de récupération
+                  </label>
+                  <Input
+                    type="password"
+                    value={recoveryPassword}
+                    onChange={(e) => setRecoveryPassword(e.target.value)}
+                    placeholder="Mot de passe à 12 caractères"
+                    className="input-modern"
+                  />
+                </div>
+                <div className="flex space-x-3 pt-4">
+                  <Button 
+                    onClick={() => setShowRecoveryModal(false)}
+                    variant="outline" 
+                    className="flex-1"
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
+                    onClick={() => handleRecovery(recoveryUrl, recoveryPassword)}
+                    disabled={!recoveryUrl || !recoveryPassword}
+                    className="flex-1 btn-gradient-primary"
+                  >
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Récupérer
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Modal organisateur absent */}
+      {showOrganizerAbsentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Organisateur absent
+                </CardTitle>
+                <Button
+                  onClick={() => setShowOrganizerAbsentModal(false)}
+                  variant="outline"
+                  size="sm"
+                  className="border-white text-white hover:bg-white hover:text-amber-600"
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <AlertCircle className="w-8 h-8 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-2">L'organisateur est absent</h3>
+                  <p className="text-slate-600 text-sm mb-4">
+                    L'organisateur n'est plus présent. Vous pouvez télécharger un rapport partiel des résultats actuels.
+                  </p>
+                  <p className="text-amber-700 text-xs bg-amber-50 p-2 rounded">
+                    Les données seront automatiquement supprimées si tous les participants se déconnectent ou après 12 heures.
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setShowOrganizerAbsentModal(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Fermer
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      downloadPartialReport();
+                      setShowOrganizerAbsentModal(false);
+                    }}
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Rapport partiel
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
