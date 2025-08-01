@@ -31,6 +31,7 @@
 - Modern UI with colorful gradients and no gray backgrounds
 - Production configuration files created
 - SSL and security configurations prepared
+- **CRITICAL BUGS FIXED** (2025-01-31): PDF generation infinite loop and scrutator notification issues resolved
 
 ---
 
