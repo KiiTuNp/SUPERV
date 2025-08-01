@@ -370,51 +370,83 @@ class ProductionEnvironmentSetup:
         """Génération des fichiers de configuration"""
         print_step(7, self.total_steps, "Génération des Fichiers de Configuration")
         
-        # .env racine
-        root_env = self._generate_root_env()
+        print_info("Génération de tous les fichiers de configuration...")
         
-        # .env backend
-        backend_env = self._generate_backend_env()
+        # Créer les répertoires nécessaires
+        config_dirs = ['config', 'scripts']
+        for dir_name in config_dirs:
+            dir_path = self.project_root / dir_name
+            dir_path.mkdir(exist_ok=True)
+            print_success(f"Répertoire {dir_name}/ créé")
         
-        # .env frontend
-        frontend_env = self._generate_frontend_env()
-        
-        # Configuration Nginx
-        nginx_config = self._generate_nginx_config()
-        
-        # Service systemd
-        systemd_service = self._generate_systemd_service()
-        
-        # Scripts de gestion
-        management_scripts = self._generate_management_scripts()
-        
-        # Écriture des fichiers
-        # Détecter l'environnement (systemd ou supervisor)
+        # Détection de l'environnement de déploiement
         has_systemd = os.path.exists('/run/systemd/system')
+        has_supervisor = os.path.exists('/usr/bin/supervisorctl') or os.path.exists('/usr/local/bin/supervisorctl')
         
-        configs = {
-            '.env': root_env,
-            'backend/.env': backend_env,
-            'frontend/.env': frontend_env,
-            'config/nginx.conf': nginx_config,
-            'config/nginx-ssl.conf': self._generate_nginx_config_ssl(),  # Configuration SSL séparée
-            'config/gunicorn.conf.py': self._generate_gunicorn_config(),  # Configuration Gunicorn
-            'config/vote-secret.service': systemd_service if has_systemd else "",  # SystemD si disponible
-            'config/vote-secret.conf': self._generate_supervisor_service() if not has_systemd else "",  # Supervisor sinon
-            'scripts/manage.sh': management_scripts['manage'],
-            'scripts/backup.sh': management_scripts['backup'],
-            'scripts/monitor.sh': management_scripts['monitor']
-        }
+        print_info(f"Environnement détecté: SystemD={has_systemd}, Supervisor={has_supervisor}")
         
-        for path, content in configs.items():
-            self._write_config_file(path, content)
+        # Génération des configurations selon l'environnement
+        configs_generated = []
         
-        # Guide de déploiement
-        deployment_guide = self._generate_deployment_guide()
-        self._write_config_file('DEPLOYMENT_GUIDE.md', deployment_guide)
-        
-        print_success("Tous les fichiers de configuration générés !")
-        return True
+        try:
+            # Configuration de base
+            configs = {
+                '.env': self._generate_root_env(),
+                'backend/.env': self._generate_backend_env(),
+                'frontend/.env': self._generate_frontend_env(),
+            }
+            
+            # Configuration Nginx (HTTP et SSL)
+            configs['config/nginx.conf'] = self._generate_nginx_config_http()
+            configs['config/nginx-ssl.conf'] = self._generate_nginx_config_ssl()
+            
+            # Configuration Gunicorn
+            configs['config/gunicorn.conf.py'] = self._generate_gunicorn_config()
+            
+            # Services selon l'environnement
+            if has_systemd:
+                configs['config/vote-secret.service'] = self._generate_systemd_service()
+                print_info("Configuration SystemD générée")
+            
+            if has_supervisor:
+                configs['config/vote-secret.conf'] = self._generate_supervisor_service()
+                print_info("Configuration Supervisor générée")
+            
+            # Scripts de gestion
+            management_scripts = self._generate_management_scripts()
+            configs.update({
+                'scripts/manage.sh': management_scripts['manage'],
+                'scripts/backup.sh': management_scripts['backup'],
+                'scripts/monitor.sh': management_scripts['monitor']
+            })
+            
+            # Écriture de tous les fichiers
+            for path, content in configs.items():
+                if content:  # Éviter d'écrire des fichiers vides
+                    success = self._write_config_file(path, content)
+                    if success:
+                        configs_generated.append(path)
+            
+            # Guide de déploiement
+            deployment_guide = self._generate_deployment_guide()
+            if self._write_config_file('DEPLOYMENT_GUIDE.md', deployment_guide):
+                configs_generated.append('DEPLOYMENT_GUIDE.md')
+            
+            print_success(f"Configuration générée avec succès ! ({len(configs_generated)} fichiers)")
+            
+            # Résumé des fichiers générés
+            print_info("Fichiers de configuration générés :")
+            for config_file in sorted(configs_generated):
+                print(f"  ✓ {config_file}")
+            
+            # Vérification de la cohérence
+            self._validate_generated_configs(configs_generated)
+            
+            return True
+            
+        except Exception as e:
+            print_error(f"Erreur lors de la génération: {str(e)}")
+            return False
 
     def _generate_root_env(self) -> str:
         return f"""# Vote Secret v2.0 - Configuration Production
