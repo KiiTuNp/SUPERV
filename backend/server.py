@@ -512,6 +512,72 @@ async def submit_scrutator_vote(meeting_id: str, vote_data: ScrutatorReportVote)
         }
 
 
+@api_router.post("/scrutators/join")
+async def join_as_scrutator(join_data: ScrutatorJoin):
+    """Rejoindre une réunion en tant que scrutateur (avec approbation requise)"""
+    # Validation des champs obligatoires
+    if not join_data.name or not join_data.name.strip():
+        raise HTTPException(status_code=400, detail="Le nom du scrutateur est requis")
+    if not join_data.scrutator_code or not join_data.scrutator_code.strip():
+        raise HTTPException(status_code=400, detail="Le code de scrutateur est requis")
+    
+    clean_name = join_data.name.strip()
+    clean_code = join_data.scrutator_code.strip().upper()
+    
+    # Vérifier que le code de scrutateur existe
+    meeting = await db.meetings.find_one({"scrutator_code": clean_code, "status": "active"})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Code de scrutateur invalide ou réunion inactive")
+    
+    # Vérifier que le nom est dans la liste des scrutateurs autorisés
+    if clean_name not in meeting.get("scrutators", []):
+        raise HTTPException(status_code=403, detail="Nom non autorisé pour cette réunion en tant que scrutateur")
+    
+    # Vérifier si le scrutateur existe déjà dans la base
+    existing_scrutator = await db.scrutators.find_one({
+        "meeting_id": meeting["id"],
+        "name": clean_name
+    })
+    
+    if existing_scrutator:
+        # Le scrutateur existe - vérifier son statut
+        if existing_scrutator["approval_status"] == "approved":
+            # Déjà approuvé - permettre l'accès
+            return {
+                "meeting": Meeting(**meeting),
+                "scrutator_name": clean_name,
+                "access_type": "scrutator",
+                "status": "approved"
+            }
+        elif existing_scrutator["approval_status"] == "pending":
+            # En attente d'approbation
+            return {
+                "status": "pending_approval",
+                "message": "Votre accès est en attente d'approbation par l'organisateur"
+            }
+        else:
+            # Rejeté
+            raise HTTPException(status_code=403, detail="Votre accès a été rejeté par l'organisateur")
+    else:
+        # Nouveau scrutateur - créer l'entrée en attente d'approbation
+        scrutator = Scrutator(
+            name=clean_name, 
+            meeting_id=meeting["id"],
+            approval_status=ScrutatorStatus.PENDING
+        )
+        await db.scrutators.insert_one(scrutator.dict())
+        
+        # Notifier l'organisateur
+        await manager.send_to_meeting({
+            "type": "scrutator_join_request",
+            "scrutator": scrutator.dict()
+        }, meeting["id"])
+        
+        return {
+            "status": "pending_approval",
+            "message": "Demande d'accès envoyée à l'organisateur. Veuillez attendre l'approbation."
+        }
+
 @api_router.post("/participants/{participant_id}/approve")
 async def approve_participant(participant_id: str, approval: ParticipantApproval):
     participant = await db.participants.find_one({"id": participant_id})
