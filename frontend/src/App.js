@@ -2389,6 +2389,327 @@ function App() {
     <div className="App">
       {renderCurrentView()}
     </div>
+    
+    {/* Modal d'information détaillé */}
+    {showInfoModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          {/* Header du modal */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Vote Secret - Comment ça marche ?</h2>
+                  <p className="text-blue-100">Système de vote anonyme transparent et sécurisé</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowInfoModal(false)}
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Contenu du modal */}
+          <div className="p-8 space-y-8">
+            {/* Section: Principe général */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Vote className="w-6 h-6 text-blue-600" />
+                Principe du système
+              </h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <p className="text-slate-700 leading-relaxed mb-4">
+                  <strong>Vote Secret</strong> est un système de vote anonyme conçu pour les assemblées, réunions et consultations nécessitant la <strong>confidentialité absolue des votes</strong> et la <strong>transparence des résultats</strong>.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div className="bg-white p-4 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold text-green-800">100% Anonyme</span>
+                    </div>
+                    <p className="text-sm text-slate-600">Aucun lien entre l'identité et le vote</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye className="w-5 h-5 text-blue-600" />
+                      <span className="font-semibold text-blue-800">Transparence</span>
+                    </div>
+                    <p className="text-sm text-slate-600">Résultats vérifiables par tous</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trash2 className="w-5 h-5 text-red-600" />
+                      <span className="font-semibold text-red-800">Éphémère</span>
+                    </div>
+                    <p className="text-sm text-slate-600">Données supprimées après rapport</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Rôles et acteurs */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Users className="w-6 h-6 text-purple-600" />
+                Les différents rôles
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Organisateur */}
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-lg border border-slate-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Settings className="w-6 h-6 text-slate-600" />
+                    <h4 className="font-semibold text-slate-800">Organisateur</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li>• Crée et configure la réunion</li>
+                    <li>• Approuve les participants</li>
+                    <li>• Gère les sondages et votes</li>
+                    <li>• Génère le rapport final</li>
+                    <li>• Invite des scrutateurs (optionnel)</li>
+                  </ul>
+                </div>
+
+                {/* Participants */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserPlus className="w-6 h-6 text-blue-600" />
+                    <h4 className="font-semibold text-blue-800">Participants</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-blue-700">
+                    <li>• Rejoignent avec le code de réunion</li>
+                    <li>• Votent de manière anonyme</li>
+                    <li>• Voient les résultats après clôture</li>
+                    <li>• Reçoivent les notifications</li>
+                    <li>• Identité protégée à 100%</li>
+                  </ul>
+                </div>
+
+                {/* Scrutateurs */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserCheck className="w-6 h-6 text-purple-600" />
+                    <h4 className="font-semibold text-purple-800">Scrutateurs</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-purple-700">
+                    <li>• Observateurs neutres autorisés</li>
+                    <li>• Accès à l'interface organisateur</li>
+                    <li>• Valident la génération du rapport</li>
+                    <li>• Garantissent la régularité</li>
+                    <li>• Vote à la majorité requis</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Gestion des données */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Lock className="w-6 h-6 text-green-600" />
+                Gestion sécurisée des données
+              </h3>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-green-600 font-bold text-sm">1</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-green-800">Anonymat garanti</h4>
+                      <p className="text-sm text-green-700">Les votes sont dissociés de l'identité des participants. Impossible de remonter à l'auteur d'un vote.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-green-600 font-bold text-sm">2</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-green-800">Stockage temporaire</h4>
+                      <p className="text-sm text-green-700">Toutes les données sont stockées temporairement uniquement pendant la durée de la réunion.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-green-600 font-bold text-sm">3</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-green-800">Suppression automatique</h4>
+                      <p className="text-sm text-green-700">Dès que le rapport PDF est généré, <strong>toutes les données sont définitivement supprimées</strong> des serveurs.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-green-600 font-bold text-sm">4</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-green-800">Rapport final</h4>
+                      <p className="text-sm text-green-700">Seul le rapport PDF contient les résultats agrégés (sans données personnelles). C'est la seule trace persistante.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Processus de validation */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-orange-600" />
+                Processus de validation
+              </h3>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-orange-800 mb-3">Sans scrutateurs</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>L'organisateur génère directement le rapport</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Suppression immédiate des données</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Notification aux participants</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-orange-800 mb-3">Avec scrutateurs</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Demande de génération par l'organisateur</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Vote à la majorité des scrutateurs</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Génération uniquement si approuvé</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-orange-700">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <span>Double validation = légitimité renforcée</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Garanties et légitimité */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-indigo-600" />
+                Garanties de légitimité
+              </h3>
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-indigo-800 mb-3">Technique</h4>
+                    <ul className="space-y-1 text-sm text-indigo-700">
+                      <li>• Codes de réunion uniques et sécurisés</li>
+                      <li>• Validation d'identité par l'organisateur</li>
+                      <li>• Système anti-fraude intégré</li>
+                      <li>• Horodatage des actions</li>
+                      <li>• Architecture résistante aux pannes</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-indigo-800 mb-3">Procédurale</h4>
+                    <ul className="space-y-1 text-sm text-indigo-700">
+                      <li>• Scrutateurs indépendants</li>
+                      <li>• Validation par majorité qualifiée</li>
+                      <li>• Traçabilité des décisions importantes</li>
+                      <li>• Rapport PDF inaltérable</li>
+                      <li>• Processus transparent pour tous</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Pourquoi utiliser Vote Secret */}
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-pink-600" />
+                Pourquoi utiliser Vote Secret ?
+              </h3>
+              <div className="bg-pink-50 border border-pink-200 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Assemblées générales</strong> d'associations</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Conseils d'administration</strong> et comités</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Élections</strong> de représentants</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Consultations internes</strong> d'entreprise</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Réunions syndicales</strong> et professionnelles</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Votes sensibles</strong> nécessitant l'anonymat</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Assemblées citoyennes</strong> et participatives</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700"><strong>Toute décision collective</strong> importante</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer du modal */}
+            <div className="border-t border-slate-200 pt-6">
+              <div className="text-center">
+                <p className="text-sm text-slate-500 mb-4">
+                  Vote Secret respecte votre vie privée et garantit la légitimité de vos décisions collectives.
+                </p>
+                <Button
+                  onClick={() => setShowInfoModal(false)}
+                  className="btn-gradient-primary px-8"
+                >
+                  J'ai compris, commencer
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
 
