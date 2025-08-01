@@ -550,7 +550,7 @@ function App() {
                   <div>
                     <CardTitle className="text-2xl font-bold">{meeting?.title}</CardTitle>
                     <CardDescription className="text-blue-100">
-                      Interface Organisateur
+                      Par {meeting?.organizer_name || "Organisateur"} à {meeting?.created_at ? new Date(meeting.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : "00:00"} le {meeting?.created_at ? new Date(meeting.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}
                     </CardDescription>
                   </div>
                 </div>
