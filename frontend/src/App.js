@@ -784,7 +784,7 @@ function App() {
 
         if (response.data.direct_generation) {
           // Pas de scrutateurs - génération directe
-          downloadReport();
+          downloadReportDirect();
         } else {
           // Scrutateurs présents - attendre leur approbation
           setReportGenerationInProgress(true);
