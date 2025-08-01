@@ -61,28 +61,9 @@ function App() {
             <h1 className="text-5xl md:text-7xl font-black text-modern-heading gradient-text mb-4">
               Vote Secret
             </h1>
-            <p className="text-xl md:text-2xl text-modern-body max-w-3xl mx-auto mb-8">
+            <p className="text-xl md:text-2xl text-modern-body max-w-3xl mx-auto mb-12">
               Système de vote anonyme moderne pour assemblées avec suppression automatique des données
             </p>
-            
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto">
-              <div className="glass-card p-6">
-                <Shield className="w-8 h-8 text-indigo-600 mx-auto mb-3" />
-                <h3 className="font-bold text-slate-800 mb-2">100% Anonyme</h3>
-                <p className="text-sm text-slate-600">Aucune traçabilité des votes</p>
-              </div>
-              <div className="glass-card p-6">
-                <BarChart3 className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-                <h3 className="font-bold text-slate-800 mb-2">Temps Réel</h3>
-                <p className="text-sm text-slate-600">Résultats instantanés</p>
-              </div>
-              <div className="glass-card p-6">
-                <FileText className="w-8 h-8 text-cyan-600 mx-auto mb-3" />
-                <h3 className="font-bold text-slate-800 mb-2">Rapport PDF</h3>
-                <p className="text-sm text-slate-600">Auto-destruction des données</p>
-              </div>
-            </div>
           </div>
 
           {/* Main Actions */}
