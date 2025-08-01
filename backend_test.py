@@ -983,6 +983,274 @@ class VoteSecretTester:
         
         return all_passed
 
+    def test_participant_polls_endpoint_modifications(self):
+        """
+        Test NEW participant-specific polls endpoint modifications:
+        1. Create meeting "Test Affichage Résultats Participants 2025"
+        2. Create poll without show_results_real_time field
+        3. Test participant endpoint hides detailed results for active polls
+        4. Test participant endpoint shows total_votes_count for active polls
+        5. Test participant endpoint shows full results for closed polls
+        6. Test organizer endpoint still shows everything in real-time
+        """
+        print("\n🎯 TESTING PARTICIPANT RESULTS DISPLAY MODIFICATIONS")
+        print("=" * 70)
+        
+        scenario_data = {}
+        all_passed = True
+        
+        # Step 1: Create meeting "Test Affichage Résultats Participants 2025"
+        try:
+            meeting_data = {
+                "title": "Test Affichage Résultats Participants 2025",
+                "organizer_name": "Marie Organisateur"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                scenario_data['meeting'] = response.json()
+                self.log_result("Step 1 - Create Meeting", True, f"Meeting created: {scenario_data['meeting']['meeting_code']}", response_time)
+            else:
+                self.log_result("Step 1 - Create Meeting", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 1 - Create Meeting", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 2: Create poll WITHOUT show_results_real_time field
+        try:
+            poll_data = {
+                "question": "Quel est votre avis sur cette nouvelle fonctionnalité ?",
+                "options": ["Très favorable", "Favorable", "Neutre", "Défavorable", "Très défavorable"],
+                "timer_duration": 300
+                # NOTE: No show_results_real_time field as per new modifications
+            }
+            
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/polls", json=poll_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Verify that show_results_real_time field is not in response
+                if 'show_results_real_time' not in data:
+                    scenario_data['poll'] = data
+                    self.log_result("Step 2 - Create Poll Without Real-Time Field", True, f"Poll created without show_results_real_time field", response_time)
+                else:
+                    self.log_result("Step 2 - Create Poll Without Real-Time Field", False, f"Poll still contains show_results_real_time field: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 2 - Create Poll Without Real-Time Field", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 2 - Create Poll Without Real-Time Field", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 3: Add participants and approve them
+        try:
+            participants = ["Jean Participant", "Marie Votante", "Pierre Testeur"]
+            scenario_data['participants'] = []
+            
+            for participant_name in participants:
+                join_data = {
+                    "name": participant_name,
+                    "meeting_code": scenario_data['meeting']['meeting_code']
+                }
+                
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                if response.status_code == 200:
+                    participant_data = response.json()
+                    scenario_data['participants'].append(participant_data)
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant_data['id'],
+                        "approved": True
+                    }
+                    self.session.post(f"{BASE_URL}/participants/{participant_data['id']}/approve", json=approval_data)
+            
+            self.log_result("Step 3 - Add and Approve Participants", True, f"Added and approved {len(scenario_data['participants'])} participants")
+            
+        except Exception as e:
+            self.log_result("Step 3 - Add and Approve Participants", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 4: Start poll and add votes
+        try:
+            poll_id = scenario_data['poll']['id']
+            
+            # Start poll
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/start")
+            if response.status_code == 200:
+                self.log_result("Step 4a - Start Poll", True, "Poll started successfully")
+                
+                # Add votes (2-3 votes)
+                votes_added = 0
+                for i in range(3):
+                    vote_data = {
+                        "poll_id": poll_id,
+                        "option_id": scenario_data['poll']['options'][i % len(scenario_data['poll']['options'])]['id']
+                    }
+                    
+                    response = self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                    if response.status_code == 200:
+                        votes_added += 1
+                
+                self.log_result("Step 4b - Add Votes", True, f"Added {votes_added} votes to active poll")
+                scenario_data['votes_added'] = votes_added
+            else:
+                self.log_result("Step 4a - Start Poll", False, f"Failed to start poll: {response.status_code}")
+                all_passed = False
+                
+        except Exception as e:
+            self.log_result("Step 4 - Start Poll and Add Votes", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 5: Test NEW participant endpoint for ACTIVE poll (should hide detailed results)
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/polls/participant")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if len(data) > 0:
+                    poll_data = data[0]  # First poll
+                    
+                    # Check that detailed results are hidden for active poll
+                    options_votes_hidden = all(option.get('votes', 0) == 0 for option in poll_data.get('options', []))
+                    has_total_votes_count = 'total_votes_count' in poll_data
+                    total_votes = poll_data.get('total_votes_count', 0)
+                    
+                    if options_votes_hidden and has_total_votes_count and total_votes == scenario_data.get('votes_added', 0):
+                        self.log_result("Step 5 - Participant Endpoint Active Poll", True, f"✅ Detailed results hidden, total_votes_count={total_votes} shown", response_time)
+                    else:
+                        self.log_result("Step 5 - Participant Endpoint Active Poll", False, f"❌ Results not properly hidden. Options votes hidden: {options_votes_hidden}, Has total: {has_total_votes_count}, Total: {total_votes}", response_time)
+                        all_passed = False
+                else:
+                    self.log_result("Step 5 - Participant Endpoint Active Poll", False, "No polls returned from participant endpoint", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 5 - Participant Endpoint Active Poll", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 5 - Participant Endpoint Active Poll", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 6: Test organizer endpoint still shows everything in real-time
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/polls")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if len(data) > 0:
+                    poll_data = data[0]  # First poll
+                    
+                    # Check that organizer sees all detailed results
+                    total_organizer_votes = sum(option.get('votes', 0) for option in poll_data.get('options', []))
+                    
+                    if total_organizer_votes == scenario_data.get('votes_added', 0):
+                        self.log_result("Step 6 - Organizer Endpoint Real-Time", True, f"✅ Organizer sees all results in real-time: {total_organizer_votes} votes", response_time)
+                    else:
+                        self.log_result("Step 6 - Organizer Endpoint Real-Time", False, f"❌ Organizer results incorrect. Expected: {scenario_data.get('votes_added', 0)}, Got: {total_organizer_votes}", response_time)
+                        all_passed = False
+                else:
+                    self.log_result("Step 6 - Organizer Endpoint Real-Time", False, "No polls returned from organizer endpoint", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 6 - Organizer Endpoint Real-Time", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 6 - Organizer Endpoint Real-Time", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 7: Close poll and test participant endpoint shows full results
+        try:
+            poll_id = scenario_data['poll']['id']
+            
+            # Close poll
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/close")
+            if response.status_code == 200:
+                self.log_result("Step 7a - Close Poll", True, "Poll closed successfully")
+                
+                # Test participant endpoint now shows full results
+                meeting_id = scenario_data['meeting']['id']
+                start_time = time.time()
+                response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/polls/participant")
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if len(data) > 0:
+                        poll_data = data[0]  # First poll
+                        
+                        # Check that detailed results are now shown for closed poll
+                        total_participant_votes = sum(option.get('votes', 0) for option in poll_data.get('options', []))
+                        has_total_votes_count = 'total_votes_count' in poll_data
+                        
+                        if total_participant_votes == scenario_data.get('votes_added', 0) and has_total_votes_count:
+                            self.log_result("Step 7b - Participant Endpoint Closed Poll", True, f"✅ Full results shown for closed poll: {total_participant_votes} votes", response_time)
+                        else:
+                            self.log_result("Step 7b - Participant Endpoint Closed Poll", False, f"❌ Closed poll results incorrect. Expected: {scenario_data.get('votes_added', 0)}, Got: {total_participant_votes}", response_time)
+                            all_passed = False
+                    else:
+                        self.log_result("Step 7b - Participant Endpoint Closed Poll", False, "No polls returned from participant endpoint", response_time)
+                        all_passed = False
+                else:
+                    self.log_result("Step 7b - Participant Endpoint Closed Poll", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 7a - Close Poll", False, f"Failed to close poll: {response.status_code}")
+                all_passed = False
+                
+        except Exception as e:
+            self.log_result("Step 7 - Close Poll and Test Results", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 8: Clean up by generating PDF report
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if 'application/pdf' in content_type:
+                    file_size = len(response.content)
+                    self.log_result("Step 8 - Cleanup PDF Generation", True, f"PDF generated and data cleaned up ({file_size} bytes)", response_time)
+                else:
+                    self.log_result("Step 8 - Cleanup PDF Generation", False, f"Wrong content type: {content_type}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 8 - Cleanup PDF Generation", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 8 - Cleanup PDF Generation", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Summary
+        if all_passed:
+            self.log_result("PARTICIPANT RESULTS DISPLAY MODIFICATIONS", True, "✅ All participant results display tests passed")
+            print("\n🎉 PARTICIPANT RESULTS DISPLAY VALIDATION COMPLETE:")
+            print("✅ Polls created without show_results_real_time field")
+            print("✅ Participant endpoint hides detailed results for active polls")
+            print("✅ Participant endpoint shows total_votes_count for active polls")
+            print("✅ Participant endpoint shows full results for closed polls")
+            print("✅ Organizer endpoint shows all results in real-time")
+        else:
+            self.log_result("PARTICIPANT RESULTS DISPLAY MODIFICATIONS", False, "❌ Some participant results display tests failed")
+        
+        return all_passed
+
     def test_advanced_scrutator_workflow_with_approval_and_voting(self):
         """
         Test the NEW advanced scrutator workflow with approval and majority voting:
