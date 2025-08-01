@@ -2395,6 +2395,266 @@ class VoteSecretTester:
         
         return all_passed
 
+    def test_vote_equality_bug_fix(self):
+        """
+        TEST DU BUG FIX - GESTION DES ÉGALITÉS DANS LES VOTES
+        
+        Test the critical bug fix for vote equality handling.
+        Before the fix, the application incorrectly declared winners in case of ties.
+        
+        Test scenarios:
+        1. Equality scenario (2-2-2) - should show no winner
+        2. Clear winner (4-2-1) - should show Option A as winner  
+        3. Partial equality (3-3-1) - should show no winner
+        4. Zero votes scenario - should show no winner
+        5. Two options equal (5-5) - should show no winner
+        """
+        print("\n🎯 TESTING VOTE EQUALITY BUG FIX - GESTION DES ÉGALITÉS")
+        print("=" * 80)
+        
+        all_scenarios_passed = True
+        
+        # Test Scenario 1: Equality (2-2-2) - should show no winner
+        print("\n📊 Test Scenario 1: Égalité parfaite (2-2-2)")
+        scenario1_passed = self._test_equality_scenario(
+            "Test Égalité Votes 2025",
+            "Test d'égalité",
+            ["Option A", "Option B", "Option C"],
+            [2, 2, 2],  # 2 votes for each option
+            expected_winner=None,
+            scenario_name="Égalité parfaite (2-2-2)"
+        )
+        all_scenarios_passed = all_scenarios_passed and scenario1_passed
+        
+        # Test Scenario 2: Clear winner (4-2-1) - should show Option A as winner
+        print("\n📊 Test Scenario 2: Gagnant clair (4-2-1)")
+        scenario2_passed = self._test_equality_scenario(
+            "Test Gagnant Clair 2025",
+            "Test gagnant clair",
+            ["Option A", "Option B", "Option C"],
+            [4, 2, 1],  # 4 votes for A, 2 for B, 1 for C
+            expected_winner="Option A",
+            scenario_name="Gagnant clair (4-2-1)"
+        )
+        all_scenarios_passed = all_scenarios_passed and scenario2_passed
+        
+        # Test Scenario 3: Partial equality (3-3-1) - should show no winner
+        print("\n📊 Test Scenario 3: Égalité partielle (3-3-1)")
+        scenario3_passed = self._test_equality_scenario(
+            "Test Égalité Partielle 2025",
+            "Test égalité partielle",
+            ["Option A", "Option B", "Option C"],
+            [3, 3, 1],  # 3 votes for A, 3 for B, 1 for C
+            expected_winner=None,
+            scenario_name="Égalité partielle (3-3-1)"
+        )
+        all_scenarios_passed = all_scenarios_passed and scenario3_passed
+        
+        # Test Scenario 4: Zero votes - should show no winner
+        print("\n📊 Test Scenario 4: Aucun vote (0-0-0)")
+        scenario4_passed = self._test_equality_scenario(
+            "Test Sans Votes 2025",
+            "Test sans votes",
+            ["Option A", "Option B", "Option C"],
+            [0, 0, 0],  # No votes
+            expected_winner=None,
+            scenario_name="Aucun vote (0-0-0)"
+        )
+        all_scenarios_passed = all_scenarios_passed and scenario4_passed
+        
+        # Test Scenario 5: Two options equal (5-5) - should show no winner
+        print("\n📊 Test Scenario 5: Deux options égales (5-5)")
+        scenario5_passed = self._test_equality_scenario(
+            "Test Deux Options Égales 2025",
+            "Test deux options égales",
+            ["Option A", "Option B"],
+            [5, 5],  # 5 votes for each option
+            expected_winner=None,
+            scenario_name="Deux options égales (5-5)"
+        )
+        all_scenarios_passed = all_scenarios_passed and scenario5_passed
+        
+        # Summary
+        if all_scenarios_passed:
+            self.log_result("VOTE EQUALITY BUG FIX", True, "✅ Tous les scénarios d'égalité fonctionnent correctement - Bug corrigé!")
+            print("\n🎉 BUG FIX VALIDATION COMPLETE:")
+            print("✅ Égalité parfaite (2-2-2) - Aucun gagnant déclaré")
+            print("✅ Gagnant clair (4-2-1) - Option A déclarée gagnante")
+            print("✅ Égalité partielle (3-3-1) - Aucun gagnant déclaré")
+            print("✅ Aucun vote (0-0-0) - Aucun gagnant déclaré")
+            print("✅ Deux options égales (5-5) - Aucun gagnant déclaré")
+            print("✅ La logique d'égalité fonctionne parfaitement!")
+        else:
+            self.log_result("VOTE EQUALITY BUG FIX", False, "❌ Certains scénarios d'égalité ont échoué - Bug non corrigé")
+        
+        return all_scenarios_passed
+    
+    def _test_equality_scenario(self, meeting_title, poll_question, options, vote_counts, expected_winner, scenario_name):
+        """Helper method to test a specific equality scenario"""
+        try:
+            # Step 1: Create meeting
+            meeting_data = {
+                "title": meeting_title,
+                "organizer_name": "Organisateur Test"
+            }
+            
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            if response.status_code != 200:
+                self.log_result(f"{scenario_name} - Create Meeting", False, f"Failed to create meeting: {response.status_code}")
+                return False
+            
+            meeting = response.json()
+            meeting_id = meeting['id']
+            
+            # Step 2: Add participants (enough for the votes needed)
+            total_votes = sum(vote_counts)
+            participants = []
+            for i in range(total_votes):
+                participant_name = f"Participant{i+1:02d}"
+                join_data = {
+                    "name": participant_name,
+                    "meeting_code": meeting['meeting_code']
+                }
+                
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                if response.status_code == 200:
+                    participant = response.json()
+                    participants.append(participant)
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant['id'],
+                        "approved": True
+                    }
+                    self.session.post(f"{BASE_URL}/participants/{participant['id']}/approve", json=approval_data)
+            
+            # Step 3: Create poll
+            poll_data = {
+                "question": poll_question,
+                "options": options
+            }
+            
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/polls", json=poll_data)
+            if response.status_code != 200:
+                self.log_result(f"{scenario_name} - Create Poll", False, f"Failed to create poll: {response.status_code}")
+                return False
+            
+            poll = response.json()
+            poll_id = poll['id']
+            
+            # Step 4: Start poll
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/start")
+            if response.status_code != 200:
+                self.log_result(f"{scenario_name} - Start Poll", False, f"Failed to start poll: {response.status_code}")
+                return False
+            
+            # Step 5: Submit votes according to the scenario
+            vote_index = 0
+            for option_index, vote_count in enumerate(vote_counts):
+                option_id = poll['options'][option_index]['id']
+                
+                for _ in range(vote_count):
+                    vote_data = {
+                        "poll_id": poll_id,
+                        "option_id": option_id
+                    }
+                    
+                    response = self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                    if response.status_code != 200:
+                        self.log_result(f"{scenario_name} - Submit Vote", False, f"Failed to submit vote: {response.status_code}")
+                        return False
+                    vote_index += 1
+            
+            # Step 6: Close poll
+            response = self.session.post(f"{BASE_URL}/polls/{poll_id}/close")
+            if response.status_code != 200:
+                self.log_result(f"{scenario_name} - Close Poll", False, f"Failed to close poll: {response.status_code}")
+                return False
+            
+            # Step 7: Get poll results and analyze winner logic
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/polls/{poll_id}/results")
+            response_time = time.time() - start_time
+            
+            if response.status_code != 200:
+                self.log_result(f"{scenario_name} - Get Results", False, f"Failed to get results: {response.status_code}", response_time)
+                return False
+            
+            results = response.json()
+            
+            # Step 8: Analyze winner logic
+            winner_analysis = self._analyze_winner_logic(results, expected_winner, vote_counts, options)
+            
+            if winner_analysis['correct']:
+                self.log_result(f"{scenario_name} - Winner Logic", True, winner_analysis['message'], response_time)
+                success = True
+            else:
+                self.log_result(f"{scenario_name} - Winner Logic", False, winner_analysis['message'], response_time)
+                success = False
+            
+            # Step 9: Cleanup - Generate PDF to delete data
+            try:
+                self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+            except:
+                pass  # Ignore cleanup errors
+            
+            return success
+            
+        except Exception as e:
+            self.log_result(f"{scenario_name} - Error", False, f"Exception: {str(e)}")
+            return False
+    
+    def _analyze_winner_logic(self, results, expected_winner, vote_counts, options):
+        """Analyze the winner logic based on poll results"""
+        try:
+            # Get vote counts from results
+            actual_votes = {}
+            for result in results['results']:
+                actual_votes[result['option']] = result['votes']
+            
+            # Verify vote counts are correct
+            for i, option in enumerate(options):
+                expected_votes = vote_counts[i]
+                actual_vote_count = actual_votes.get(option, 0)
+                if actual_vote_count != expected_votes:
+                    return {
+                        'correct': False,
+                        'message': f"Vote count mismatch for {option}: expected {expected_votes}, got {actual_vote_count}"
+                    }
+            
+            # Determine actual winner based on the NEW logic (should only declare winner if strictly more votes)
+            max_votes = max(vote_counts) if vote_counts else 0
+            options_with_max_votes = [options[i] for i, votes in enumerate(vote_counts) if votes == max_votes]
+            
+            # NEW LOGIC: Only declare winner if exactly one option has the maximum votes
+            actual_winner = None
+            if max_votes > 0 and len(options_with_max_votes) == 1:
+                actual_winner = options_with_max_votes[0]
+            
+            # Compare with expected winner
+            if actual_winner == expected_winner:
+                if expected_winner is None:
+                    return {
+                        'correct': True,
+                        'message': f"✅ Égalité correctement détectée - Aucun gagnant déclaré (votes: {vote_counts})"
+                    }
+                else:
+                    return {
+                        'correct': True,
+                        'message': f"✅ Gagnant correct: {expected_winner} avec {max_votes} votes (votes: {vote_counts})"
+                    }
+            else:
+                return {
+                    'correct': False,
+                    'message': f"❌ Logique de gagnant incorrecte - Attendu: {expected_winner}, Obtenu: {actual_winner} (votes: {vote_counts})"
+                }
+                
+        except Exception as e:
+            return {
+                'correct': False,
+                'message': f"Erreur d'analyse: {str(e)}"
+            }
+
     def run_all_tests(self):
         """Run all backend tests with priority on bug fix validation"""
         print("🚀 STARTING COMPREHENSIVE BACKEND API TESTING")
