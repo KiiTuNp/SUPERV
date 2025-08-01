@@ -99,15 +99,113 @@ class MasterDeployment:
         self.start_time = time.time()
         self.deployment_state = self._load_deployment_state()
     
+    def _load_deployment_state(self) -> dict:
+        """Charge l'état du déploiement depuis un fichier JSON"""
+        if self.state_file.exists():
+            try:
+                with open(self.state_file, 'r') as f:
+                    return json.load(f)
+            except:
+                return {}
+        return {}
+    
+    def _save_deployment_state(self):
+        """Sauvegarde l'état du déploiement"""
+        try:
+            with open(self.state_file, 'w') as f:
+                json.dump(self.deployment_state, f, indent=2)
+        except Exception as e:
+            print_warning(f"Impossible de sauvegarder l'état: {e}")
+    
+    def _check_step_completed(self, step_id: str) -> bool:
+        """Vérifie si une étape a été complétée avec succès"""
+        return self.deployment_state.get(step_id, {}).get('completed', False)
+    
+    def _mark_step_completed(self, step_id: str, success: bool = True):
+        """Marque une étape comme complétée"""
+        if step_id not in self.deployment_state:
+            self.deployment_state[step_id] = {}
+        
+        self.deployment_state[step_id].update({
+            'completed': success,
+            'timestamp': time.time(),
+            'date': time.strftime('%Y-%m-%d %H:%M:%S')
+        })
+        self._save_deployment_state()
+    
+    def _get_system_info(self) -> dict:
+        """Collecte les informations système importantes"""
+        info = {}
+        try:
+            # Distribution
+            with open('/etc/os-release', 'r') as f:
+                for line in f:
+                    if line.startswith('PRETTY_NAME='):
+                        info['os'] = line.split('=', 1)[1].strip().strip('"')
+                        break
+            
+            # Architecture
+            import platform
+            info['arch'] = platform.machine()
+            
+            # Espace disque
+            import shutil
+            total, used, free = shutil.disk_usage('/')
+            info['disk_free_gb'] = free // (1024**3)
+            
+            # Mémoire
+            with open('/proc/meminfo', 'r') as f:
+                for line in f:
+                    if line.startswith('MemTotal:'):
+                        info['memory_gb'] = int(line.split()[1]) // (1024**2)
+                        break
+            
+            # Services déjà installés
+            services = ['nginx', 'mongod', 'mongodb', 'apache2']
+            installed_services = []
+            for service in services:
+                result = subprocess.run(['systemctl', 'is-enabled', service], 
+                                      capture_output=True, text=True)
+                if result.returncode == 0:
+                    installed_services.append(service)
+            info['services'] = installed_services
+            
+        except Exception as e:
+            print_warning(f"Erreur collecte info système: {e}")
+        
+        return info
+    
     def welcome(self):
         print_header("VOTE SECRET v2.0 - DÉPLOIEMENT PRODUCTION MAÎTRE")
-        print(f"{Colors.CYAN}🚀 Assistant de déploiement automatisé complet{Colors.ENDC}")
+        print(f"{Colors.CYAN}🚀 Assistant de déploiement automatisé intelligent{Colors.ENDC}")
         print(f"{Colors.CYAN}Ce script orchestre tout le processus de déploiement en production.{Colors.ENDC}\n")
+        
+        # Informations système
+        system_info = self._get_system_info()
+        print_info("Informations système détectées :")
+        print(f"  • OS: {system_info.get('os', 'Inconnu')}")
+        print(f"  • Architecture: {system_info.get('arch', 'Inconnue')}")
+        print(f"  • Mémoire: {system_info.get('memory_gb', '?')} GB")
+        print(f"  • Espace libre: {system_info.get('disk_free_gb', '?')} GB")
+        if system_info.get('services'):
+            print(f"  • Services détectés: {', '.join(system_info['services'])}")
+        
+        # État du déploiement précédent
+        if self.deployment_state:
+            print_info("État du déploiement précédent détecté :")
+            for step_id, state in self.deployment_state.items():
+                status = "✅ Complété" if state.get('completed') else "❌ Échoué"
+                date = state.get('date', 'Date inconnue')
+                step_name = next((s['name'] for s in self.deployment_scripts if s['id'] == step_id), step_id)
+                print(f"  • {step_name}: {status} ({date})")
         
         print_info("Étapes du déploiement :")
         for i, step in enumerate(self.deployment_scripts, 1):
             required = "REQUIS" if step['required'] else "OPTIONNEL"
-            print(f"  {i}. {step['name']} ({required})")
+            status = ""
+            if self._check_step_completed(step['id']):
+                status = f" {Colors.GREEN}[DÉJÀ FAIT]{Colors.ENDC}"
+            print(f"  {i}. {step['name']} ({required}){status}")
             print(f"     {step['description']}")
         
         print(f"\n{Colors.WARNING}⚠️  ATTENTION:{Colors.ENDC}")
