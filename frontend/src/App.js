@@ -1266,23 +1266,23 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <Card className="glass-card-strong mb-8 border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
+          <div className="glass-card-strong mb-8 border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                     <CheckCircle className="w-6 h-6" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl font-bold">{meeting?.title}</CardTitle>
-                    <CardDescription className="text-blue-100">
+                    <h1 className="text-xl font-bold">{meeting?.title}</h1>
+                    <p className="text-blue-100">
                       Participant: {participant?.name} - Statut: Approuvé
-                    </CardDescription>
+                    </p>
                   </div>
                 </div>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
 
           <div className="space-y-6">
             {polls.map((poll) => {
