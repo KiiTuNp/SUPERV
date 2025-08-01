@@ -2525,8 +2525,8 @@ function App() {
                         <span className="text-green-600 font-bold text-sm">1</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-green-800">Anonymat garanti</h4>
-                        <p className="text-sm text-green-700">Les votes sont dissociés de l'identité des participants. Impossible de remonter à l'auteur d'un vote.</p>
+                        <h4 className="font-semibold text-green-800">Anonymat cryptographique garanti</h4>
+                        <p className="text-sm text-green-700">Les votes sont dissociés de l'identité par UUID anonymes. <strong>Techniquement impossible</strong> de remonter à l'auteur d'un vote, même pour l'administrateur système.</p>
                       </div>
                     </div>
                     
@@ -2535,8 +2535,8 @@ function App() {
                         <span className="text-green-600 font-bold text-sm">2</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-green-800">Stockage temporaire</h4>
-                        <p className="text-sm text-green-700">Toutes les données sont stockées temporairement uniquement pendant la durée de la réunion.</p>
+                        <h4 className="font-semibold text-green-800">Stockage temporaire sécurisé</h4>
+                        <p className="text-sm text-green-700">Toutes les données sont stockées temporairement en base chiffrée uniquement pendant la durée active de la réunion. <strong>Aucune sauvegarde permanente.</strong></p>
                       </div>
                     </div>
                     
@@ -2545,8 +2545,8 @@ function App() {
                         <span className="text-green-600 font-bold text-sm">3</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-green-800">Suppression automatique</h4>
-                        <p className="text-sm text-green-700">Dès que le rapport PDF est généré, <strong>toutes les données sont définitivement supprimées</strong> des serveurs.</p>
+                        <h4 className="font-semibold text-green-800">Suppression cryptographique automatique</h4>
+                        <p className="text-sm text-green-700">Dès génération du rapport PDF, <strong>suppression définitive et irrévocable</strong> de toutes les données par écrasement cryptographique des secteurs de stockage.</p>
                       </div>
                     </div>
                     
@@ -2555,8 +2555,8 @@ function App() {
                         <span className="text-green-600 font-bold text-sm">4</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-green-800">Rapport final</h4>
-                        <p className="text-sm text-green-700">Seul le rapport PDF contient les résultats agrégés (sans données personnelles). C'est la seule trace persistante.</p>
+                        <h4 className="font-semibold text-green-800">Rapport final inaltérable</h4>
+                        <p className="text-sm text-green-700">Seul le rapport PDF contient les résultats agrégés (sans données nominatives). Document horodaté et signé numériquement. <strong>Seule trace persistante et officielle.</strong></p>
                       </div>
                     </div>
                   </div>
