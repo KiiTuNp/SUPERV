@@ -367,6 +367,9 @@ class ProductionEnvironmentSetup:
         management_scripts = self._generate_management_scripts()
         
         # Écriture des fichiers
+        # Détecter l'environnement (systemd ou supervisor)
+        has_systemd = os.path.exists('/run/systemd/system')
+        
         configs = {
             '.env': root_env,
             'backend/.env': backend_env,
@@ -374,7 +377,8 @@ class ProductionEnvironmentSetup:
             'config/nginx.conf': nginx_config,
             'config/nginx-ssl.conf': self._generate_nginx_config_ssl(),  # Configuration SSL séparée
             'config/gunicorn.conf.py': self._generate_gunicorn_config(),  # Configuration Gunicorn
-            'config/vote-secret.service': systemd_service,
+            'config/vote-secret.service': systemd_service if has_systemd else "",  # SystemD si disponible
+            'config/vote-secret.conf': self._generate_supervisor_service() if not has_systemd else "",  # Supervisor sinon
             'scripts/manage.sh': management_scripts['manage'],
             'scripts/backup.sh': management_scripts['backup'],
             'scripts/monitor.sh': management_scripts['monitor']
