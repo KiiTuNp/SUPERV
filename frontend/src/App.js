@@ -430,7 +430,14 @@ function App() {
     useEffect(() => {
       if (meeting) {
         loadOrganizerData();
-        const interval = setInterval(loadOrganizerData, 3000);
+        loadScrutators();
+        
+        // Set up polling
+        const interval = setInterval(() => {
+          loadOrganizerData();
+          loadScrutators();
+        }, 5000);
+        
         return () => clearInterval(interval);
       }
     }, [meeting]);
