@@ -528,8 +528,7 @@ function App() {
         await axios.post(`${API}/meetings/${meeting.id}/polls`, {
           question: newPollQuestion,
           options: newPollOptions.filter(opt => opt.trim()),
-          timer_duration: timerDuration ? parseInt(timerDuration) : null,
-          show_results_real_time: showResultsRealTime
+          timer_duration: timerDuration ? parseInt(timerDuration) : null
         });
         
         setNewPollQuestion("");
