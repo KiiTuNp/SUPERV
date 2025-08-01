@@ -749,7 +749,7 @@ function App() {
 
             <TabsContent value="create-poll">
               <Card className="glass-card border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-t-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5" />
                     Créer un Nouveau Sondage
