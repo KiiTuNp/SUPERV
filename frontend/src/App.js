@@ -9,7 +9,7 @@ import { Progress } from "./components/ui/progress";
 import { Separator } from "./components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Switch } from "./components/ui/switch";
-import { CheckCircle, Clock, Users, Vote, AlertCircle, Play, Square, Download, FileText, Settings, UserPlus, Sparkles, Shield, BarChart3, Timer } from "lucide-react";
+import { CheckCircle, Clock, Users, Vote, AlertCircle, Play, Square, Download, FileText, Settings, UserPlus, Sparkles, Shield, BarChart3, Timer, Info, X, Lock, Trash2, Eye, UserCheck } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
