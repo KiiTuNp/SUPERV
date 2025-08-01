@@ -264,10 +264,10 @@ class FinalDeployment:
             print_error("Échec installation dépendances Python")
             return False
         
-        # Installation Gunicorn pour la production
+        # Installation Uvicorn pour la production (au lieu de Gunicorn)
         success, _, _ = run_command(
-            f"sudo -u vote-secret {pip_path} install gunicorn",
-            "Installation Gunicorn"
+            f"sudo -u vote-secret {pip_path} install 'uvicorn[standard]'",
+            "Installation Uvicorn avec optimisations"
         )
         
         # Build du frontend
