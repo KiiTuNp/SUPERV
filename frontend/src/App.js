@@ -215,14 +215,14 @@ function App() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-100 via-teal-50 to-cyan-100 bg-pattern-grid flex items-center justify-center p-4">
-        <Card className="glass-card-strong w-full max-w-md border-0 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 text-white rounded-t-2xl">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-grid flex items-center justify-center p-4">
+        <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
+            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Settings className="w-8 h-8" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">Créer une Réunion</CardTitle>
-            <CardDescription className="text-emerald-100 text-center">
+            <CardDescription className="text-blue-100 text-center">
               Configurez votre session de vote anonyme
             </CardDescription>
           </CardHeader>
@@ -238,7 +238,7 @@ function App() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="ex: Assemblée générale 2025"
                   required
-                  className="h-12 input-modern border-emerald-300 focus:border-emerald-500"
+                  className="h-12 input-modern border-blue-200 focus:border-blue-500"
                 />
               </div>
               <div>
@@ -251,7 +251,7 @@ function App() {
                   onChange={(e) => setOrganizerName(e.target.value)}
                   placeholder="ex: Jean Dupont"
                   required
-                  className="h-12 input-modern border-emerald-300 focus:border-emerald-500"
+                  className="h-12 input-modern border-blue-200 focus:border-blue-500"
                 />
               </div>
               <div className="flex space-x-3 pt-4">
@@ -259,14 +259,14 @@ function App() {
                   type="button"
                   onClick={() => setCurrentView("home")} 
                   variant="outline" 
-                  className="flex-1 h-12 border-emerald-300 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50"
+                  className="flex-1 h-12 border-slate-300 hover:bg-slate-50"
                 >
                   Retour
                 </Button>
                 <Button 
                   type="submit"
                   disabled={!title || !organizerName || loading}
-                  className="flex-1 h-12 btn-gradient-success"
+                  className="flex-1 h-12 btn-gradient-primary"
                 >
                   {loading ? (
                     <>
@@ -275,7 +275,7 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-5 h-5 mr-2" />
+                      <Settings className="w-5 h-5 mr-2" />
                       Créer
                     </>
                   )}
