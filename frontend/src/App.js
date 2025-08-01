@@ -1232,6 +1232,25 @@ function App() {
       }
     }, [participant]);
 
+    // Handle meeting closed countdown
+    useEffect(() => {
+      if (meetingClosed && redirectCountdown > 0) {
+        const timer = setTimeout(() => {
+          setRedirectCountdown(redirectCountdown - 1);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+      } else if (meetingClosed && redirectCountdown === 0) {
+        // Redirect to home
+        setCurrentView("home");
+        setMeeting(null);
+        setParticipant(null);
+        setMeetingClosed(false);
+        setClosedMeetingInfo(null);
+        setRedirectCountdown(10);
+      }
+    }, [meetingClosed, redirectCountdown]);
+
     const checkParticipantStatus = async () => {
       try {
         const response = await axios.get(`${API}/participants/${participant.id}/status`);
