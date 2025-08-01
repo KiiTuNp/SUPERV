@@ -1311,6 +1311,85 @@ function App() {
       }
     };
 
+    // Show meeting closed notification
+    if (meetingClosed && closedMeetingInfo) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
+          <div className="glass-card-strong w-full max-w-2xl border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+              </div>
+              <h1 className="text-2xl font-bold text-center mb-2">Réunion Fermée</h1>
+              <p className="text-red-100 text-center">
+                La réunion a été fermée par l'organisateur
+              </p>
+            </div>
+            
+            <div className="p-8 text-center">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-slate-800 mb-4">
+                  {closedMeetingInfo.title}
+                </h2>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-semibold text-slate-700">Organisateur:</p>
+                      <p className="text-slate-600">{closedMeetingInfo.organizerName}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-700">Code de réunion:</p>
+                      <p className="text-slate-600 font-mono">{closedMeetingInfo.meetingCode}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+                <div className="flex items-start gap-3">
+                  <FileText className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <h3 className="font-semibold text-red-800 mb-2">Rapport généré et données supprimées</h3>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      <li>• Le rapport PDF de la réunion a été téléchargé par l'organisateur</li>
+                      <li>• Toutes les données de cette réunion ont été définitivement supprimées</li>
+                      <li>• Les résultats de vote ne sont plus accessibles</li>
+                      <li>• Le code de réunion {closedMeetingInfo.meetingCode} n'est plus valide</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-center gap-2 text-blue-700">
+                  <Clock className="w-5 h-5" />
+                  <span className="font-semibold">
+                    Redirection automatique dans {redirectCountdown} seconde{redirectCountdown !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => {
+                  setCurrentView("home");
+                  setMeeting(null);
+                  setParticipant(null);
+                  setMeetingClosed(false);
+                  setClosedMeetingInfo(null);
+                  setRedirectCountdown(10);
+                }}
+                className="btn-gradient-primary px-8"
+              >
+                Retourner à l'accueil maintenant
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (status === "pending") {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
