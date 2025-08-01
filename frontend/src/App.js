@@ -736,7 +736,7 @@ function App() {
                 {polls.length === 0 && (
                   <Card className="glass-card border-0 shadow-lg">
                     <CardContent className="text-center py-12">
-                      <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Vote className="w-8 h-8 text-white" />
                       </div>
                       <p className="text-slate-500 text-lg">Aucun sondage créé pour le moment</p>
