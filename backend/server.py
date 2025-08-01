@@ -487,7 +487,10 @@ async def submit_scrutator_vote(meeting_id: str, vote_data: ScrutatorReportVote)
         # Majorité contre - rejeter la génération
         await db.meetings.update_one(
             {"id": meeting_id},
-            {"$set": {"report_generation_pending": False}}
+            {"$set": {
+                "report_generation_pending": False,
+                "report_generation_approved": False
+            }}
         )
         
         await manager.send_to_meeting({
