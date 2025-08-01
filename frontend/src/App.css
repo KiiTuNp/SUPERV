@@ -149,15 +149,15 @@
   font-weight: 700;
 }
 
-/* Modern Card Hover Effects */
+/* Modern Card Hover Effects - More Subtle */
 .card-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .card-hover:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.1);
 }
 
 /* Meeting Code Display */
