@@ -749,11 +749,12 @@ After=network.target mongodb.service
 Wants=mongodb.service
 
 [Service]
-Type=forking
+Type=exec
 User=vote-secret
 Group=vote-secret
-WorkingDirectory=/opt/vote-secret
-Environment=PATH=/opt/vote-secret/venv/bin
+WorkingDirectory=/opt/vote-secret/backend
+Environment=PATH=/opt/vote-secret/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONPATH=/opt/vote-secret/backend
 ExecStart=/opt/vote-secret/venv/bin/gunicorn --config /opt/vote-secret/config/gunicorn.conf.py server:app
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
@@ -779,6 +780,79 @@ SyslogIdentifier=vote-secret
 
 [Install]
 WantedBy=multi-user.target
+"""
+
+    def _generate_gunicorn_config(self) -> str:
+        """Génère la configuration Gunicorn"""
+        return f"""# Vote Secret v2.0 - Configuration Gunicorn Production
+# Généré automatiquement
+
+import multiprocessing
+import os
+
+# Server socket
+bind = "127.0.0.1:8001"
+backlog = 2048
+
+# Worker processes
+workers = min(multiprocessing.cpu_count() * 2 + 1, 8)
+worker_class = "uvicorn.workers.UvicornWorker"
+worker_connections = 1000
+max_requests = 1000
+max_requests_jitter = 50
+preload_app = True
+timeout = 120
+keepalive = 2
+
+# Logging
+accesslog = "/opt/vote-secret/logs/gunicorn-access.log"
+errorlog = "/opt/vote-secret/logs/gunicorn-error.log"
+loglevel = "{self.config['LOG_LEVEL'].lower()}"
+access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
+
+# Process naming
+proc_name = "vote-secret"
+
+# Server mechanics
+daemon = False
+pidfile = "/opt/vote-secret/logs/gunicorn.pid"
+user = "vote-secret"
+group = "vote-secret"
+tmp_upload_dir = None
+
+# SSL (not used, handled by Nginx)
+keyfile = None
+certfile = None
+
+# Application configuration
+raw_env = [
+    'PYTHONPATH=/opt/vote-secret/backend',
+]
+
+# Restart workers after this many requests
+max_requests = 1000
+max_requests_jitter = 100
+
+# The maximum number of pending connections
+backlog = 2048
+
+def when_ready(server):
+    server.log.info("Server is ready. Spawning workers")
+
+def worker_int(worker):
+    worker.log.info("worker received INT or QUIT signal")
+
+def pre_fork(server, worker):
+    server.log.info("Worker spawned (pid: %s)", worker.pid)
+
+def post_fork(server, worker):
+    server.log.info("Worker spawned (pid: %s)", worker.pid)
+
+def post_worker_init(worker):
+    worker.log.info("Worker initialized (pid: %s)", worker.pid)
+
+def worker_abort(worker):
+    worker.log.info("Worker aborted (pid: %s)", worker.pid)
 """
 
     def _generate_management_scripts(self) -> Dict[str, str]:
