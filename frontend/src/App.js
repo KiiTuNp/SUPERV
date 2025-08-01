@@ -556,7 +556,7 @@ function App() {
                 </div>
                 
                 {/* Code de réunion mis en évidence */}
-                <div className="bg-gradient-to-r from-orange-400 to-purple-500 rounded-xl p-4 shadow-lg">
+                <div className="bg-gradient-to-r from-orange-400 to-purple-500 rounded-xl p-4 shadow-lg border-2 border-red-500">
                   <p className="text-white text-sm font-medium mb-2">Code de réunion</p>
                   <div className="flex items-center gap-3">
                     <div className="meeting-code text-white text-2xl font-mono font-bold tracking-widest bg-black bg-opacity-20 px-3 py-1 rounded-lg">
