@@ -116,6 +116,13 @@ class Meeting(BaseModel):
     report_generation_pending: bool = False  # Demande de génération en cours
     report_generation_approved: bool = False  # Génération approuvée par majorité
     report_votes: Dict[str, bool] = Field(default_factory=dict)  # Votes des scrutateurs {nom: vote}
+    report_downloaded: bool = False  # Suivi du téléchargement du rapport
+    recovery_url: Optional[str] = None  # URL de récupération
+    recovery_password: Optional[str] = None  # Mot de passe de récupération
+    organizer_last_seen: datetime = Field(default_factory=datetime.utcnow)  # Dernière activité organisateur
+    organizer_present: bool = True  # Présence organisateur
+    leadership_transferred_to: Optional[str] = None  # Nom du scrutateur ayant reçu le leadership
+    auto_deletion_scheduled: Optional[datetime] = None  # Suppression automatique programmée
     status: MeetingStatus = MeetingStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
