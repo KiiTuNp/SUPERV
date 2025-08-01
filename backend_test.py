@@ -1682,7 +1682,8 @@ class VoteSecretTester:
             ("Performance Load Test", self.test_performance_load),
             ("Error Handling", self.test_error_handling),
             ("Scrutator Functionality", self.test_scrutator_functionality),
-            ("Scrutator Validation", self.test_scrutator_validation)
+            ("Scrutator Validation", self.test_scrutator_validation),
+            ("Advanced Scrutator Workflow", self.test_advanced_scrutator_workflow_with_approval_and_voting)
         ]
         
         passed = 0
