@@ -554,7 +554,7 @@ async def get_poll_results(poll_id: str):
         "total_votes": total_votes
     }
 
-def generate_pdf_report(meeting_data, participants_data, polls_data):
+def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_data=None):
     """Generate PDF report for the meeting"""
     
     # Create temporary file
@@ -596,6 +596,37 @@ def generate_pdf_report(meeting_data, participants_data, polls_data):
     story.append(Paragraph(f"<b>Code de réunion:</b> {meeting_data['meeting_code']}", styles['Normal']))
     story.append(Paragraph(f"<b>Date de génération:</b> {datetime.now().strftime('%d/%m/%Y à %H:%M')}", styles['Normal']))
     story.append(Spacer(1, 30))
+    
+    # Scrutators section (if any)
+    if scrutators_data and len(scrutators_data) > 0:
+        story.append(Paragraph("SCRUTATEURS", subtitle_style))
+        
+        # Create scrutators table
+        scrutators_table_data = [['#', 'Nom du scrutateur', 'Ajouté le']]
+        for i, scrutator in enumerate(scrutators_data, 1):
+            # Handle both datetime objects and ISO strings
+            if isinstance(scrutator['added_at'], str):
+                added_time = datetime.fromisoformat(scrutator['added_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+            else:
+                added_time = scrutator['added_at'].strftime('%d/%m/%Y à %H:%M')
+            scrutators_table_data.append([str(i), scrutator['name'], added_time])
+        
+        scrutators_table = Table(scrutators_table_data, colWidths=[0.5*inch, 3*inch, 1.5*inch])
+        scrutators_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#fef3c7')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        story.append(scrutators_table)
+        story.append(Paragraph(f"<b>Total des scrutateurs:</b> {len(scrutators_data)}", styles['Normal']))
+        story.append(Spacer(1, 30))
     
     # Participants section
     story.append(Paragraph("PARTICIPANTS APPROUVÉS", subtitle_style))
