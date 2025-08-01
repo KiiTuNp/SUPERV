@@ -328,14 +328,14 @@ function App() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-cyan-50 bg-pattern-dots flex items-center justify-center p-4">
-        <Card className="glass-card-strong w-full max-w-md border-0 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-2xl">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
+        <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
+            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-4">
               <UserPlus className="w-8 h-8" />
             </div>
             <CardTitle className="text-2xl font-bold text-center">Rejoindre une Réunion</CardTitle>
-            <CardDescription className="text-indigo-100 text-center">
+            <CardDescription className="text-blue-100 text-center">
               Entrez vos informations pour participer au vote
             </CardDescription>
           </CardHeader>
@@ -351,7 +351,7 @@ function App() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ex: Marie Martin"
                   required
-                  className="h-12 input-modern border-slate-300 focus:border-indigo-500"
+                  className="h-12 input-modern border-blue-200 focus:border-blue-500"
                 />
               </div>
               <div>
@@ -363,7 +363,7 @@ function App() {
                   value={meetingCode}
                   onChange={(e) => setMeetingCode(e.target.value.toUpperCase())}
                   placeholder="ex: ABC12345"
-                  className="h-12 input-modern border-slate-300 focus:border-indigo-500 font-mono text-lg tracking-wider text-center"
+                  className="h-12 input-modern border-blue-200 focus:border-blue-500 font-mono text-lg tracking-wider text-center"
                   required
                 />
                 <p className="text-xs text-slate-500 mt-2">
@@ -375,7 +375,7 @@ function App() {
                   type="button"
                   onClick={() => setCurrentView("home")} 
                   variant="outline" 
-                  className="flex-1 h-12 border-slate-300"
+                  className="flex-1 h-12 border-slate-300 hover:bg-slate-50"
                 >
                   Retour
                 </Button>
