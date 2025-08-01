@@ -40,7 +40,7 @@
 
 **Date:** 2025-01-27  
 **Tester:** Testing Agent  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ PASSED TESTS (20/21)
 
@@ -108,7 +108,7 @@
 
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
-**Frontend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com
+**Frontend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com
 
 ### ✅ PASSED TESTS (11/11)
 
@@ -231,7 +231,7 @@
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Issue Reported:** "La génération du rapport PDF ne fonctionne pas"  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ FOCUSED PDF REPORT TESTS (3/3 PASSED)
 
@@ -328,7 +328,7 @@ The issue was likely related to frontend implementation (POST vs GET) which you 
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Issue Reported:** "Quand on appuie sur 'Confirmer et télécharger' pour télécharger le PDF, le modal se ferme et le téléchargement ne se fait pas"  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ COMPREHENSIVE SCENARIO TESTS (8/8 STEPS PASSED)
 
@@ -441,7 +441,7 @@ The reported issue "Quand on appuie sur 'Confirmer et télécharger' pour télé
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Scenario:** Realistic assembly with 100 participants, 6 polls, concurrent voting, and PDF generation  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ LOAD TEST RESULTS (6/7 MAJOR COMPONENTS PASSED)
 
@@ -594,7 +594,7 @@ The reported issue "Quand on appuie sur 'Confirmer et télécharger' pour télé
 **Date:** 2025-08-01  
 **Tester:** Testing Agent  
 **Scenario:** Realistic assembly with 100 participants simulation (condensed to 10 participants for validation)  
-**Frontend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com
+**Frontend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com
 
 ### ✅ FRONTEND LOAD TEST RESULTS (CONDENSED VERSION)
 
@@ -696,7 +696,7 @@ Based on successful 10-participant test:
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Feature:** Complete Scrutator (Scrutineer) Functionality  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ SCRUTATOR FUNCTIONALITY TESTS (9/9 PASSED)
 
@@ -860,7 +860,7 @@ Based on successful 10-participant test:
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Feature:** Advanced Scrutator Workflow with Approval and Majority Voting  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### ✅ SUCCESSFULLY TESTED COMPONENTS (8/10)
 
@@ -986,7 +986,7 @@ if not meeting.get("report_generation_approved", False):
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Feature:** Bug Fix - Scrutator Workflow PDF Generation After Majority Approval  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### 🎯 BUG FIX VALIDATION RESULTS (CRITICAL TEST PASSED)
 
@@ -1108,7 +1108,7 @@ The critical bug has been successfully fixed. Users can now complete the scrutat
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Feature:** Critical Bug Fix - Vote Equality Handling Logic  
-**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+**Backend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api
 
 ### 🎯 BUG FIX VALIDATION RESULTS (5/5 SCENARIOS PASSED)
 
@@ -1275,7 +1275,7 @@ Le frontend est prêt pour les plus grandes assemblées possibles (conventions n
 **Date:** 2025-08-01  
 **Tester:** Testing Agent  
 **Scenario:** Exhaustive test of 3 simultaneous assemblies with massive participant simulation  
-**Frontend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com
+**Frontend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com
 
 ### ✅ MASSIVE LOAD TEST RESULTS (11/12 MAJOR COMPONENTS PASSED)
 
@@ -1411,7 +1411,7 @@ Le frontend est prêt pour les plus grandes assemblées possibles (conventions n
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Scenario:** Massive assembly simulation with scrutator functionality testing  
-**Frontend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com
+**Frontend URL:** https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com
 
 ### ✅ MASSIVE LOAD TEST RESULTS (8/10 MAJOR COMPONENTS PASSED)
 

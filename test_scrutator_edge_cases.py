@@ -8,7 +8,7 @@ import json
 import time
 
 # Configuration
-BASE_URL = "https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api"
+BASE_URL = "https://7ec35474-0815-47b0-a5a7-33937258cf82.preview.emergentagent.com/api"
 
 class ScrutatorEdgeCaseTester:
     def __init__(self):
