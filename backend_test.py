@@ -656,6 +656,333 @@ class VoteSecretTester:
         
         return all_passed
 
+    def test_scrutator_functionality(self):
+        """
+        Test complete scrutator functionality as requested:
+        1. Create meeting "Assemblée Test Scrutateurs"
+        2. Add 3 scrutators: "Jean Dupont", "Marie Martin", "Pierre Durand"
+        3. Verify scrutator code generation (format SCxxxxxx)
+        4. Test scrutator connection with valid name and code
+        5. Test rejection of unauthorized name
+        6. Add participants and polls
+        7. Generate PDF with scrutators
+        8. Verify complete data deletion
+        """
+        print("\n🎯 TESTING COMPLETE SCRUTATOR FUNCTIONALITY")
+        print("=" * 70)
+        
+        scenario_data = {}
+        all_passed = True
+        
+        # Step 1: Create meeting "Assemblée Test Scrutateurs"
+        try:
+            meeting_data = {
+                "title": "Assemblée Test Scrutateurs",
+                "organizer_name": "Alice Dupont"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                scenario_data['meeting'] = response.json()
+                self.log_result("Step 1 - Create Meeting", True, f"Meeting created with code: {scenario_data['meeting']['meeting_code']}", response_time)
+            else:
+                self.log_result("Step 1 - Create Meeting", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 1 - Create Meeting", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 2: Add 3 scrutators
+        try:
+            scrutator_data = {
+                "names": ["Jean Dupont", "Marie Martin", "Pierre Durand"]
+            }
+            
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutators", json=scrutator_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'scrutator_code' in data and data['scrutator_code'].startswith('SC') and len(data['scrutator_code']) == 8:
+                    scenario_data['scrutator_code'] = data['scrutator_code']
+                    scenario_data['scrutators'] = data['scrutators']
+                    self.log_result("Step 2 - Add Scrutators", True, f"3 scrutators added with code: {data['scrutator_code']}", response_time)
+                else:
+                    self.log_result("Step 2 - Add Scrutators", False, f"Invalid scrutator code format: {data}", response_time)
+                    return False
+            else:
+                self.log_result("Step 2 - Add Scrutators", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("Step 2 - Add Scrutators", False, f"Error: {str(e)}")
+            return False
+        
+        # Step 3: Get scrutators list
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/scrutators")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'scrutator_code' in data and 'scrutators' in data and len(data['scrutators']) == 3:
+                    self.log_result("Step 3 - Get Scrutators", True, f"Retrieved {len(data['scrutators'])} scrutators", response_time)
+                else:
+                    self.log_result("Step 3 - Get Scrutators", False, f"Invalid response format: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 3 - Get Scrutators", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 3 - Get Scrutators", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 4: Test scrutator connection with valid name
+        try:
+            join_data = {
+                "name": "Jean Dupont",
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if 'meeting' in data and 'scrutator_name' in data and data['scrutator_name'] == "Jean Dupont":
+                    self.log_result("Step 4 - Valid Scrutator Join", True, f"Jean Dupont connected successfully", response_time)
+                else:
+                    self.log_result("Step 4 - Valid Scrutator Join", False, f"Invalid response format: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 4 - Valid Scrutator Join", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 4 - Valid Scrutator Join", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 5: Test rejection of unauthorized name
+        try:
+            join_data = {
+                "name": "Antoine Bernard",  # Not in authorized list
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 403:
+                self.log_result("Step 5 - Unauthorized Scrutator Rejection", True, f"Antoine Bernard correctly rejected", response_time)
+            else:
+                self.log_result("Step 5 - Unauthorized Scrutator Rejection", False, f"Expected 403, got {response.status_code}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 5 - Unauthorized Scrutator Rejection", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 6: Add participants and polls for complete scenario
+        try:
+            # Add participants
+            participants = ["Sophie Lefebvre", "Pierre-Alexandre Martin"]
+            scenario_data['participants'] = []
+            
+            for participant_name in participants:
+                join_data = {
+                    "name": participant_name,
+                    "meeting_code": scenario_data['meeting']['meeting_code']
+                }
+                
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                if response.status_code == 200:
+                    participant_data = response.json()
+                    scenario_data['participants'].append(participant_data)
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant_data['id'],
+                        "approved": True
+                    }
+                    self.session.post(f"{BASE_URL}/participants/{participant_data['id']}/approve", json=approval_data)
+            
+            # Create polls
+            polls_data = [
+                {
+                    "question": "Approuvez-vous le budget 2025 ?",
+                    "options": ["Oui", "Non", "Abstention"],
+                    "show_results_real_time": True
+                },
+                {
+                    "question": "Validez-vous les nouveaux statuts ?",
+                    "options": ["Approuvé", "Rejeté", "Report"],
+                    "show_results_real_time": True
+                }
+            ]
+            
+            scenario_data['polls'] = []
+            meeting_id = scenario_data['meeting']['id']
+            
+            for poll_data in polls_data:
+                response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/polls", json=poll_data)
+                if response.status_code == 200:
+                    poll = response.json()
+                    scenario_data['polls'].append(poll)
+                    
+                    # Start poll and add some votes
+                    self.session.post(f"{BASE_URL}/polls/{poll['id']}/start")
+                    
+                    # Add votes
+                    for i in range(2):  # 2 votes per poll
+                        vote_data = {
+                            "poll_id": poll['id'],
+                            "option_id": poll['options'][i % len(poll['options'])]['id']
+                        }
+                        self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                    
+                    # Close poll
+                    self.session.post(f"{BASE_URL}/polls/{poll['id']}/close")
+            
+            self.log_result("Step 6 - Add Participants and Polls", True, f"Added {len(scenario_data['participants'])} participants and {len(scenario_data['polls'])} polls")
+            
+        except Exception as e:
+            self.log_result("Step 6 - Add Participants and Polls", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 7: Generate PDF with scrutators
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if 'application/pdf' in content_type:
+                    file_size = len(response.content)
+                    # Check if PDF contains scrutator data (basic check)
+                    pdf_content = response.content.decode('latin-1', errors='ignore')
+                    has_scrutators = 'SCRUTATEURS' in pdf_content or 'Jean Dupont' in pdf_content
+                    
+                    if has_scrutators:
+                        self.log_result("Step 7 - Generate PDF with Scrutators", True, f"PDF generated with scrutators ({file_size} bytes)", response_time)
+                    else:
+                        self.log_result("Step 7 - Generate PDF with Scrutators", False, f"PDF generated but scrutators not found in content", response_time)
+                        all_passed = False
+                else:
+                    self.log_result("Step 7 - Generate PDF with Scrutators", False, f"Wrong content type: {content_type}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("Step 7 - Generate PDF with Scrutators", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("Step 7 - Generate PDF with Scrutators", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Step 8: Verify complete data deletion
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            meeting_code = scenario_data['meeting']['meeting_code']
+            
+            # Test meeting deletion
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_code}")
+            if response.status_code == 404:
+                self.log_result("Step 8a - Meeting Deleted", True, "Meeting correctly deleted")
+            else:
+                self.log_result("Step 8a - Meeting Deleted", False, f"Expected 404, got {response.status_code}")
+                all_passed = False
+            
+            # Test scrutators deletion
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/scrutators")
+            if response.status_code == 404:
+                self.log_result("Step 8b - Scrutators Deleted", True, "Scrutators correctly deleted")
+            else:
+                self.log_result("Step 8b - Scrutators Deleted", False, f"Expected 404, got {response.status_code}")
+                all_passed = False
+            
+            # Test organizer view deletion
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/organizer")
+            if response.status_code == 404:
+                self.log_result("Step 8c - Organizer View Deleted", True, "Organizer view correctly deleted")
+            else:
+                self.log_result("Step 8c - Organizer View Deleted", False, f"Expected 404, got {response.status_code}")
+                all_passed = False
+                
+        except Exception as e:
+            self.log_result("Step 8 - Verify Data Deletion", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Summary
+        if all_passed:
+            self.log_result("SCRUTATOR FUNCTIONALITY", True, "✅ All scrutator tests passed - Functionality working correctly")
+            print("\n🎉 SCRUTATOR VALIDATION COMPLETE:")
+            print("✅ Scrutator code generation working (SCxxxxxx format)")
+            print("✅ Scrutator validation and authorization working")
+            print("✅ PDF generation includes scrutator data")
+            print("✅ Complete data cleanup includes scrutators")
+        else:
+            self.log_result("SCRUTATOR FUNCTIONALITY", False, "❌ Some scrutator tests failed - Review issues above")
+        
+        return all_passed
+
+    def test_scrutator_validation(self):
+        """Test scrutator validation scenarios"""
+        print("\n🔍 TESTING SCRUTATOR VALIDATION")
+        print("=" * 50)
+        
+        # First create a meeting for testing
+        meeting_data = {
+            "title": "Test Validation Scrutateurs",
+            "organizer_name": "Test Organizer"
+        }
+        
+        response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+        if response.status_code != 200:
+            self.log_result("Scrutator Validation Setup", False, "Failed to create test meeting")
+            return False
+        
+        meeting = response.json()
+        meeting_id = meeting['id']
+        all_passed = True
+        
+        # Test validation cases
+        test_cases = [
+            ({"names": []}, "Empty names list validation"),
+            ({"names": [""]}, "Empty name validation"),
+            ({"names": ["x" * 101]}, "Name length validation"),
+            ({"names": ["Jean Dupont", "Jean Dupont"]}, "Duplicate names validation"),
+            ({"names": ["Jean Dupont", "Marie Martin", ""]}, "Mixed valid/invalid names validation")
+        ]
+        
+        for invalid_data, test_desc in test_cases:
+            try:
+                start_time = time.time()
+                response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutators", json=invalid_data)
+                response_time = time.time() - start_time
+                
+                if response.status_code == 400:
+                    self.log_result(f"Scrutator Validation - {test_desc}", True, "Validation error returned correctly", response_time)
+                else:
+                    self.log_result(f"Scrutator Validation - {test_desc}", False, f"Expected 400, got {response.status_code}", response_time)
+                    all_passed = False
+            except Exception as e:
+                self.log_result(f"Scrutator Validation - {test_desc}", False, f"Error: {str(e)}")
+                all_passed = False
+        
+        # Clean up test meeting
+        try:
+            self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+        except:
+            pass
+        
+        return all_passed
+
     def test_complete_meeting_closure_notification_scenario(self):
         """
         Test complete scenario for participant notification when meeting is closed.
