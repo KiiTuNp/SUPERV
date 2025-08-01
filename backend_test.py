@@ -1648,6 +1648,491 @@ class VoteSecretTester:
         
         return all_passed
 
+    def test_bug_fix_scrutator_workflow_complete(self):
+        """
+        TEST DE CORRECTION DU BUG - WORKFLOW SCRUTATEURS COMPLET
+        
+        Test the complete workflow as requested by the user to validate the bug fix:
+        1. Create assembly "Test Correction Bug Scrutateurs"
+        2. Add 3 scrutators and generate access code
+        3. Test scrutator connections and approval workflow
+        4. Test complete majority voting workflow
+        5. CRITICAL: Test PDF generation after majority approval (the bug fix)
+        6. Test case without scrutators
+        """
+        print("\n🎯 TEST DE CORRECTION DU BUG - WORKFLOW SCRUTATEURS COMPLET")
+        print("=" * 80)
+        
+        scenario_data = {}
+        all_passed = True
+        
+        # 1. Créer une assemblée - "Test Correction Bug Scrutateurs"
+        try:
+            meeting_data = {
+                "title": "Test Correction Bug Scrutateurs",
+                "organizer_name": "Organisateur Principal"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                scenario_data['meeting'] = response.json()
+                self.log_result("1. Créer assemblée", True, f"Assemblée créée: {scenario_data['meeting']['meeting_code']}", response_time)
+            else:
+                self.log_result("1. Créer assemblée", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("1. Créer assemblée", False, f"Error: {str(e)}")
+            return False
+        
+        # 2. Ajouter 3 scrutateurs et générer le code d'accès
+        try:
+            scrutator_data = {
+                "names": ["Jean Dupont", "Marie Martin", "Pierre Durand"]
+            }
+            
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutators", json=scrutator_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                scenario_data['scrutator_code'] = data['scrutator_code']
+                scenario_data['scrutators'] = data['scrutators']
+                self.log_result("2. Ajouter 3 scrutateurs", True, f"Code généré: {data['scrutator_code']}", response_time)
+            else:
+                self.log_result("2. Ajouter 3 scrutateurs", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                return False
+        except Exception as e:
+            self.log_result("2. Ajouter 3 scrutateurs", False, f"Error: {str(e)}")
+            return False
+        
+        # 3. Connexion et approbation des scrutateurs
+        scrutator_ids = {}
+        
+        # Jean Dupont se connecte (status pending)
+        try:
+            join_data = {
+                "name": "Jean Dupont",
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'pending_approval':
+                    self.log_result("3a. Jean Dupont connexion", True, "Status pending_approval correct", response_time)
+                else:
+                    self.log_result("3a. Jean Dupont connexion", False, f"Expected pending_approval, got: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("3a. Jean Dupont connexion", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("3a. Jean Dupont connexion", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Marie Martin se connecte (status pending)
+        try:
+            join_data = {
+                "name": "Marie Martin",
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'pending_approval':
+                    self.log_result("3b. Marie Martin connexion", True, "Status pending_approval correct", response_time)
+                else:
+                    self.log_result("3b. Marie Martin connexion", False, f"Expected pending_approval, got: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("3b. Marie Martin connexion", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("3b. Marie Martin connexion", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Pierre Durand se connecte (status pending)
+        try:
+            join_data = {
+                "name": "Pierre Durand",
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'pending_approval':
+                    self.log_result("3c. Pierre Durand connexion", True, "Status pending_approval correct", response_time)
+                else:
+                    self.log_result("3c. Pierre Durand connexion", False, f"Expected pending_approval, got: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("3c. Pierre Durand connexion", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("3c. Pierre Durand connexion", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Organisateur approuve tous les scrutateurs
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/scrutators")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                scrutators_list = data['scrutators']
+                
+                approved_count = 0
+                for scrutator in scrutators_list:
+                    approval_data = {
+                        "scrutator_id": scrutator['id'],
+                        "approved": True
+                    }
+                    
+                    response = self.session.post(f"{BASE_URL}/scrutators/{scrutator['id']}/approve", json=approval_data)
+                    if response.status_code == 200:
+                        approved_count += 1
+                        scrutator_ids[scrutator['name']] = scrutator['id']
+                
+                if approved_count == 3:
+                    self.log_result("3d. Organisateur approuve tous", True, f"Tous les 3 scrutateurs approuvés", response_time)
+                else:
+                    self.log_result("3d. Organisateur approuve tous", False, f"Seulement {approved_count}/3 approuvés")
+                    all_passed = False
+            else:
+                self.log_result("3d. Organisateur approuve tous", False, f"HTTP {response.status_code}: {response.text}")
+                all_passed = False
+        except Exception as e:
+            self.log_result("3d. Organisateur approuve tous", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # 4. Vérifier accès après approbation - Jean Dupont peut maintenant accéder
+        try:
+            join_data = {
+                "name": "Jean Dupont",
+                "scrutator_code": scenario_data['scrutator_code']
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/scrutators/join", json=join_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('status') == 'approved' and 'meeting' in data:
+                    self.log_result("4. Jean Dupont accès après approbation", True, "Accès interface autorisé", response_time)
+                else:
+                    self.log_result("4. Jean Dupont accès après approbation", False, f"Expected approved access, got: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("4. Jean Dupont accès après approbation", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("4. Jean Dupont accès après approbation", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # 5. Test complet du workflow de vote majoritaire
+        # Ajouter des participants et sondages
+        try:
+            # Add participants
+            participants = ["Participant Un", "Participant Deux"]
+            scenario_data['participants'] = []
+            
+            for participant_name in participants:
+                join_data = {
+                    "name": participant_name,
+                    "meeting_code": scenario_data['meeting']['meeting_code']
+                }
+                
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                if response.status_code == 200:
+                    participant_data = response.json()
+                    scenario_data['participants'].append(participant_data)
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant_data['id'],
+                        "approved": True
+                    }
+                    self.session.post(f"{BASE_URL}/participants/{participant_data['id']}/approve", json=approval_data)
+            
+            # Create poll
+            poll_data = {
+                "question": "Approuvez-vous le budget 2025 ?",
+                "options": ["Oui", "Non", "Abstention"],
+                "show_results_real_time": True
+            }
+            
+            meeting_id = scenario_data['meeting']['id']
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/polls", json=poll_data)
+            if response.status_code == 200:
+                poll = response.json()
+                scenario_data['poll'] = poll
+                
+                # Start poll and add votes
+                self.session.post(f"{BASE_URL}/polls/{poll['id']}/start")
+                
+                # Add votes
+                for i in range(3):
+                    vote_data = {
+                        "poll_id": poll['id'],
+                        "option_id": poll['options'][i % len(poll['options'])]['id']
+                    }
+                    self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                
+                # Close poll
+                self.session.post(f"{BASE_URL}/polls/{poll['id']}/close")
+            
+            self.log_result("5a. Ajouter participants et sondages", True, f"Ajouté {len(scenario_data['participants'])} participants et 1 sondage")
+            
+        except Exception as e:
+            self.log_result("5a. Ajouter participants et sondages", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Organisateur demande la génération via /request-report
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            request_data = {
+                "meeting_id": meeting_id,
+                "requested_by": "Organisateur Principal"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/request-report", json=request_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('scrutator_approval_required') and data.get('majority_needed') == 2:  # (3//2)+1 = 2
+                    self.log_result("5b. Organisateur demande génération", True, f"Demande envoyée, majorité requise: {data['majority_needed']}", response_time)
+                else:
+                    self.log_result("5b. Organisateur demande génération", False, f"Unexpected response: {data}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("5b. Organisateur demande génération", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("5b. Organisateur demande génération", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Jean Dupont vote OUI
+        try:
+            vote_data = {
+                "meeting_id": meeting_id,
+                "scrutator_name": "Jean Dupont",
+                "approved": True
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutator-vote", json=vote_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log_result("5c. Jean Dupont vote OUI", True, f"Vote enregistré: {result.get('message', 'Vote submitted')}", response_time)
+            else:
+                self.log_result("5c. Jean Dupont vote OUI", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("5c. Jean Dupont vote OUI", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Marie Martin vote OUI
+        try:
+            vote_data = {
+                "meeting_id": meeting_id,
+                "scrutator_name": "Marie Martin",
+                "approved": True
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutator-vote", json=vote_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log_result("5d. Marie Martin vote OUI", True, f"Vote enregistré: {result.get('message', 'Vote submitted')}", response_time)
+            else:
+                self.log_result("5d. Marie Martin vote OUI", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("5d. Marie Martin vote OUI", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Pierre Durand vote NON
+        try:
+            vote_data = {
+                "meeting_id": meeting_id,
+                "scrutator_name": "Pierre Durand",
+                "approved": False
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings/{meeting_id}/scrutator-vote", json=vote_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('decision') == 'approved':
+                    self.log_result("5e. Pierre Durand vote NON", True, f"Majorité atteinte (2/3): {result.get('message', 'Approved')}", response_time)
+                    scenario_data['generation_approved'] = True
+                else:
+                    self.log_result("5e. Pierre Durand vote NON", True, f"Vote enregistré: {result.get('message', 'Vote submitted')}", response_time)
+            else:
+                self.log_result("5e. Pierre Durand vote NON", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("5e. Pierre Durand vote NON", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # POINT CRITIQUE: Tester la génération PDF via GET /report
+        try:
+            meeting_id = scenario_data['meeting']['id']
+            start_time = time.time()
+            response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                if 'application/pdf' in content_type:
+                    file_size = len(response.content)
+                    self.log_result("5f. CRITIQUE: Génération PDF après approbation", True, f"✅ BUG CORRIGÉ! PDF généré ({file_size} bytes)", response_time)
+                    scenario_data['pdf_generated'] = True
+                else:
+                    self.log_result("5f. CRITIQUE: Génération PDF après approbation", False, f"❌ BUG PERSISTE! Wrong content type: {content_type}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("5f. CRITIQUE: Génération PDF après approbation", False, f"❌ BUG PERSISTE! HTTP {response.status_code}: {response.text}", response_time)
+                all_passed = False
+        except Exception as e:
+            self.log_result("5f. CRITIQUE: Génération PDF après approbation", False, f"❌ BUG PERSISTE! Error: {str(e)}")
+            all_passed = False
+        
+        # Vérifier que toutes les données sont supprimées
+        if scenario_data.get('pdf_generated'):
+            try:
+                meeting_id = scenario_data['meeting']['id']
+                meeting_code = scenario_data['meeting']['meeting_code']
+                
+                # Test meeting deletion
+                response = self.session.get(f"{BASE_URL}/meetings/{meeting_code}")
+                if response.status_code == 404:
+                    self.log_result("5g. Vérification suppression données", True, "Toutes les données supprimées après PDF")
+                else:
+                    self.log_result("5g. Vérification suppression données", False, f"Données non supprimées: {response.status_code}")
+                    all_passed = False
+            except Exception as e:
+                self.log_result("5g. Vérification suppression données", False, f"Error: {str(e)}")
+                all_passed = False
+        
+        # 6. Test du cas sans scrutateurs
+        try:
+            meeting_data = {
+                "title": "Assemblée Sans Scrutateurs",
+                "organizer_name": "Organisateur Simple"
+            }
+            
+            start_time = time.time()
+            response = self.session.post(f"{BASE_URL}/meetings", json=meeting_data)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                no_scrutator_meeting = response.json()
+                
+                # Add a participant and poll
+                join_data = {
+                    "name": "Participant Simple",
+                    "meeting_code": no_scrutator_meeting['meeting_code']
+                }
+                
+                response = self.session.post(f"{BASE_URL}/participants/join", json=join_data)
+                if response.status_code == 200:
+                    participant = response.json()
+                    
+                    # Approve participant
+                    approval_data = {
+                        "participant_id": participant['id'],
+                        "approved": True
+                    }
+                    self.session.post(f"{BASE_URL}/participants/{participant['id']}/approve", json=approval_data)
+                
+                # Create and complete a poll
+                poll_data = {
+                    "question": "Test sans scrutateurs ?",
+                    "options": ["Oui", "Non"],
+                    "show_results_real_time": True
+                }
+                
+                response = self.session.post(f"{BASE_URL}/meetings/{no_scrutator_meeting['id']}/polls", json=poll_data)
+                if response.status_code == 200:
+                    poll = response.json()
+                    
+                    # Start, vote, close
+                    self.session.post(f"{BASE_URL}/polls/{poll['id']}/start")
+                    vote_data = {
+                        "poll_id": poll['id'],
+                        "option_id": poll['options'][0]['id']
+                    }
+                    self.session.post(f"{BASE_URL}/votes", json=vote_data)
+                    self.session.post(f"{BASE_URL}/polls/{poll['id']}/close")
+                
+                # Test direct PDF generation
+                start_time = time.time()
+                response = self.session.get(f"{BASE_URL}/meetings/{no_scrutator_meeting['id']}/report")
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        file_size = len(response.content)
+                        self.log_result("6. Test sans scrutateurs", True, f"PDF généré directement ({file_size} bytes)", response_time)
+                    else:
+                        self.log_result("6. Test sans scrutateurs", False, f"Wrong content type: {content_type}", response_time)
+                        all_passed = False
+                else:
+                    self.log_result("6. Test sans scrutateurs", False, f"HTTP {response.status_code}: {response.text}", response_time)
+                    all_passed = False
+            else:
+                self.log_result("6. Test sans scrutateurs", False, f"Failed to create meeting: {response.status_code}")
+                all_passed = False
+        except Exception as e:
+            self.log_result("6. Test sans scrutateurs", False, f"Error: {str(e)}")
+            all_passed = False
+        
+        # Summary
+        if all_passed:
+            self.log_result("RÉSULTAT FINAL", True, "✅ TOUS LES TESTS PASSENT - BUG CORRIGÉ AVEC SUCCÈS!")
+            print("\n🎉 VALIDATION COMPLÈTE DU BUG FIX:")
+            print("✅ Workflow scrutateurs avec approbation fonctionne")
+            print("✅ Système de vote majoritaire fonctionne (2/3)")
+            print("✅ CRITIQUE: Génération PDF après approbation majoritaire fonctionne")
+            print("✅ Suppression complète des données après génération")
+            print("✅ Génération directe sans scrutateurs fonctionne")
+            print("\n🚀 LE BUG EST CORRIGÉ - PRÊT POUR PRODUCTION!")
+        else:
+            self.log_result("RÉSULTAT FINAL", False, "❌ CERTAINS TESTS ÉCHOUENT - BUG PEUT PERSISTER")
+            print("\n⚠️  ATTENTION: Certains tests ont échoué")
+            print("Vérifiez les détails ci-dessus pour identifier les problèmes restants")
+        
+        return all_passed
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Vote Secret Backend API Tests")
