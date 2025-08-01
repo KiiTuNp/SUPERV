@@ -2336,24 +2336,10 @@ function App() {
             message: data.message
           });
           setMeetingClosed(true);
-          setRedirectCountdown(10);
-          
-          // Start countdown timer
-          const countdownInterval = setInterval(() => {
-            setRedirectCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(countdownInterval);
-                // Redirect to home page
-                setCurrentView("home");
-                setMeeting(null);
-                setParticipant(null);
-                setMeetingClosed(false);
-                setClosedMeetingInfo(null);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
+          // Ne démarrer le countdown que s'il n'est pas déjà en cours
+          if (redirectCountdown === 10) {
+            setRedirectCountdown(10);
+          }
         }
       }
     };
