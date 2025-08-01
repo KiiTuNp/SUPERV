@@ -806,8 +806,8 @@ timeout = 120
 keepalive = 2
 
 # Logging
-accesslog = "/opt/vote-secret/logs/gunicorn-access.log"
-errorlog = "/opt/vote-secret/logs/gunicorn-error.log"
+accesslog = "/var/log/vote-secret/gunicorn-access.log"
+errorlog = "/var/log/vote-secret/gunicorn-error.log"
 loglevel = "{self.config['LOG_LEVEL'].lower()}"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
@@ -816,7 +816,7 @@ proc_name = "vote-secret"
 
 # Server mechanics
 daemon = False
-pidfile = "/opt/vote-secret/logs/gunicorn.pid"
+pidfile = "/var/log/vote-secret/gunicorn.pid"
 user = "vote-secret"
 group = "vote-secret"
 tmp_upload_dir = None
