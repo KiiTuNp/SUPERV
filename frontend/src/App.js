@@ -663,6 +663,25 @@ function App() {
                   </div>
                   <div>
                     <CardTitle className="text-2xl font-bold">{meeting?.title}</CardTitle>
+                    
+                    {/* Bouton Ajouter des scrutateurs */}
+                    <div className="mt-2 mb-2">
+                      <Button
+                        onClick={() => setShowScrutatorModal(true)}
+                        size="sm"
+                        variant="outline"
+                        className="border-white border-opacity-60 text-white hover:bg-white hover:text-blue-600 transition-all duration-300 text-xs"
+                      >
+                        <UserPlus className="w-3 h-3 mr-1" />
+                        Ajouter des scrutateurs
+                      </Button>
+                      {scrutators.length > 0 && (
+                        <span className="ml-2 text-blue-200 text-xs">
+                          ({scrutators.length} scrutateur{scrutators.length > 1 ? 's' : ''})
+                        </span>
+                      )}
+                    </div>
+                    
                     <CardDescription className="text-blue-100">
                       Par {meeting?.organizer_name || "Organisateur"} à {meeting?.created_at ? new Date(meeting.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : "00:00"} le {meeting?.created_at ? new Date(meeting.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}
                     </CardDescription>
