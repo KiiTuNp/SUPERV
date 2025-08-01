@@ -334,6 +334,12 @@
   background: linear-gradient(135deg, rgba(156, 163, 175, 0.95) 0%, rgba(107, 114, 128, 0.95) 100%);
 }
 
+/* Progress Bar for Winner */
+.progress-winner [data-state="complete"] {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
 /* Loading Spinners */
 .spinner-modern {
   width: 24px;
