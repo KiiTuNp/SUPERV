@@ -1070,7 +1070,7 @@ class VoteSecretTester:
             self.log_result("Step 3 - Jean Dupont Pending Approval", False, f"Error: {str(e)}")
             all_passed = False
         
-        # Step 4: Get Jean Dupont's scrutator ID and approve him
+        # Step 4: Get all scrutators and approve them all
         try:
             meeting_id = scenario_data['meeting']['id']
             start_time = time.time()
@@ -1079,37 +1079,31 @@ class VoteSecretTester:
             
             if response.status_code == 200:
                 data = response.json()
-                jean_scrutator = None
-                for scrutator in data['scrutators']:
-                    if scrutator['name'] == 'Jean Dupont':
-                        jean_scrutator = scrutator
-                        break
+                scrutators_list = data['scrutators']
                 
-                if jean_scrutator:
-                    # Approve Jean Dupont
+                # Approve all scrutators
+                approved_count = 0
+                for scrutator in scrutators_list:
                     approval_data = {
-                        "scrutator_id": jean_scrutator['id'],
+                        "scrutator_id": scrutator['id'],
                         "approved": True
                     }
                     
-                    start_time = time.time()
-                    response = self.session.post(f"{BASE_URL}/scrutators/{jean_scrutator['id']}/approve", json=approval_data)
-                    response_time = time.time() - start_time
-                    
+                    response = self.session.post(f"{BASE_URL}/scrutators/{scrutator['id']}/approve", json=approval_data)
                     if response.status_code == 200:
-                        self.log_result("Step 4 - Approve Jean Dupont", True, f"Jean Dupont approved successfully", response_time)
-                        scenario_data['jean_approved'] = True
-                    else:
-                        self.log_result("Step 4 - Approve Jean Dupont", False, f"HTTP {response.status_code}: {response.text}", response_time)
-                        all_passed = False
+                        approved_count += 1
+                
+                if approved_count == 3:
+                    self.log_result("Step 4 - Approve All Scrutators", True, f"All 3 scrutators approved successfully", response_time)
+                    scenario_data['all_approved'] = True
                 else:
-                    self.log_result("Step 4 - Find Jean Dupont", False, "Jean Dupont not found in scrutators list")
+                    self.log_result("Step 4 - Approve All Scrutators", False, f"Only {approved_count}/3 scrutators approved")
                     all_passed = False
             else:
                 self.log_result("Step 4 - Get Scrutators for Approval", False, f"HTTP {response.status_code}: {response.text}")
                 all_passed = False
         except Exception as e:
-            self.log_result("Step 4 - Approve Jean Dupont", False, f"Error: {str(e)}")
+            self.log_result("Step 4 - Approve All Scrutators", False, f"Error: {str(e)}")
             all_passed = False
         
         # Step 5: Test Jean Dupont can now access interface (should get approved status)
