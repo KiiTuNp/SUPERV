@@ -868,20 +868,20 @@ WantedBy=multi-user.target
 """
 
     def _generate_systemd_service_advanced(self) -> str:
-        """Génère une configuration SystemD avancée (pour production sécurisée)"""
+        """Génère une configuration SystemD avancée (pour production sécurisée) avec Uvicorn"""
         return f"""[Unit]
-Description=Vote Secret v2.0 Backend Service
+Description=Vote Secret v2.0 Backend Service (Uvicorn)
 After=network.target mongodb.service
 Wants=mongodb.service
 
 [Service]
-Type=exec
+Type=simple
 User=vote-secret
 Group=vote-secret
 WorkingDirectory=/opt/vote-secret/backend
 Environment=PATH=/opt/vote-secret/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=PYTHONPATH=/opt/vote-secret/backend
-ExecStart=/opt/vote-secret/venv/bin/gunicorn --config /opt/vote-secret/config/gunicorn.conf.py server:app
+ExecStart=/opt/vote-secret/venv/bin/uvicorn server:app --host 127.0.0.1 --port 8001 --log-level info --workers 4
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5
