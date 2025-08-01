@@ -666,7 +666,7 @@ function App() {
               <div className="space-y-6">
                 {polls.map((poll) => (
                   <Card key={poll.id} className="glass-card border-0 shadow-lg">
-                    <CardHeader className="bg-gradient-to-r from-rose-500 via-pink-500 to-violet-500 text-white rounded-t-xl">
+                    <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <CardTitle className="text-lg">{poll.question}</CardTitle>
                         <div className="flex items-center gap-2">
@@ -690,7 +690,7 @@ function App() {
                                 size="sm" 
                                 variant="outline"
                                 onClick={() => closePoll(poll.id)}
-                                className="border-white text-white hover:bg-white hover:text-rose-600 transition-colors"
+                                className="border-white text-white hover:bg-white hover:text-blue-600 transition-colors"
                               >
                                 <Square className="w-4 h-4 mr-1" />
                                 Fermer
