@@ -117,7 +117,7 @@ function App() {
             {/* Organizer Action - Elegant and Discrete */}
             <div className="order-2 lg:order-2">
               <Card className="glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white relative">
+                <CardHeader className="bg-gradient-to-r from-slate-500 to-slate-600 text-white relative">
                   <div className="absolute inset-0 bg-white bg-opacity-10"></div>
                   <div className="relative z-10">
                     <div className="flex items-center justify-center mb-3">
@@ -128,27 +128,27 @@ function App() {
                     <CardTitle className="text-xl font-bold text-center">
                       Interface Organisateur
                     </CardTitle>
-                    <CardDescription className="text-emerald-100 text-center">
+                    <CardDescription className="text-slate-200 text-center">
                       Créez et gérez votre réunion de vote
                     </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 bg-gradient-to-br from-white to-slate-50">
                   <div className="space-y-3 mb-6 text-sm">
-                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50">
-                      <div className="w-6 h-6 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                         <Vote className="w-3 h-3 text-white" />
                       </div>
                       <span className="font-medium">Créer des sondages</span>
                     </div>
-                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50">
-                      <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                         <Users className="w-3 h-3 text-white" />
                       </div>
                       <span className="font-medium">Gérer les participants</span>
                     </div>
-                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-cyan-50 to-blue-50">
-                      <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 text-slate-700 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                         <FileText className="w-3 h-3 text-white" />
                       </div>
                       <span className="font-medium">Générer le rapport</span>
@@ -157,7 +157,7 @@ function App() {
                   <Button 
                     onClick={() => setCurrentView("create")} 
                     variant="outline" 
-                    className="w-full h-12 border-2 border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-teal-600 hover:text-white hover:border-transparent transition-all duration-300"
+                    className="w-full h-12 border-2 border-blue-200 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-transparent transition-all duration-300"
                   >
                     <Settings className="w-5 h-5 mr-2" />
                     Accès Organisateur
