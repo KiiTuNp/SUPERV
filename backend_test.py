@@ -1289,7 +1289,9 @@ class VoteSecretTester:
             ("PDF Report Generation", self.test_pdf_report_generation),
             ("CORS Configuration", self.test_cors_headers),
             ("Performance Load Test", self.test_performance_load),
-            ("Error Handling", self.test_error_handling)
+            ("Error Handling", self.test_error_handling),
+            ("Scrutator Functionality", self.test_scrutator_functionality),
+            ("Scrutator Validation", self.test_scrutator_validation)
         ]
         
         passed = 0
