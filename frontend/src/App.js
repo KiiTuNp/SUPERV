@@ -1688,6 +1688,102 @@ function App() {
             </Card>
           </div>
         )}
+
+        {/* Modal de vote pour les scrutateurs */}
+        {showReportVoteModal && reportVoteData && isScrutator && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl bg-white">
+              <CardHeader className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <Vote className="w-8 h-8" />
+                  </div>
+                </div>
+                <CardTitle className="text-2xl font-bold text-center">
+                  Autorisation de Génération du Rapport
+                </CardTitle>
+                <CardDescription className="text-amber-100 text-center text-lg">
+                  Votre autorisation est requise pour générer le rapport final
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="space-y-6">
+                  
+                  {/* Information sur la demande */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      Demande de génération
+                    </h3>
+                    
+                    <div className="space-y-2 text-sm text-blue-700">
+                      <p><strong>Demandé par :</strong> {reportVoteData.requested_by}</p>
+                      <p><strong>Nombre de scrutateurs :</strong> {reportVoteData.scrutator_count}</p>
+                      <p><strong>Majorité requise :</strong> {reportVoteData.majority_needed} votes positifs</p>
+                    </div>
+                  </div>
+
+                  {/* Explication de la décision */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-amber-600" />
+                      Conséquences de votre décision
+                    </h3>
+                    
+                    <div className="text-sm text-amber-700 space-y-2">
+                      <p><strong>Si vous votez OUI :</strong></p>
+                      <ul className="list-disc list-inside ml-4 space-y-1">
+                        <li>Vous autorisez la génération du rapport PDF</li>
+                        <li>Toutes les données seront supprimées après génération</li>
+                        <li>La réunion sera définitivement fermée</li>
+                      </ul>
+                      
+                      <p className="mt-3"><strong>Si vous votez NON :</strong></p>
+                      <ul className="list-disc list-inside ml-4 space-y-1">
+                        <li>Vous refusez la génération du rapport</li>
+                        <li>La réunion continuera normalement</li>
+                        <li>Les données resteront accessibles</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Message d'importance */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-red-800 mb-2">Responsabilité de scrutateur</h4>
+                        <p className="text-sm text-red-700">
+                          En tant que scrutateur, votre rôle est de vérifier que le processus de vote s'est déroulé correctement 
+                          et que la génération du rapport est justifiée. Votez selon votre conscience professionnelle.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Boutons de vote */}
+                <div className="flex justify-center space-x-4 pt-8 border-t border-slate-200">
+                  <Button 
+                    onClick={() => submitScrutatorVote(false)}
+                    variant="outline"
+                    className="border-red-300 text-red-600 hover:bg-red-50 px-8 py-3 text-lg font-semibold"
+                  >
+                    <AlertCircle className="w-5 h-5 mr-2" />
+                    NON - Je refuse
+                  </Button>
+                  <Button 
+                    onClick={() => submitScrutatorVote(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold"
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    OUI - J'autorise
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   };
