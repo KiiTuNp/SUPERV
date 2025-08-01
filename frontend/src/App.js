@@ -1377,7 +1377,7 @@ function App() {
                           );
                         })}
                         {hasVoted && (
-                          <div className="mt-4 glass-card bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-4 rounded-xl">
+                          <div className="mt-4 bg-blue-50 border border-blue-200 p-4 rounded-xl">
                             <p className="text-sm text-blue-700 flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
                               <span className="font-semibold">Vote enregistré!</span> 
@@ -1388,28 +1388,31 @@ function App() {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Shield className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Vote className="w-6 h-6 text-blue-600" />
+                        </div>
                         <p className="text-slate-500">
-                          {poll.status === "draft" ? "Ce sondage n'a pas encore été lancé" : 
-                           "Les résultats seront affichés après la fin du sondage"}
+                          {poll.status === "draft" ? "Ce sondage n'est pas encore actif" : "Sondage fermé"}
                         </p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               );
             })}
 
             {polls.length === 0 && (
-              <Card className="glass-card border-0 shadow-lg">
-                <CardContent className="text-center py-12">
-                  <Vote className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <div className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+                <div className="text-center py-12 p-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Vote className="w-8 h-8 text-blue-600" />
+                  </div>
                   <p className="text-slate-500 text-lg">Aucun sondage n'a encore été créé</p>
                   <p className="text-slate-400 text-sm mt-2">
                     Les sondages apparaîtront ici automatiquement
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
