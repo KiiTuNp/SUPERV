@@ -956,13 +956,40 @@ def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_
 
 @api_router.get("/meetings/{meeting_id}/report")
 async def generate_meeting_report(meeting_id: str):
-    """Generate and download PDF report, then delete all meeting data"""
+    """Generate and download PDF report ONLY after scrutator approval if scrutators exist"""
     
     # Get meeting data
     meeting = await db.meetings.find_one({"id": meeting_id})
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
     
+    # Vérifier qu'il y a des scrutateurs approuvés
+    approved_scrutators = await db.scrutators.find({
+        "meeting_id": meeting_id, 
+        "approval_status": "approved"
+    }).to_list(100)
+    
+    # Si il y a des scrutateurs approuvés, vérifier l'approbation
+    if len(approved_scrutators) > 0:
+        if not meeting.get("report_generation_pending", False):
+            # Pas de demande en cours - le processus n'a pas été initié correctement
+            raise HTTPException(
+                status_code=400, 
+                detail="La génération du rapport nécessite l'approbation des scrutateurs. Utilisez l'endpoint /request-report d'abord."
+            )
+        
+        # Vérifier si la majorité a approuvé
+        report_votes = meeting.get("report_votes", {})
+        yes_votes = sum(1 for vote in report_votes.values() if vote)
+        majority_needed = (len(approved_scrutators) // 2) + 1
+        
+        if yes_votes < majority_needed:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Génération du rapport non approuvée. {yes_votes}/{len(approved_scrutators)} votes positifs, {majority_needed} requis."
+            )
+    
+    # Procéder à la génération normale
     # Get participants data
     participants = await db.participants.find({"meeting_id": meeting_id}).to_list(1000)
     
@@ -1012,9 +1039,12 @@ async def generate_meeting_report(meeting_id: str):
         delete_scrutators_result = await db.scrutators.delete_many({"meeting_id": meeting_id})
         logger.info(f"Deleted {delete_scrutators_result.deleted_count} scrutators for meeting {meeting_id}")
         
-        # Delete scrutator access records
-        delete_access_result = await db.scrutator_access.delete_many({"meeting_id": meeting_id})
-        logger.info(f"Deleted {delete_access_result.deleted_count} scrutator access records for meeting {meeting_id}")
+        # Delete scrutator access records (if any)
+        try:
+            delete_access_result = await db.scrutator_access.delete_many({"meeting_id": meeting_id})
+            logger.info(f"Deleted {delete_access_result.deleted_count} scrutator access records for meeting {meeting_id}")
+        except:
+            pass  # Collection might not exist
         
         # Finally delete the meeting itself
         delete_meeting_result = await db.meetings.delete_one({"id": meeting_id})
