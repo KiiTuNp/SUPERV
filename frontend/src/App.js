@@ -795,7 +795,7 @@ function App() {
                         variant="outline"
                         size="sm"
                         onClick={addPollOption}
-                        className="btn-gradient-success"
+                        className="border-blue-300 hover:bg-blue-50"
                       >
                         + Ajouter une option
                       </Button>
