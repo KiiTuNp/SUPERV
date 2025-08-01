@@ -58,33 +58,45 @@ def prompt_continue(message: str = "Continuer ?") -> bool:
             return False
         print_warning("Réponse invalide.")
 
-def run_command(command: str, description: str = "", check_success: bool = True) -> Tuple[bool, str, str]:
+def run_command(command: str, description: str = "", check_success: bool = True, interactive: bool = False) -> Tuple[bool, str, str]:
     if description:
         print(f"{Colors.BLUE}🔄 {description}...{Colors.ENDC}")
     
     try:
-        process = subprocess.run(
-            command,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=300
-        )
-        
-        success = process.returncode == 0
-        stdout = process.stdout.strip()
-        stderr = process.stderr.strip()
-        
-        if success:
-            if description:
-                print_success(f"{description} - Terminé")
+        if interactive:
+            # Pour les commandes interactives, afficher la commande et laisser l'utilisateur la voir
+            print(f"{Colors.CYAN}Commande: {command}{Colors.ENDC}")
+            process = subprocess.run(
+                command,
+                shell=True,
+                text=True,
+                timeout=600  # 10 minutes pour les commandes interactives
+            )
+            success = process.returncode == 0
+            return success, "", ""
         else:
-            if check_success:
-                print_error(f"{description} - Échec")
-                if stderr:
-                    print(f"{Colors.FAIL}Erreur: {stderr}{Colors.ENDC}")
-        
-        return success, stdout, stderr
+            process = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            
+            success = process.returncode == 0
+            stdout = process.stdout.strip()
+            stderr = process.stderr.strip()
+            
+            if success:
+                if description:
+                    print_success(f"{description} - Terminé")
+            else:
+                if check_success:
+                    print_error(f"{description} - Échec")
+                    if stderr:
+                        print(f"{Colors.FAIL}Erreur: {stderr}{Colors.ENDC}")
+            
+            return success, stdout, stderr
         
     except subprocess.TimeoutExpired:
         print_error(f"{description} - Timeout")
