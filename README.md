@@ -156,12 +156,23 @@ tail -f /var/log/vote-secret/        # Logs application
 
 ### Scripts de Management Générés
 ```bash
-# Utilisation des scripts générés
-/usr/local/bin/manage.sh start       # Démarrer tous services
-/usr/local/bin/manage.sh stop        # Arrêter tous services
-/usr/local/bin/manage.sh restart     # Redémarrer tous services
-/usr/local/bin/manage.sh status      # Statut tous services
-/usr/local/bin/manage.sh logs        # Voir logs récents
+# Gestionnaire de service adaptatif (nouveau)
+python3 service_manager.py start       # Démarrer Vote Secret
+python3 service_manager.py stop        # Arrêter Vote Secret  
+python3 service_manager.py restart     # Redémarrer Vote Secret
+python3 service_manager.py status      # Statut détaillé
+python3 service_manager.py logs        # Voir logs
+
+# Diagnostic automatique (nouveau)
+python3 diagnostic.py                  # Diagnostic complet
+python3 diagnostic.py --fix            # Diagnostic + corrections
+
+# Scripts de production (si déployé)
+/usr/local/bin/manage.sh start         # Démarrer tous services
+/usr/local/bin/manage.sh stop          # Arrêter tous services
+/usr/local/bin/manage.sh restart       # Redémarrer tous services
+/usr/local/bin/manage.sh status        # Statut tous services
+/usr/local/bin/manage.sh logs          # Voir logs récents
 ```
 
 ## 🎯 Utilisation
