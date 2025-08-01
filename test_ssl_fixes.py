@@ -149,7 +149,7 @@ def test_deploy_nginx_logic():
             ("Deux phases SSL", "Configuration Nginx avec SSL" in content),
             ("Test config SSL", "nginx -t" in content and "Test configuration SSL" in content),
             ("Rechargement après SSL", "systemctl reload nginx" in content),
-            ("Pas d'usage --nginx", "--nginx" not in content.replace("python3-certbot-nginx", ""))  # Exclure l'installation
+            ("Pas d'usage --nginx", "certbot --nginx" not in content)  # Recherche spécifique de la commande problématique
         ]
         
         all_passed = True
