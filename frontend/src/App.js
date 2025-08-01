@@ -1244,8 +1244,8 @@ function App() {
     if (status === "rejected") {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 bg-pattern-dots flex items-center justify-center p-4">
-          <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
-            <CardContent className="text-center py-12">
+          <div className="glass-card-strong w-full max-w-md border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+            <div className="text-center py-12 p-6">
               <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertCircle className="w-8 h-8 text-white" />
               </div>
@@ -1256,8 +1256,8 @@ function App() {
               <Button onClick={() => setCurrentView("home")} className="btn-gradient-primary">
                 Retour à l'accueil
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       );
     }
