@@ -114,6 +114,7 @@ class Meeting(BaseModel):
     scrutator_code: Optional[str] = None  # Code spécial pour les scrutateurs
     scrutators: List[str] = Field(default_factory=list)  # Liste des noms de scrutateurs
     report_generation_pending: bool = False  # Demande de génération en cours
+    report_generation_approved: bool = False  # Génération approuvée par majorité
     report_votes: Dict[str, bool] = Field(default_factory=dict)  # Votes des scrutateurs {nom: vote}
     status: MeetingStatus = MeetingStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
