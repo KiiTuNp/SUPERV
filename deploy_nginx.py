@@ -345,9 +345,9 @@ class NginxSSLSetup:
         try:
             import sys
             sys.path.append(str(self.project_root))
-            from deploy_environment import EnvironmentSetup
+            from deploy_environment import ProductionEnvironmentSetup
             
-            env_setup = EnvironmentSetup()
+            env_setup = ProductionEnvironmentSetup()
             env_setup.config = self.config
             ssl_config_content = env_setup._generate_nginx_config_ssl()
             
