@@ -699,7 +699,7 @@ function App() {
 
           {/* Bouton rapport en bas */}
           <div className="mt-12 flex justify-center">
-            <Card className="glass-card border border-blue-200 shadow-lg">
+            <Card className="glass-card border border-blue-200 shadow-lg bg-white">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-6 h-6 text-blue-600" />
@@ -709,11 +709,11 @@ function App() {
                   Télécharger le rapport PDF et supprimer définitivement toutes les données
                 </p>
                 <Button
-                  onClick={downloadReport}
+                  onClick={() => setShowReportModal(true)}
                   className="bg-red-600 hover:bg-red-700 text-white"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  Télécharger le rapport
+                  <FileText className="w-4 h-4 mr-2" />
+                  Voir le résumé du rapport
                 </Button>
               </CardContent>
             </Card>
