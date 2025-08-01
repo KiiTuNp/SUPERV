@@ -130,6 +130,14 @@ class MeetingCreate(BaseModel):
     title: str
     organizer_name: str
 
+class RecoveryRequest(BaseModel):
+    meeting_id: str
+    password: str
+
+class OrganizerHeartbeat(BaseModel):
+    meeting_id: str
+    organizer_name: str
+
 class Participant(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
