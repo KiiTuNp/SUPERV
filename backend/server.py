@@ -511,49 +511,6 @@ async def submit_scrutator_vote(meeting_id: str, vote_data: ScrutatorReportVote)
             "message": f"En attente de {majority_needed - max(yes_votes, no_votes)} vote(s) supplémentaire(s)"
         }
 
-@api_router.post("/scrutators/join")
-async def join_as_scrutator(join_data: ScrutatorJoin):
-    """Rejoindre une réunion en tant que scrutateur"""
-    # Validation des champs obligatoires
-    if not join_data.name or not join_data.name.strip():
-        raise HTTPException(status_code=400, detail="Le nom du scrutateur est requis")
-    if not join_data.scrutator_code or not join_data.scrutator_code.strip():
-        raise HTTPException(status_code=400, detail="Le code de scrutateur est requis")
-    
-    clean_name = join_data.name.strip()
-    clean_code = join_data.scrutator_code.strip().upper()
-    
-    # Vérifier que le code de scrutateur existe
-    meeting = await db.meetings.find_one({"scrutator_code": clean_code, "status": "active"})
-    if not meeting:
-        raise HTTPException(status_code=404, detail="Code de scrutateur invalide ou réunion inactive")
-    
-    # Vérifier que le nom est dans la liste des scrutateurs autorisés
-    if clean_name not in meeting.get("scrutators", []):
-        raise HTTPException(status_code=403, detail="Nom non autorisé pour cette réunion en tant que scrutateur")
-    
-    # Vérifier que ce scrutateur n'a pas déjà accédé à l'interface
-    existing_access = await db.scrutator_access.find_one({
-        "meeting_id": meeting["id"],
-        "scrutator_name": clean_name
-    })
-    
-    if not existing_access:
-        # Enregistrer l'accès du scrutateur
-        access_record = {
-            "id": str(uuid.uuid4()),
-            "meeting_id": meeting["id"],
-            "scrutator_name": clean_name,
-            "accessed_at": datetime.utcnow()
-        }
-        await db.scrutator_access.insert_one(access_record)
-    
-    # Retourner les informations de la réunion pour l'interface organisateur
-    return {
-        "meeting": Meeting(**meeting),
-        "scrutator_name": clean_name,
-        "access_type": "scrutator"
-    }
 
 @api_router.post("/participants/{participant_id}/approve")
 async def approve_participant(participant_id: str, approval: ParticipantApproval):
