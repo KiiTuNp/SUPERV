@@ -1033,11 +1033,11 @@ function App() {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 bg-pattern-dots p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <Card className="glass-card-strong mb-8 border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-2xl">
+          <Card className="glass-card-strong mb-8 border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
@@ -1045,7 +1045,7 @@ function App() {
                   </div>
                   <div>
                     <CardTitle className="text-xl font-bold">{meeting?.title}</CardTitle>
-                    <CardDescription className="text-emerald-100">
+                    <CardDescription className="text-blue-100">
                       Participant: {participant?.name} - Statut: Approuvé
                     </CardDescription>
                   </div>
@@ -1063,9 +1063,9 @@ function App() {
               return (
                 <Card key={poll.id} className="glass-card border-0 shadow-lg">
                   <CardHeader className={`rounded-t-xl text-white ${
-                    poll.status === "active" ? "bg-gradient-to-r from-green-500 to-emerald-600" :
-                    poll.status === "closed" ? "bg-gradient-to-r from-gray-500 to-slate-600" :
-                    "bg-gradient-to-r from-blue-500 to-indigo-600"
+                    poll.status === "active" ? "bg-gradient-to-r from-blue-500 to-blue-600" :
+                    poll.status === "closed" ? "bg-gradient-to-r from-slate-500 to-slate-600" :
+                    "bg-gradient-to-r from-blue-400 to-blue-500"
                   }`}>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <CardTitle className="text-lg">{poll.question}</CardTitle>
@@ -1089,17 +1089,17 @@ function App() {
                       </div>
                     </div>
                     {canVote && (
-                      <CardDescription className="text-green-100 font-medium">
+                      <CardDescription className="text-blue-100 font-medium">
                         🔒 Votez pour voir les résultats
                       </CardDescription>
                     )}
                     {hasVoted && (
-                      <CardDescription className="text-green-100 font-medium">
+                      <CardDescription className="text-blue-100 font-medium">
                         ✅ Vous avez voté - Résultats {poll.show_results_real_time ? "en temps réel" : "finaux"}
                       </CardDescription>
                     )}
                     {!canVote && !hasVoted && poll.status !== "active" && (
-                      <CardDescription className="text-gray-100">
+                      <CardDescription className="text-blue-100">
                         {poll.status === "closed" ? "Sondage terminé" : "Sondage pas encore lancé"}
                       </CardDescription>
                     )}
