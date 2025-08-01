@@ -158,7 +158,6 @@ class Poll(BaseModel):
     status: PollStatus = PollStatus.DRAFT
     timer_duration: Optional[int] = None  # in seconds
     timer_started_at: Optional[datetime] = None
-    show_results_real_time: bool = True  # New field for controlling result visibility
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class PollCreate(BaseModel):
