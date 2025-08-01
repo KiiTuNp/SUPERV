@@ -730,8 +730,8 @@ function App() {
                 })}
               </div>
             ) : (
-              <Card className="glass-card border-0 shadow-lg bg-white">
-                <CardContent className="text-center py-16">
+              <div className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+                <div className="text-center py-16 p-6">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Vote className="w-8 h-8 text-blue-600" />
                   </div>
@@ -744,8 +744,8 @@ function App() {
                     <Sparkles className="w-4 h-4 mr-2" />
                     Créer un sondage
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
 
