@@ -107,6 +107,13 @@ class Participant(BaseModel):
     approval_status: ParticipantStatus = ParticipantStatus.PENDING
     joined_at: datetime = Field(default_factory=datetime.utcnow)
 
+class ScrutatorAdd(BaseModel):
+    names: List[str]  # Liste des noms de scrutateurs à ajouter
+
+class ScrutatorJoin(BaseModel):
+    name: str
+    scrutator_code: str
+
 class ParticipantJoin(BaseModel):
     name: str
     meeting_code: str
