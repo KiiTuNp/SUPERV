@@ -2426,7 +2426,8 @@ function App() {
                 </h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <p className="text-slate-700 leading-relaxed mb-4">
-                    <strong>Vote Secret</strong> est un système de vote anonyme conçu pour les assemblées, réunions et consultations nécessitant la <strong>confidentialité absolue des votes</strong> et la <strong>transparence des résultats</strong>.
+                    <strong>Vote Secret</strong> est un système de vote anonyme conçu pour les assemblées, réunions et consultations nécessitant la <strong>confidentialité absolue des votes</strong> et la <strong>transparence des résultats</strong>. 
+                    Le système garantit l'<strong>immutabilité des données</strong> et l'<strong>intégrité du processus électoral</strong>.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div className="bg-white p-4 rounded-lg border border-blue-100">
@@ -2434,21 +2435,21 @@ function App() {
                         <Shield className="w-5 h-5 text-green-600" />
                         <span className="font-semibold text-green-800">100% Anonyme</span>
                       </div>
-                      <p className="text-sm text-slate-600">Aucun lien entre l'identité et le vote</p>
+                      <p className="text-sm text-slate-600">Dissociation cryptographique identité/vote</p>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-blue-100">
                       <div className="flex items-center gap-2 mb-2">
                         <Eye className="w-5 h-5 text-blue-600" />
                         <span className="font-semibold text-blue-800">Transparence</span>
                       </div>
-                      <p className="text-sm text-slate-600">Résultats vérifiables par tous</p>
+                      <p className="text-sm text-slate-600">Résultats vérifiables et auditables</p>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-blue-100">
                       <div className="flex items-center gap-2 mb-2">
                         <Trash2 className="w-5 h-5 text-red-600" />
                         <span className="font-semibold text-red-800">Éphémère</span>
                       </div>
-                      <p className="text-sm text-slate-600">Données supprimées après rapport</p>
+                      <p className="text-sm text-slate-600">Suppression cryptographique post-rapport</p>
                     </div>
                   </div>
                 </div>
