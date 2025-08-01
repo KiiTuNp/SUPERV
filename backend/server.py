@@ -164,7 +164,6 @@ class PollCreate(BaseModel):
     question: str
     options: List[str]
     timer_duration: Optional[int] = None
-    # Suppression de show_results_real_time - les résultats ne s'affichent que quand le sondage est fermé
 
 class Vote(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
