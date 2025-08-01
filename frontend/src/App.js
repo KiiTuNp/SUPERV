@@ -1028,27 +1028,36 @@ function App() {
             )}
           </div>
 
-          {/* Bouton rapport en bas */}
-          <div className="mt-12 flex justify-center">
-            <div className="border-0 shadow-lg bg-white rounded-2xl overflow-hidden" style={{background: 'white'}}>
-              <div className="p-6 text-center">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-6 h-6 text-blue-600" />
+          {/* Bouton rapport en bas - Masqué pour les scrutateurs */}
+          {!isScrutator && (
+            <div className="mt-12 flex justify-center">
+              <div className="border-0 shadow-lg bg-white rounded-2xl overflow-hidden" style={{background: 'white'}}>
+                <div className="p-6 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800 mb-2">Générer le rapport final</h3>
+                  <p className="text-slate-500 mb-4 text-sm">
+                    Télécharger le rapport PDF et supprimer définitivement toutes les données
+                  </p>
+                  {reportGenerationInProgress ? (
+                    <div className="text-center">
+                      <div className="spinner-modern mx-auto mb-2"></div>
+                      <p className="text-blue-600 text-sm">En attente de l'approbation des scrutateurs...</p>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => setShowReportModal(true)}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Voir le résumé du rapport
+                    </Button>
+                  )}
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Générer le rapport final</h3>
-                <p className="text-slate-500 mb-4 text-sm">
-                  Télécharger le rapport PDF et supprimer définitivement toutes les données
-                </p>
-                <Button
-                  onClick={() => setShowReportModal(true)}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Voir le résumé du rapport
-                </Button>
               </div>
             </div>
-          </div>
+          )}
         </div>
         {/* Modal de gestion des participants */}
         {showParticipantsModal && (
