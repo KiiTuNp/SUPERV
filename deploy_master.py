@@ -232,17 +232,44 @@ class MasterDeployment:
             sys.exit(0)
 
     def run_deployment_script(self, script_info: dict) -> bool:
-        """Exécute un script de déploiement"""
+        """Exécute un script de déploiement avec gestion d'état"""
         script_name = script_info['script']
+        script_id = script_info['id']
         script_path = self.project_root / script_name
         
         if not script_path.exists():
             print_error(f"Script {script_name} non trouvé")
             return False
         
+        # Vérifier si l'étape a déjà été complétée avec succès
+        if self._check_step_completed(script_id):
+            print(f"\n{Colors.GREEN}{Colors.BOLD}✅ {script_info['name']} - DÉJÀ COMPLÉTÉ{Colors.ENDC}")
+            print(f"{Colors.GREEN}Cette étape a été complétée avec succès précédemment.{Colors.ENDC}")
+            
+            choice = prompt_input(
+                "Action: [1] Ignorer (recommandé) [2] Réexécuter [3] Marquer comme non fait",
+                default="1"
+            )
+            
+            if choice == "1":
+                print_success(f"{script_info['name']} - Ignoré (déjà fait)")
+                return True
+            elif choice == "3":
+                self._mark_step_completed(script_id, False)
+                print_info("Étape marquée comme non complétée")
+                # Continue vers l'exécution
+            # choice == "2": continue vers l'exécution
+        
         print(f"\n{Colors.CYAN}{Colors.BOLD}🔄 Lancement: {script_info['name']}{Colors.ENDC}")
         print(f"{Colors.CYAN}Description: {script_info['description']}{Colors.ENDC}")
         print(f"{Colors.CYAN}Script: {script_name}{Colors.ENDC}")
+        
+        # Vérifier les dépendances
+        for dep in script_info.get('dependencies', []):
+            if not self._check_step_completed(dep):
+                dep_name = next((s['name'] for s in self.deployment_scripts if s['id'] == dep), dep)
+                print_error(f"Dépendance non satisfaite: {dep_name}")
+                return False
         
         if not prompt_continue(f"Lancer {script_info['name']} ?"):
             if script_info['required']:
@@ -250,10 +277,14 @@ class MasterDeployment:
                 return False
             else:
                 print_warning("Étape optionnelle ignorée")
+                self._mark_step_completed(script_id, True)  # Marquer comme fait si ignoré
                 return True
         
         try:
-            # Exécution du script
+            # Exécution du script avec information de progression
+            print_info("Démarrage de l'exécution...")
+            start_time = time.time()
+            
             process = subprocess.run(
                 [sys.executable, str(script_path)],
                 cwd=self.project_root,
@@ -261,22 +292,29 @@ class MasterDeployment:
                 timeout=3600  # 1 heure maximum par script
             )
             
+            duration = int(time.time() - start_time)
+            
             if process.returncode == 0:
-                print_success(f"{script_info['name']} - Terminé avec succès")
+                print_success(f"{script_info['name']} - Terminé avec succès en {duration}s")
                 self.completed_steps.append(script_info['name'])
+                self._mark_step_completed(script_id, True)
                 return True
             else:
                 print_error(f"{script_info['name']} - Échec (code: {process.returncode})")
+                self._mark_step_completed(script_id, False)
                 return False
                 
         except subprocess.TimeoutExpired:
             print_error(f"{script_info['name']} - Timeout (>1 heure)")
+            self._mark_step_completed(script_id, False)
             return False
         except KeyboardInterrupt:
             print_warning(f"{script_info['name']} - Interrompu par l'utilisateur")
+            self._mark_step_completed(script_id, False)
             raise
         except Exception as e:
             print_error(f"{script_info['name']} - Exception: {str(e)}")
+            self._mark_step_completed(script_id, False)
             return False
 
     def handle_failure(self, failed_step: dict, step_number: int) -> bool:
