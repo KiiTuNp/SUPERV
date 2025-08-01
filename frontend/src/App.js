@@ -179,12 +179,24 @@ function App() {
           </div>
 
           {/* Footer */}
-          <div className="text-center mt-12 text-slate-500">
-            <p className="flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Vote Secret v2.0 - Technologie 2025
-              <Sparkles className="w-4 h-4" />
-            </p>
+          <div className="text-center mt-12">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <Button
+                onClick={() => setShowInfoModal(true)}
+                variant="outline"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300"
+              >
+                <Info className="w-4 h-4 mr-2" />
+                Comment ça marche ?
+              </Button>
+            </div>
+            <div className="text-slate-500">
+              <p className="flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Vote Secret v2.0 - Technologie 2025
+                <Sparkles className="w-4 h-4" />
+              </p>
+            </div>
           </div>
         </div>
       </div>
