@@ -534,7 +534,6 @@ function App() {
         setNewPollQuestion("");
         setNewPollOptions(["", ""]);
         setTimerDuration("");
-        setShowResultsRealTime(true);
         setShowCreatePollModal(false);
         loadOrganizerData();
       } catch (error) {
