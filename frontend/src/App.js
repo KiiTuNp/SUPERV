@@ -701,6 +701,19 @@ function App() {
       }
     };
 
+    const generateRecoveryUrl = async () => {
+      try {
+        const response = await axios.post(`${API}/meetings/${meeting.id}/generate-recovery`);
+        setRecoveryUrl(response.data.recovery_url);
+        setRecoveryPassword(response.data.recovery_password);
+        
+        alert(`URL de récupération générée avec succès !\n\nURL: ${response.data.recovery_url}\nMot de passe: ${response.data.recovery_password}\n\nConservez ces informations en lieu sûr.`);
+      } catch (error) {
+        console.error("Erreur lors de la génération de l'URL:", error);
+        alert("Erreur lors de la génération de l'URL de récupération: " + (error.response?.data?.detail || "Erreur inconnue"));
+      }
+    };
+
     const approveScrutator = async (scrutatorId, approved) => {
       try {
         await axios.post(`${API}/scrutators/${scrutatorId}/approve`, {
