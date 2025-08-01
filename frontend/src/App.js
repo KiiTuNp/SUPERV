@@ -1147,8 +1147,8 @@ function App() {
                           );
                         })}
                         {hasVoted && (
-                          <div className="mt-4 glass-card bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-xl">
-                            <p className="text-sm text-green-700 flex items-center gap-2">
+                          <div className="mt-4 glass-card bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-4 rounded-xl">
+                            <p className="text-sm text-blue-700 flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
                               <span className="font-semibold">Vote enregistré!</span> 
                               Les résultats se mettent à jour automatiquement
