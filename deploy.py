@@ -416,7 +416,9 @@ gpgkey=https://www.mongodb.org/static/pgp/server-8.0.asc"""
             ]
         
         for command, description in mongo_commands:
-            success, _, _ = run_command(command, description)
+            # Les commandes apt-get peuvent nécessiter une interaction utilisateur
+            interactive = 'apt-get install' in command or 'apt install' in command
+            success, _, _ = run_command(command, description, interactive=interactive)
             if not success:
                 print_error(f"Échec: {description}")
                 print_info("Vous pouvez installer MongoDB manuellement ou utiliser MongoDB Atlas")
