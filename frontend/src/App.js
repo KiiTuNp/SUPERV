@@ -2485,11 +2485,12 @@ function App() {
                       <h4 className="font-semibold text-blue-800">Participants</h4>
                     </div>
                     <ul className="space-y-2 text-sm text-blue-700">
-                      <li>• Rejoignent avec le code de réunion</li>
-                      <li>• Votent de manière anonyme</li>
-                      <li>• Voient les résultats après clôture</li>
-                      <li>• Reçoivent les notifications</li>
-                      <li>• Identité protégée à 100%</li>
+                      <li>• Rejoignent avec code de réunion unique</li>
+                      <li>• Votent de manière strictement anonyme</li>
+                      <li>• Consultent les résultats après clôture uniquement</li>
+                      <li>• Reçoivent notifications de fermeture automatique</li>
+                      <li>• Identité cryptographiquement protégée</li>
+                      <li>• Aucune modification de vote possible</li>
                     </ul>
                   </div>
 
