@@ -1334,23 +1334,23 @@ function App() {
                       </p>
                     )}
                   </div>
-                  <CardContent className="p-6">
+                  <div className="p-6 bg-white">
                     {canVote ? (
                       <div className="space-y-3">
                         {poll.options.map((option) => (
                           <Button
                             key={option.id}
                             variant="outline"
-                            className="w-full justify-start h-12 vote-option"
+                            className="w-full justify-start h-12 vote-option border-blue-200 hover:border-blue-400 bg-white hover:bg-blue-50"
                             onClick={() => submitVote(poll.id, option.id)}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-6 h-6 rounded-full border-2 border-slate-300"></div>
-                              <span className="font-medium">{option.text}</span>
+                              <div className="w-6 h-6 rounded-full border-2 border-blue-300"></div>
+                              <span className="font-medium text-slate-700">{option.text}</span>
                             </div>
                           </Button>
                         ))}
-                        <div className="mt-6 glass-card bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-4 rounded-xl">
+                        <div className="mt-6 bg-blue-50 border border-blue-200 p-4 rounded-xl">
                           <p className="text-sm text-blue-700 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
                             <span className="font-semibold">Vote secret:</span> 
