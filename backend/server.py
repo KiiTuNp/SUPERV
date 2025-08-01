@@ -1182,7 +1182,11 @@ async def generate_meeting_report(meeting_id: str):
         # Mark meeting as completed BEFORE deletion (for logging purposes)
         await db.meetings.update_one(
             {"id": meeting_id},
-            {"$set": {"status": MeetingStatus.COMPLETED, "completed_at": datetime.utcnow()}}
+            {"$set": {
+                "status": MeetingStatus.COMPLETED, 
+                "completed_at": datetime.utcnow(),
+                "report_downloaded": True  # Marquer le rapport comme téléchargé
+            }}
         )
         
         # Delete all associated data after PDF generation
