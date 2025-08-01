@@ -1273,18 +1273,83 @@ sudo crontab -e
 *Vote Secret v2.0 - Déploiement Production*
 """
 
-    def _write_config_file(self, path: str, content: str):
-        full_path = self.project_root / path
-        full_path.parent.mkdir(parents=True, exist_ok=True)
+    def _validate_generated_configs(self, configs_generated: list):
+        """Valide la cohérence des configurations générées"""
+        print_info("Validation des configurations générées...")
         
-        with open(full_path, 'w', encoding='utf-8') as f:
-            f.write(content)
+        validation_results = []
         
-        # Rendre les scripts exécutables
-        if path.startswith('scripts/') and path.endswith('.sh'):
-            os.chmod(full_path, 0o755)
+        # Vérification des fichiers critiques
+        critical_files = ['.env', 'backend/.env', 'frontend/.env', 'config/gunicorn.conf.py']
+        for critical_file in critical_files:
+            if critical_file in configs_generated:
+                validation_results.append(f"✓ {critical_file}")
+            else:
+                validation_results.append(f"✗ {critical_file} MANQUANT")
         
-        print_success(f"Fichier créé: {path}")
+        # Vérification de la cohérence des URLs
+        try:
+            frontend_url = self.config.get('FRONTEND_URL', '')
+            backend_url = self.config.get('BACKEND_URL', '')
+            domain = self.config.get('DOMAIN', '')
+            
+            if domain in frontend_url and domain in backend_url:
+                validation_results.append("✓ URLs cohérentes")
+            else:
+                validation_results.append("⚠ URLs potentiellement incohérentes")
+                
+        except Exception:
+            validation_results.append("? Impossible de valider les URLs")
+        
+        # Vérification SSL
+        ssl_mode = self.config.get('SSL_MODE', 'none')
+        if ssl_mode != 'none' and 'config/nginx-ssl.conf' in configs_generated:
+            validation_results.append("✓ Configuration SSL présente")
+        elif ssl_mode == 'none':
+            validation_results.append("⚠ SSL désactivé (non recommandé pour la production)")
+        
+        # Affichage des résultats
+        print_info("Résultats de validation :")
+        for result in validation_results:
+            if result.startswith('✓'):
+                print_success(result)
+            elif result.startswith('⚠'):
+                print_warning(result)
+            elif result.startswith('✗'):
+                print_error(result)
+            else:
+                print_info(result)
+    
+    def _write_config_file(self, path: str, content: str) -> bool:
+        """Écrit un fichier de configuration avec gestion d'erreurs"""
+        if not content.strip():
+            print_warning(f"Contenu vide pour {path}, fichier ignoré")
+            return False
+        
+        try:
+            file_path = self.project_root / path
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Sauvegarde si le fichier existe déjà
+            if file_path.exists():
+                backup_path = file_path.with_suffix(f'{file_path.suffix}.backup')
+                file_path.rename(backup_path)
+                print_info(f"Sauvegarde existante : {backup_path}")
+            
+            file_path.write_text(content, encoding='utf-8')
+            
+            # Permissions spéciales pour les scripts
+            if path.startswith('scripts/') and path.endswith('.sh'):
+                os.chmod(file_path, 0o755)
+            elif path.endswith('.env'):
+                os.chmod(file_path, 0o600)  # Fichiers sensibles
+            
+            print_success(f"Fichier créé : {path}")
+            return True
+            
+        except Exception as e:
+            print_error(f"Erreur écriture {path}: {str(e)}")
+            return False
 
     def run(self):
         """Exécute la configuration complète"""
