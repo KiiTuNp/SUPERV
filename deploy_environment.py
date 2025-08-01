@@ -660,6 +660,9 @@ server {{
     
     def _generate_nginx_config_ssl(self) -> str:
         """Génère la configuration finale avec SSL"""
+        app_name = self.config.get('SERVER_NAME', 'vote-secret')
+        www_path = f"/var/www/{app_name}"
+        
         ssl_config = ""
         redirect_config = ""
         
@@ -672,7 +675,7 @@ server {{
     
     # Let's Encrypt challenge (toujours accessible en HTTP)
     location /.well-known/acme-challenge/ {{
-        root /var/www/html;
+        root {www_path};
     }}
     
     # Redirect all other traffic to HTTPS
