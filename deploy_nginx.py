@@ -173,7 +173,9 @@ class NginxSSLSetup:
             return False
         
         for command, description in commands:
-            success, _, _ = run_command(command, description)
+            # Les commandes d'installation peuvent nécessiter une interaction utilisateur
+            interactive = any(cmd in command for cmd in ['apt install', 'yum install', 'dnf install'])
+            success, _, _ = run_command(command, description, interactive=interactive)
             if not success:
                 print_error(f"Échec: {description}")
                 return False
