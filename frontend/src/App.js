@@ -49,12 +49,12 @@ function App() {
   // Home Component - Modern Design
   const Home = () => {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 bg-pattern-dots flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
         <div className="w-full max-w-6xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-12">
             <div className="hero-animate inline-block mb-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl">
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
                 <Vote className="w-12 h-12 text-white" />
               </div>
             </div>
