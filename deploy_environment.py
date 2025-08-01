@@ -372,6 +372,7 @@ class ProductionEnvironmentSetup:
             'backend/.env': backend_env,
             'frontend/.env': frontend_env,
             'config/nginx.conf': nginx_config,
+            'config/nginx-ssl.conf': self._generate_nginx_config_ssl(),  # Configuration SSL séparée
             'config/vote-secret.service': systemd_service,
             'scripts/manage.sh': management_scripts['manage'],
             'scripts/backup.sh': management_scripts['backup'],
