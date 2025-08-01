@@ -506,6 +506,7 @@ class MasterDeployment:
         print(f"   • Logs système : /var/log/vote-secret/")
         print(f"   • Configuration : /opt/vote-secret/config/")
         print(f"   • Scripts de gestion : /usr/local/bin/{{manage,backup,monitor}}.sh")
+        print(f"   • Serveur : Uvicorn (FastAPI natif)")
         
         if ssl_mode == 'letsencrypt':
             print(f"   • Certificats SSL : Renouvellement automatique configuré")
