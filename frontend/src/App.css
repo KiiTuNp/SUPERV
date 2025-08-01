@@ -35,13 +35,13 @@
   background-size: 30px 30px;
 }
 
-/* Glassmorphism Effects - Modern Light Theme */
+/* Glassmorphism Effects - Modern Light Theme - Force White Background */
 .glass-card {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 1) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid transparent;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.98)),
+  background-image: linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 1)),
                     linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
   background-origin: border-box;
   background-clip: content-box, border-box;
@@ -50,11 +50,11 @@
 }
 
 .glass-card-strong {
-  background: rgba(255, 255, 255, 0.99);
+  background: rgba(255, 255, 255, 1) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid transparent;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.99)),
+  background-image: linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 1)),
                     linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
   background-origin: border-box;
   background-clip: content-box, border-box;
