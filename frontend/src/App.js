@@ -470,6 +470,13 @@ function App() {
     const [scrutatorCode, setScrutatorCode] = useState('');
     const [scrutators, setScrutators] = useState([]);
     const [scrutatorCodeGenerated, setScrutatorCodeGenerated] = useState(false);
+    const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
+    const [scrutatorName, setScrutatorName] = useState('');  // Nom du scrutateur connecté
+
+    // Report generation voting states
+    const [showReportVoteModal, setShowReportVoteModal] = useState(false);
+    const [reportVoteData, setReportVoteData] = useState(null);
+    const [reportGenerationInProgress, setReportGenerationInProgress] = useState(false);
 
     useEffect(() => {
       if (meeting) {
