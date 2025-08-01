@@ -1828,8 +1828,8 @@ function App() {
     const loadPolls = async () => {
       if (!meeting) return;
       try {
-        const response = await axios.get(`${API}/meetings/${meeting.id}/polls`);
-        // Show ALL polls (active, closed, draft) to participants
+        const response = await axios.get(`${API}/meetings/${meeting.id}/polls/participant`);
+        // Use participant-specific endpoint that hides results for active polls
         setPolls(response.data);
       } catch (error) {
         console.error("Error loading polls:", error);
