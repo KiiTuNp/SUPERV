@@ -309,7 +309,7 @@ function App() {
             <div className="text-slate-500">
               <p className="flex items-center justify-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Vote Secret v2.0 - Technologie 2025
+                Vote Secret v2.0 - Une app de SimonSB
                 <Sparkles className="w-4 h-4" />
               </p>
             </div>
