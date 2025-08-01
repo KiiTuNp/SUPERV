@@ -2665,6 +2665,7 @@ class VoteSecretTester:
         
         # PRIORITY: Test the bug fix first
         bug_fix_tests = [
+            ("🎯 BUG FIX TEST - Vote Equality Logic", self.test_vote_equality_bug_fix),
             ("🎯 BUG FIX TEST - Workflow Scrutateurs Complet", self.test_bug_fix_scrutator_workflow_complete),
         ]
         
