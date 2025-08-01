@@ -404,13 +404,18 @@ function App() {
                   type="text"
                   value={meetingCode}
                   onChange={(e) => setMeetingCode(e.target.value.toUpperCase())}
-                  placeholder="ex: ABC12345"
+                  placeholder="ex: ABC12345 ou SC123ABC"
                   className="h-12 input-modern border-blue-200 focus:border-blue-500 font-mono text-lg tracking-wider text-center"
                   required
                 />
-                <p className="text-xs text-slate-500 mt-2">
-                  Demandez le code de réunion à l'organisateur
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-slate-500">
+                    • <strong>Code participant</strong> (ex: ABC12345) : Pour participer au vote
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    • <strong>Code scrutateur</strong> (ex: SC123ABC) : Pour superviser la réunion
+                  </p>
+                </div>
               </div>
               <div className="flex space-x-3 pt-4">
                 <Button 
