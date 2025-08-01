@@ -325,13 +325,20 @@ function App() {
             
             console.log("✅ Successfully joined as scrutator:", response.data);
             
-            // Définir les données de la réunion et rediriger vers l'interface organisateur
-            setMeeting(response.data.meeting);
-            setCurrentView("organizer");
-            connectWebSocket(response.data.meeting.id);
-            
-            // Afficher un message de confirmation
-            alert(`✅ Connexion réussie en tant que scrutateur !\n\nBonjour ${name}, vous avez maintenant accès à l'interface organisateur pour surveiller la réunion "${response.data.meeting.title}".`);
+            if (response.data.status === "approved") {
+              // Scrutateur approuvé - accès à l'interface organisateur
+              setMeeting(response.data.meeting);
+              setIsScrutator(true);
+              setScrutatorName(name);
+              setCurrentView("organizer");
+              connectWebSocket(response.data.meeting.id);
+              
+              alert(`✅ Connexion réussie en tant que scrutateur !\n\nBonjour ${name}, vous avez maintenant accès à l'interface organisateur pour surveiller la réunion "${response.data.meeting.title}".`);
+            } else if (response.data.status === "pending_approval") {
+              // En attente d'approbation
+              alert(`⏳ Demande d'accès envoyée !\n\n${response.data.message}\n\nVeuillez attendre que l'organisateur approuve votre accès.`);
+              setCurrentView("home");
+            }
             
             return;
           } catch (scrutatorError) {
