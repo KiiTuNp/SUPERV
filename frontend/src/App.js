@@ -614,14 +614,14 @@ function App() {
                     poll.options.reduce((prev, current) => (prev.votes > current.votes) ? prev : current) : null;
                   
                   return (
-                    <Card key={poll.id} className="glass-card border-0 shadow-lg bg-white">
-                      <CardHeader className={`poll-card-header ${
+                    <div key={poll.id} className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+                      <div className={`poll-card-header p-4 ${
                         poll.status === "closed" ? "poll-card-closed" : 
                         poll.status === "draft" ? "poll-card-draft" : ""
                       }`}>
                         <div className="flex flex-col gap-3">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <CardTitle className="text-lg font-semibold">{poll.question}</CardTitle>
+                            <h3 className="text-lg font-semibold text-white">{poll.question}</h3>
                             <div className="flex items-center gap-2">
                               {poll.status === "draft" && (
                                 <Button 
@@ -659,7 +659,7 @@ function App() {
                           </div>
                           
                           {/* Informations supplémentaires dans l'en-tête */}
-                          <div className="flex flex-wrap items-center gap-4 text-sm opacity-90">
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-white opacity-90">
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
                               <span>{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
@@ -680,16 +680,16 @@ function App() {
                             )}
                           </div>
                         </div>
-                      </CardHeader>
+                      </div>
                       
-                      <CardContent className="p-6 bg-white">
+                      <div className="p-6 bg-white">
                         <div className="space-y-4">
                           {poll.options.map((option) => {
                             const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
                             const isWinner = poll.status === "closed" && winnerOption && option.id === winnerOption.id;
                             
                             return (
-                              <div key={option.id} className={`space-y-2 ${isWinner ? 'vote-option-winner' : ''} p-3 rounded-lg transition-all`}>
+                              <div key={option.id} className={`space-y-2 ${isWinner ? 'vote-option-winner' : 'bg-slate-50 border border-slate-200'} p-3 rounded-lg transition-all`}>
                                 <div className="flex justify-between items-center text-sm">
                                   <span className={`font-medium ${isWinner ? 'text-green-700 font-semibold' : 'text-slate-700'}`}>
                                     {isWinner && <span className="mr-2">🏆</span>}
@@ -712,8 +712,8 @@ function App() {
                             );
                           })}
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
