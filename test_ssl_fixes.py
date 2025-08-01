@@ -56,7 +56,9 @@ def test_nginx_http_config():
             'DOMAIN': 'vote.super-csn.ca',
             'SSL_MODE': 'letsencrypt',
             'RATE_LIMIT_REQUESTS': '60',
-            'RATE_LIMIT_BURST': '10'
+            'RATE_LIMIT_BURST': '10',
+            'MONITORING_ENABLED': True,
+            'METRICS_PORT': '9090'
         }
         
         # Générer la configuration HTTP temporaire
