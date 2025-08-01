@@ -416,9 +416,16 @@ function App() {
     const [timerDuration, setTimerDuration] = useState("");
     const [showResultsRealTime, setShowResultsRealTime] = useState(true);
     const [showCreatePollModal, setShowCreatePollModal] = useState(false);
-    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+    const [showScrutatorModal, setShowScrutatorModal] = useState(false);
+    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
     const [downloadingReport, setDownloadingReport] = useState(false);
+    
+    // Scrutator states
+    const [scrutatorNames, setScrutatorNames] = useState(['']);
+    const [scrutatorCode, setScrutatorCode] = useState('');
+    const [scrutators, setScrutators] = useState([]);
+    const [scrutatorCodeGenerated, setScrutatorCodeGenerated] = useState(false);
 
     useEffect(() => {
       if (meeting) {
