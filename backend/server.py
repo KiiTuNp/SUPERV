@@ -244,6 +244,117 @@ async def join_meeting(join_data: ParticipantJoin):
     
     return participant
 
+# Scrutator endpoints
+@api_router.post("/meetings/{meeting_id}/scrutators")
+async def add_scrutators(meeting_id: str, scrutator_data: ScrutatorAdd):
+    """Ajouter des scrutateurs à une réunion"""
+    # Validation des champs obligatoires
+    if not scrutator_data.names or len(scrutator_data.names) == 0:
+        raise HTTPException(status_code=400, detail="Au moins un nom de scrutateur est requis")
+    
+    # Validation des noms
+    clean_names = []
+    for name in scrutator_data.names:
+        if not name or not name.strip():
+            raise HTTPException(status_code=400, detail="Les noms de scrutateurs ne peuvent pas être vides")
+        if len(name.strip()) > 100:
+            raise HTTPException(status_code=400, detail="Les noms ne peuvent pas dépasser 100 caractères")
+        clean_names.append(name.strip())
+    
+    # Vérifier les doublons
+    if len(set(clean_names)) != len(clean_names):
+        raise HTTPException(status_code=400, detail="Les noms de scrutateurs doivent être uniques")
+    
+    # Vérifier que la réunion existe
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Générer un code spécial pour les scrutateurs (différent du code de réunion)
+    scrutator_code = f"SC{str(uuid.uuid4())[:6].upper()}"
+    
+    # Mettre à jour la réunion avec les scrutateurs et le code spécial
+    await db.meetings.update_one(
+        {"id": meeting_id},
+        {"$set": {
+            "scrutators": clean_names,
+            "scrutator_code": scrutator_code
+        }}
+    )
+    
+    # Ajouter les scrutateurs dans la collection scrutators pour traçabilité
+    scrutator_docs = []
+    for name in clean_names:
+        scrutator = Scrutator(name=name, meeting_id=meeting_id)
+        scrutator_docs.append(scrutator.dict())
+    
+    if scrutator_docs:
+        await db.scrutators.insert_many(scrutator_docs)
+    
+    return {
+        "scrutator_code": scrutator_code,
+        "scrutators": clean_names,
+        "message": f"Code de scrutateur généré : {scrutator_code}"
+    }
+
+@api_router.get("/meetings/{meeting_id}/scrutators")
+async def get_meeting_scrutators(meeting_id: str):
+    """Obtenir la liste des scrutateurs d'une réunion"""
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    scrutators = await db.scrutators.find({"meeting_id": meeting_id}).to_list(100)
+    
+    return {
+        "scrutator_code": meeting.get("scrutator_code"),
+        "scrutators": [Scrutator(**s) for s in scrutators]
+    }
+
+@api_router.post("/scrutators/join")
+async def join_as_scrutator(join_data: ScrutatorJoin):
+    """Rejoindre une réunion en tant que scrutateur"""
+    # Validation des champs obligatoires
+    if not join_data.name or not join_data.name.strip():
+        raise HTTPException(status_code=400, detail="Le nom du scrutateur est requis")
+    if not join_data.scrutator_code or not join_data.scrutator_code.strip():
+        raise HTTPException(status_code=400, detail="Le code de scrutateur est requis")
+    
+    clean_name = join_data.name.strip()
+    clean_code = join_data.scrutator_code.strip().upper()
+    
+    # Vérifier que le code de scrutateur existe
+    meeting = await db.meetings.find_one({"scrutator_code": clean_code, "status": "active"})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Code de scrutateur invalide ou réunion inactive")
+    
+    # Vérifier que le nom est dans la liste des scrutateurs autorisés
+    if clean_name not in meeting.get("scrutators", []):
+        raise HTTPException(status_code=403, detail="Nom non autorisé pour cette réunion en tant que scrutateur")
+    
+    # Vérifier que ce scrutateur n'a pas déjà accédé à l'interface
+    existing_access = await db.scrutator_access.find_one({
+        "meeting_id": meeting["id"],
+        "scrutator_name": clean_name
+    })
+    
+    if not existing_access:
+        # Enregistrer l'accès du scrutateur
+        access_record = {
+            "id": str(uuid.uuid4()),
+            "meeting_id": meeting["id"],
+            "scrutator_name": clean_name,
+            "accessed_at": datetime.utcnow()
+        }
+        await db.scrutator_access.insert_one(access_record)
+    
+    # Retourner les informations de la réunion pour l'interface organisateur
+    return {
+        "meeting": Meeting(**meeting),
+        "scrutator_name": clean_name,
+        "access_type": "scrutator"
+    }
+
 @api_router.post("/participants/{participant_id}/approve")
 async def approve_participant(participant_id: str, approval: ParticipantApproval):
     participant = await db.participants.find_one({"id": participant_id})
