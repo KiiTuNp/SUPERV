@@ -647,8 +647,7 @@ async def create_poll(meeting_id: str, poll_data: PollCreate):
         meeting_id=meeting_id,
         question=poll_data.question.strip(),
         options=options,
-        timer_duration=poll_data.timer_duration,
-        show_results_real_time=poll_data.show_results_real_time
+        timer_duration=poll_data.timer_duration
     )
     
     await db.polls.insert_one(poll.dict())
