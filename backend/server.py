@@ -80,11 +80,31 @@ class MeetingStatus(str, Enum):
     COMPLETED = "completed"
 
 # Models
+class ScrutatorStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
 class Scrutator(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     meeting_id: str
+    approval_status: ScrutatorStatus = ScrutatorStatus.PENDING
     added_at: datetime = Field(default_factory=datetime.utcnow)
+    approved_at: Optional[datetime] = None
+
+class ScrutatorApproval(BaseModel):
+    scrutator_id: str
+    approved: bool
+
+class ReportGenerationRequest(BaseModel):
+    meeting_id: str
+    requested_by: str  # organizer name
+
+class ScrutatorReportVote(BaseModel):
+    meeting_id: str
+    scrutator_name: str
+    approved: bool  # True = autorise, False = refuse
 
 class Meeting(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -93,6 +113,8 @@ class Meeting(BaseModel):
     meeting_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8].upper())
     scrutator_code: Optional[str] = None  # Code spécial pour les scrutateurs
     scrutators: List[str] = Field(default_factory=list)  # Liste des noms de scrutateurs
+    report_generation_pending: bool = False  # Demande de génération en cours
+    report_votes: Dict[str, bool] = Field(default_factory=dict)  # Votes des scrutateurs {nom: vote}
     status: MeetingStatus = MeetingStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
