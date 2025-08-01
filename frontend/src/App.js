@@ -608,74 +608,115 @@ function App() {
             {/* Liste des sondages */}
             {polls.length > 0 ? (
               <div className="space-y-6">
-                {polls.map((poll) => (
-                  <Card key={poll.id} className="glass-card border-0 shadow-lg">
-                    <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <CardTitle className="text-lg">{poll.question}</CardTitle>
-                        <div className="flex items-center gap-2">
-                          {poll.status === "draft" && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => startPoll(poll.id)}
-                              className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600"
-                            >
-                              <Play className="w-4 h-4 mr-1" />
-                              Lancer
-                            </Button>
-                          )}
-                          {poll.status === "active" && (
-                            <>
-                              <Badge className="bg-green-500 text-white">
-                                <Clock className="w-3 h-3 mr-1" />
-                                En cours
-                              </Badge>
-                              <Button 
-                                size="sm" 
-                                onClick={() => closePoll(poll.id)}
-                                className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600"
-                              >
-                                <Square className="w-4 h-4 mr-1" />
-                                Fermer
-                              </Button>
-                            </>
-                          )}
-                          {poll.status === "closed" && (
-                            <Badge className="bg-slate-500 text-white">Fermé</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {poll.options.map((option) => {
-                          const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-                          const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
-                          
-                          return (
-                            <div key={option.id} className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="font-medium text-slate-700">{option.text}</span>
-                                <span className="font-bold text-slate-600">
-                                  {option.votes} votes ({percentage.toFixed(1)}%)
-                                </span>
-                              </div>
-                              <Progress value={percentage} className="h-3" />
+                {polls.map((poll) => {
+                  const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                  const winnerOption = poll.status === "closed" ? 
+                    poll.options.reduce((prev, current) => (prev.votes > current.votes) ? prev : current) : null;
+                  
+                  return (
+                    <Card key={poll.id} className="glass-card border-0 shadow-lg bg-white">
+                      <CardHeader className={`poll-card-header ${
+                        poll.status === "closed" ? "poll-card-closed" : 
+                        poll.status === "draft" ? "poll-card-draft" : ""
+                      }`}>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <CardTitle className="text-lg font-semibold">{poll.question}</CardTitle>
+                            <div className="flex items-center gap-2">
+                              {poll.status === "draft" && (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => startPoll(poll.id)}
+                                  className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600 transition-all"
+                                >
+                                  <Play className="w-4 h-4 mr-1" />
+                                  Lancer
+                                </Button>
+                              )}
+                              {poll.status === "active" && (
+                                <>
+                                  <Badge className="bg-green-500 text-white shadow-sm">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    En cours
+                                  </Badge>
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => closePoll(poll.id)}
+                                    className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600 transition-all"
+                                  >
+                                    <Square className="w-4 h-4 mr-1" />
+                                    Fermer
+                                  </Button>
+                                </>
+                              )}
+                              {poll.status === "closed" && (
+                                <Badge className="bg-slate-500 text-white shadow-sm">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Fermé
+                                </Badge>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                      {poll.timer_duration && (
-                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-sm text-blue-700 flex items-center gap-2">
-                            <Timer className="w-4 h-4" />
-                            Durée du minuteur: {poll.timer_duration} secondes
-                          </p>
+                          </div>
+                          
+                          {/* Informations supplémentaires dans l'en-tête */}
+                          <div className="flex flex-wrap items-center gap-4 text-sm opacity-90">
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4" />
+                              <span>{totalVotes} vote{totalVotes !== 1 ? 's' : ''}</span>
+                            </div>
+                            
+                            {poll.timer_duration && (
+                              <div className="flex items-center gap-1">
+                                <Timer className="w-4 h-4" />
+                                <span>Minuteur: {poll.timer_duration}s</span>
+                              </div>
+                            )}
+                            
+                            {poll.status === "closed" && winnerOption && (
+                              <div className="flex items-center gap-1 bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                                <span className="text-yellow-300">🏆</span>
+                                <span className="font-medium">Gagnant: {winnerOption.text}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardHeader>
+                      
+                      <CardContent className="p-6 bg-white">
+                        <div className="space-y-4">
+                          {poll.options.map((option) => {
+                            const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+                            const isWinner = poll.status === "closed" && winnerOption && option.id === winnerOption.id;
+                            
+                            return (
+                              <div key={option.id} className={`space-y-2 ${isWinner ? 'vote-option-winner' : ''} p-3 rounded-lg transition-all`}>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className={`font-medium ${isWinner ? 'text-green-700 font-semibold' : 'text-slate-700'}`}>
+                                    {isWinner && <span className="mr-2">🏆</span>}
+                                    {option.text}
+                                  </span>
+                                  <span className={`font-bold ${isWinner ? 'text-green-600' : 'text-slate-600'}`}>
+                                    {option.votes} votes ({percentage.toFixed(1)}%)
+                                  </span>
+                                </div>
+                                <div className="relative">
+                                  <Progress 
+                                    value={percentage} 
+                                    className={`h-3 ${isWinner ? 'progress-winner' : ''}`}
+                                  />
+                                  {isWinner && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 rounded-full opacity-70"></div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
               </div>
             ) : (
               <Card className="glass-card border-0 shadow-lg">
