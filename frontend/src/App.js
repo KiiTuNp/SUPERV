@@ -695,10 +695,35 @@ function App() {
     const downloadReport = async () => {
       if (!meeting?.id) return;
       
+      // Si c'est un scrutateur, pas de génération directe
+      if (isScrutator) {
+        alert("En tant que scrutateur, vous ne pouvez pas générer le rapport directement.");
+        return;
+      }
+      
       setDownloadingReport(true);
       
       try {
-        console.log("🔄 Début de la génération du rapport PDF...");
+        console.log("🔄 Demande de génération du rapport PDF...");
+        
+        // D'abord demander l'approbation des scrutateurs si nécessaire
+        await requestReportGeneration();
+        
+      } catch (error) {
+        console.error("❌ Erreur lors de la demande:", error);
+        setDownloadingReport(false);
+        
+        alert("❌ Erreur lors de la demande de génération du rapport:\n\n" + 
+              error.message + 
+              "\n\nVeuillez réessayer ou contacter le support technique.");
+      }
+    };
+
+    const downloadReportDirect = async () => {
+      if (!meeting?.id) return;
+      
+      try {
+        console.log("🔄 Téléchargement direct du rapport PDF...");
         
         // Make API call to generate and download PDF
         const response = await fetch(`${API}/meetings/${meeting.id}/report`, {
@@ -757,6 +782,8 @@ function App() {
           setParticipants([]);
           setPolls([]);
           setParticipant(null);
+          setIsScrutator(false);
+          setScrutatorName('');
         }, 500);
         
       } catch (error) {
