@@ -1080,60 +1080,128 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="p-6 overflow-y-auto max-h-96">
-                <div className="space-y-4">
-                  {participants.map((participant) => (
-                    <div key={participant.id} className="flex items-center justify-between p-4 border border-blue-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
-                          {participant.name.charAt(0).toUpperCase()}
+                <div className="space-y-6">
+                  {/* Section Participants */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-600" />
+                      Participants ({participants.length})
+                    </h3>
+                    <div className="space-y-4">
+                      {participants.map((participant) => (
+                        <div key={participant.id} className="flex items-center justify-between p-4 border border-blue-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
+                              {participant.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-800">{participant.name}</p>
+                              <p className="text-sm text-slate-500">
+                                Rejoint le {new Date(participant.joined_at).toLocaleTimeString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {participant.approval_status === "pending" && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => approveParticipant(participant.id, true)}
+                                  className="btn-gradient-success"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Approuver
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => approveParticipant(participant.id, false)}
+                                  className="border-blue-300 hover:bg-blue-50"
+                                >
+                                  Rejeter
+                                </Button>
+                              </>
+                            )}
+                            {participant.approval_status === "approved" && (
+                              <Badge className="status-approved">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Approuvé
+                              </Badge>
+                            )}
+                            {participant.approval_status === "rejected" && (
+                              <Badge className="status-rejected">Rejeté</Badge>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-800">{participant.name}</p>
-                          <p className="text-sm text-slate-500">
-                            Rejoint le {new Date(participant.joined_at).toLocaleTimeString()}
-                          </p>
+                      ))}
+                      {participants.length === 0 && (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <UserPlus className="w-8 h-8 text-blue-600" />
+                          </div>
+                          <p className="text-slate-500 text-lg">Aucun participant pour le moment</p>
+                          <p className="text-slate-400 text-sm mt-2">Partagez le code : <span className="font-mono font-bold text-blue-600">{meeting?.meeting_code}</span></p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {participant.approval_status === "pending" && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => approveParticipant(participant.id, true)}
-                              className="btn-gradient-success"
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Approuver
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => approveParticipant(participant.id, false)}
-                              className="border-blue-300 hover:bg-blue-50"
-                            >
-                              Rejeter
-                            </Button>
-                          </>
-                        )}
-                        {participant.approval_status === "approved" && (
-                          <Badge className="status-approved">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Approuvé
-                          </Badge>
-                        )}
-                        {participant.approval_status === "rejected" && (
-                          <Badge className="status-rejected">Rejeté</Badge>
-                        )}
-                      </div>
+                      )}
                     </div>
-                  ))}
-                  {participants.length === 0 && (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <UserPlus className="w-8 h-8 text-blue-600" />
+                  </div>
+
+                  {/* Section Scrutateurs */}
+                  {scrutators.length > 0 && (
+                    <div>
+                      <Separator className="my-6" />
+                      <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-purple-600" />
+                        Scrutateurs ({scrutators.length})
+                      </h3>
+                      <div className="space-y-4">
+                        {scrutators.map((scrutator) => (
+                          <div key={scrutator.id} className="flex items-center justify-between p-4 border border-purple-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
+                                {scrutator.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-slate-800">{scrutator.name}</p>
+                                <p className="text-sm text-slate-500">
+                                  Ajouté le {new Date(scrutator.added_at).toLocaleTimeString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {scrutator.approval_status === "pending" && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => approveScrutator(scrutator.id, true)}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approuver
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => approveScrutator(scrutator.id, false)}
+                                    className="border-purple-300 hover:bg-purple-50"
+                                  >
+                                    Rejeter
+                                  </Button>
+                                </>
+                              )}
+                              {scrutator.approval_status === "approved" && (
+                                <Badge className="bg-purple-600 text-white">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Approuvé
+                                </Badge>
+                              )}
+                              {scrutator.approval_status === "rejected" && (
+                                <Badge className="bg-red-600 text-white">Rejeté</Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <p className="text-slate-500 text-lg">Aucun participant pour le moment</p>
-                      <p className="text-slate-400 text-sm mt-2">Partagez le code : <span className="font-mono font-bold text-blue-600">{meeting?.meeting_code}</span></p>
                     </div>
                   )}
                 </div>
