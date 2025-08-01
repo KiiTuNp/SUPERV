@@ -460,6 +460,7 @@ function App() {
         setNewPollOptions(["", ""]);
         setTimerDuration("");
         setShowResultsRealTime(true);
+        setShowCreatePollModal(false);
         loadOrganizerData();
       } catch (error) {
         console.error("Error creating poll:", error);
