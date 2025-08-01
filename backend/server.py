@@ -333,6 +333,184 @@ async def get_meeting_scrutators(meeting_id: str):
         "scrutators": [Scrutator(**s) for s in scrutators]
     }
 
+@api_router.post("/scrutators/{scrutator_id}/approve")
+async def approve_scrutator(scrutator_id: str, approval: ScrutatorApproval):
+    """Approuver ou rejeter un scrutateur"""
+    scrutator = await db.scrutators.find_one({"id": scrutator_id})
+    if not scrutator:
+        raise HTTPException(status_code=404, detail="Scrutateur non trouvé")
+    
+    new_status = ScrutatorStatus.APPROVED if approval.approved else ScrutatorStatus.REJECTED
+    update_data = {
+        "approval_status": new_status,
+        "approved_at": datetime.utcnow() if approval.approved else None
+    }
+    
+    await db.scrutators.update_one(
+        {"id": scrutator_id},
+        {"$set": update_data}
+    )
+    
+    # Notify via WebSocket
+    await manager.send_to_meeting({
+        "type": "scrutator_approved",
+        "scrutator_id": scrutator_id,
+        "scrutator_name": scrutator["name"],
+        "status": new_status
+    }, scrutator["meeting_id"])
+    
+    return {"status": "success", "new_status": new_status}
+
+@api_router.post("/meetings/{meeting_id}/request-report")
+async def request_report_generation(meeting_id: str, request_data: ReportGenerationRequest):
+    """Demander la génération du rapport - nécessite l'approbation des scrutateurs"""
+    
+    # Vérifier que la réunion existe
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Vérifier qu'il y a des scrutateurs approuvés
+    approved_scrutators = await db.scrutators.find({
+        "meeting_id": meeting_id, 
+        "approval_status": "approved"
+    }).to_list(100)
+    
+    if len(approved_scrutators) == 0:
+        # Pas de scrutateurs - génération directe comme avant
+        return {"direct_generation": True, "message": "Aucun scrutateur approuvé - génération directe"}
+    
+    # Marquer la demande de génération en cours
+    await db.meetings.update_one(
+        {"id": meeting_id},
+        {"$set": {
+            "report_generation_pending": True,
+            "report_votes": {}
+        }}
+    )
+    
+    # Notifier tous les scrutateurs approuvés
+    await manager.send_to_meeting({
+        "type": "report_generation_requested",
+        "requested_by": request_data.requested_by,
+        "scrutator_count": len(approved_scrutators),
+        "majority_needed": (len(approved_scrutators) // 2) + 1
+    }, meeting_id)
+    
+    return {
+        "scrutator_approval_required": True,
+        "scrutator_count": len(approved_scrutators),
+        "majority_needed": (len(approved_scrutators) // 2) + 1,
+        "message": "Demande envoyée aux scrutateurs"
+    }
+
+@api_router.post("/meetings/{meeting_id}/scrutator-vote")
+async def submit_scrutator_vote(meeting_id: str, vote_data: ScrutatorReportVote):
+    """Voter pour la génération du rapport en tant que scrutateur"""
+    
+    # Vérifier que la réunion existe et qu'une demande est en cours
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    if not meeting.get("report_generation_pending", False):
+        raise HTTPException(status_code=400, detail="Aucune demande de génération en cours")
+    
+    # Vérifier que le scrutateur est approuvé
+    scrutator = await db.scrutators.find_one({
+        "meeting_id": meeting_id,
+        "name": vote_data.scrutator_name,
+        "approval_status": "approved"
+    })
+    if not scrutator:
+        raise HTTPException(status_code=403, detail="Scrutateur non autorisé")
+    
+    # Enregistrer le vote
+    current_votes = meeting.get("report_votes", {})
+    current_votes[vote_data.scrutator_name] = vote_data.approved
+    
+    await db.meetings.update_one(
+        {"id": meeting_id},
+        {"$set": {"report_votes": current_votes}}
+    )
+    
+    # Vérifier si tous les scrutateurs ont voté ou si la majorité est atteinte
+    approved_scrutators = await db.scrutators.find({
+        "meeting_id": meeting_id,
+        "approval_status": "approved"
+    }).to_list(100)
+    
+    total_scrutators = len(approved_scrutators)
+    votes_cast = len(current_votes)
+    yes_votes = sum(1 for vote in current_votes.values() if vote)
+    no_votes = votes_cast - yes_votes
+    majority_needed = (total_scrutators // 2) + 1
+    
+    # Notifier le vote
+    await manager.send_to_meeting({
+        "type": "scrutator_vote_submitted",
+        "scrutator_name": vote_data.scrutator_name,
+        "vote": vote_data.approved,
+        "votes_cast": votes_cast,
+        "total_scrutators": total_scrutators,
+        "yes_votes": yes_votes,
+        "no_votes": no_votes,
+        "majority_needed": majority_needed
+    }, meeting_id)
+    
+    # Vérifier si la décision est prise
+    if yes_votes >= majority_needed:
+        # Majorité atteinte - approuver la génération
+        await db.meetings.update_one(
+            {"id": meeting_id},
+            {"$set": {"report_generation_pending": False}}
+        )
+        
+        await manager.send_to_meeting({
+            "type": "report_generation_approved",
+            "yes_votes": yes_votes,
+            "majority_needed": majority_needed
+        }, meeting_id)
+        
+        return {
+            "decision": "approved",
+            "yes_votes": yes_votes,
+            "majority_needed": majority_needed,
+            "message": "Génération du rapport approuvée par la majorité"
+        }
+    
+    elif no_votes >= majority_needed:
+        # Majorité contre - rejeter la génération
+        await db.meetings.update_one(
+            {"id": meeting_id},
+            {"$set": {"report_generation_pending": False}}
+        )
+        
+        await manager.send_to_meeting({
+            "type": "report_generation_rejected",
+            "no_votes": no_votes,
+            "majority_needed": majority_needed
+        }, meeting_id)
+        
+        return {
+            "decision": "rejected",
+            "no_votes": no_votes,
+            "majority_needed": majority_needed,
+            "message": "Génération du rapport rejetée par la majorité"
+        }
+    
+    else:
+        # Attendre plus de votes
+        return {
+            "decision": "pending",
+            "votes_cast": votes_cast,
+            "total_scrutators": total_scrutators,
+            "yes_votes": yes_votes,
+            "no_votes": no_votes,
+            "majority_needed": majority_needed,
+            "message": f"En attente de {majority_needed - max(yes_votes, no_votes)} vote(s) supplémentaire(s)"
+        }
+
 @api_router.post("/scrutators/join")
 async def join_as_scrutator(join_data: ScrutatorJoin):
     """Rejoindre une réunion en tant que scrutateur"""
