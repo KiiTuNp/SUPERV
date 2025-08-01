@@ -525,6 +525,25 @@ function App() {
                 </Button>
               </div>
             </form>
+
+            {/* Section de récupération */}
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-blue-600" />
+                Récupérer une réunion existante
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                Si vous avez fermé votre navigateur pendant une réunion, vous pouvez y revenir avec votre URL de récupération.
+              </p>
+              <Button
+                onClick={() => setShowRecoveryModal(true)}
+                variant="outline"
+                className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <UserCheck className="w-4 h-4 mr-2" />
+                Récupérer ma réunion
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
