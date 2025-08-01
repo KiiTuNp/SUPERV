@@ -27,6 +27,12 @@ function App() {
   const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
   const [scrutatorName, setScrutatorName] = useState('');  // Nom du scrutateur connecté
   const [showInfoModal, setShowInfoModal] = useState(false);  // Modal d'information sur le système
+  const [canCloseMeeting, setCanCloseMeeting] = useState(false);  // Peut fermer la réunion
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);  // Modal de récupération
+  const [recoveryUrl, setRecoveryUrl] = useState('');  // URL de récupération
+  const [recoveryPassword, setRecoveryPassword] = useState('');  // Mot de passe de récupération
+  const [showOrganizerAbsentModal, setShowOrganizerAbsentModal] = useState(false);  // Modal organisateur absent
+  const [lastHeartbeat, setLastHeartbeat] = useState(Date.now());  // Dernier heartbeat envoyé
 
   // Report generation voting states
   const [showReportVoteModal, setShowReportVoteModal] = useState(false);
