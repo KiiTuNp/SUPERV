@@ -1222,6 +1222,20 @@ function App() {
                   <p className="text-slate-500 mb-4 text-sm">
                     Télécharger le rapport PDF et supprimer définitivement toutes les données
                   </p>
+                  
+                  {/* Protection warning */}
+                  {!canCloseMeeting && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center gap-2 text-amber-800 text-sm">
+                        <Lock className="w-4 h-4" />
+                        <span className="font-medium">Protection activée</span>
+                      </div>
+                      <p className="text-amber-700 text-xs mt-1">
+                        La réunion ne peut pas être fermée sans télécharger le rapport final.
+                      </p>
+                    </div>
+                  )}
+                  
                   {reportGenerationInProgress ? (
                     <div className="text-center">
                       <div className="spinner-modern mx-auto mb-2"></div>
