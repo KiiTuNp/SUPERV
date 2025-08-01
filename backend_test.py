@@ -1204,7 +1204,7 @@ class VoteSecretTester:
             
             if response.status_code == 200:
                 data = response.json()
-                if data.get('scrutator_approval_required') and data.get('majority_needed') == 2:  # (3//2)+1 = 2
+                if data.get('scrutator_approval_required') and data.get('scrutator_count') == 3 and data.get('majority_needed') == 2:  # (3//2)+1 = 2
                     self.log_result("Step 7a - Request Report Generation", True, f"Report request sent to scrutators, majority needed: {data['majority_needed']}", response_time)
                     
                     # Simulate votes: Jean=YES, Marie=NO, Pierre=YES (2/3 majority)
