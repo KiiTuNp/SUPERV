@@ -1245,6 +1245,120 @@ async def generate_meeting_report(meeting_id: str):
         logger.error(f"Error generating report for meeting {meeting_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
 
+# Background task to monitor organizer presence and handle automatic cleanup
+async def monitor_organizer_presence():
+    """Background task to monitor organizer presence and handle leadership transfer/deletion"""
+    while True:
+        try:
+            # Vérifier toutes les réunions actives
+            active_meetings = await db.meetings.find({"status": "active"}).to_list(1000)
+            
+            for meeting in active_meetings:
+                meeting_id = meeting["id"]
+                organizer_last_seen = meeting.get("organizer_last_seen", meeting["created_at"])
+                organizer_present = meeting.get("organizer_present", True)
+                
+                # Calculer le temps écoulé depuis la dernière activité
+                time_elapsed = datetime.utcnow() - organizer_last_seen
+                
+                # Si l'organisateur est absent depuis plus de 5 minutes
+                if time_elapsed.total_seconds() > 300 and organizer_present:  # 5 minutes
+                    # Marquer l'organisateur comme absent
+                    await db.meetings.update_one(
+                        {"id": meeting_id},
+                        {"$set": {"organizer_present": False}}
+                    )
+                    
+                    # Vérifier s'il y a des scrutateurs approuvés
+                    approved_scrutators = await db.scrutators.find({
+                        "meeting_id": meeting_id, 
+                        "approval_status": "approved"
+                    }).sort("approved_at", 1).to_list(100)
+                    
+                    if approved_scrutators:
+                        # Transférer le leadership au scrutateur approuvé depuis le plus longtemps
+                        senior_scrutator = approved_scrutators[0]
+                        await db.meetings.update_one(
+                            {"id": meeting_id},
+                            {"$set": {"leadership_transferred_to": senior_scrutator["name"]}}
+                        )
+                        
+                        # Notifier seulement les scrutateurs
+                        await manager.send_to_meeting({
+                            "type": "leadership_transferred",
+                            "new_leader": senior_scrutator["name"],
+                            "reason": "organizer_absence",
+                            "message": f"Leadership transféré à {senior_scrutator['name']} (organisateur absent)"
+                        }, meeting_id)
+                        
+                        logger.info(f"Leadership transferred to {senior_scrutator['name']} for meeting {meeting_id}")
+                    else:
+                        # Pas de scrutateurs - notifier les participants et programmer la suppression
+                        await manager.send_to_meeting({
+                            "type": "organizer_absent",
+                            "reason": "no_scrutators",
+                            "message": "L'organisateur est absent. Vous pouvez télécharger un rapport partiel. Les données seront supprimées automatiquement."
+                        }, meeting_id)
+                        
+                        # Programmer la suppression pour dans 12 heures
+                        deletion_time = datetime.utcnow() + timedelta(hours=12)
+                        await db.meetings.update_one(
+                            {"id": meeting_id},
+                            {"$set": {"auto_deletion_scheduled": deletion_time}}
+                        )
+                
+                # Vérifier si la suppression automatique doit avoir lieu
+                auto_deletion = meeting.get("auto_deletion_scheduled")
+                if auto_deletion and datetime.utcnow() >= auto_deletion:
+                    # Vérifier s'il y a encore des connexions actives
+                    active_connections = len(manager.active_connections.get(meeting_id, []))
+                    
+                    if active_connections == 0:
+                        # Pas de connexions actives - supprimer la réunion
+                        await cleanup_meeting_data(meeting_id, "auto_deletion_time_limit")
+                        logger.info(f"Auto-deleted meeting {meeting_id} due to time limit and no active connections")
+                    else:
+                        # Reporter la suppression de 1 heure
+                        new_deletion_time = datetime.utcnow() + timedelta(hours=1)
+                        await db.meetings.update_one(
+                            {"id": meeting_id},
+                            {"$set": {"auto_deletion_scheduled": new_deletion_time}}
+                        )
+        
+        except Exception as e:
+            logger.error(f"Error in organizer presence monitoring: {str(e)}")
+        
+        # Attendre 60 secondes avant la prochaine vérification
+        await asyncio.sleep(60)
+
+async def cleanup_meeting_data(meeting_id: str, reason: str):
+    """Clean up all meeting data"""
+    try:
+        # Notifier avant suppression
+        await manager.send_to_meeting({
+            "type": "meeting_auto_deleted",
+            "reason": reason,
+            "message": "La réunion a été automatiquement supprimée selon les règles de rétention des données."
+        }, meeting_id)
+        
+        await asyncio.sleep(2)  # Laisser le temps aux notifications
+        
+        # Supprimer toutes les données associées
+        await db.votes.delete_many({"poll_id": {"$in": [poll["id"] for poll in await db.polls.find({"meeting_id": meeting_id}).to_list(1000)]}})
+        await db.polls.delete_many({"meeting_id": meeting_id})
+        await db.participants.delete_many({"meeting_id": meeting_id})
+        await db.scrutators.delete_many({"meeting_id": meeting_id})
+        await db.recovery_sessions.delete_many({"meeting_id": meeting_id})
+        await db.meetings.delete_one({"id": meeting_id})
+        
+        logger.info(f"Meeting {meeting_id} completely cleaned up due to {reason}")
+        
+    except Exception as e:
+        logger.error(f"Error cleaning up meeting {meeting_id}: {str(e)}")
+
+# Start the background task
+asyncio.create_task(monitor_organizer_presence())
+
 # WebSocket endpoint
 @app.websocket("/ws/meetings/{meeting_id}")
 async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
