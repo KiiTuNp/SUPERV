@@ -309,19 +309,58 @@ function App() {
       setLoading(true);
       try {
         console.log("🚀 Making API call to join meeting...");
-        const response = await axios.post(`${API}/participants/join`, {
-          name,
-          meeting_code: meetingCode.toUpperCase()
-        });
-        console.log("✅ Successfully joined meeting:", response.data);
-        setParticipant(response.data);
         
-        // Get meeting details
-        const meetingResponse = await axios.get(`${API}/meetings/${meetingCode.toUpperCase()}`);
-        setMeeting(meetingResponse.data);
+        // Détecter si c'est un code de scrutateur (commence par "SC")
+        const isScrutatorCode = meetingCode.toUpperCase().startsWith('SC');
         
-        setCurrentView("participant");
-        connectWebSocket(meetingResponse.data.id);
+        if (isScrutatorCode) {
+          // Tentative de connexion en tant que scrutateur
+          console.log("🔍 Tentative de connexion en tant que scrutateur...");
+          
+          try {
+            const response = await axios.post(`${API}/scrutators/join`, {
+              name,
+              scrutator_code: meetingCode.toUpperCase()
+            });
+            
+            console.log("✅ Successfully joined as scrutator:", response.data);
+            
+            // Définir les données de la réunion et rediriger vers l'interface organisateur
+            setMeeting(response.data.meeting);
+            setCurrentView("organizer");
+            connectWebSocket(response.data.meeting.id);
+            
+            // Afficher un message de confirmation
+            alert(`✅ Connexion réussie en tant que scrutateur !\n\nBonjour ${name}, vous avez maintenant accès à l'interface organisateur pour surveiller la réunion "${response.data.meeting.title}".`);
+            
+            return;
+          } catch (scrutatorError) {
+            console.error("❌ Error joining as scrutator:", scrutatorError);
+            // Si l'erreur est due à un nom non autorisé, afficher un message spécifique
+            if (scrutatorError.response?.status === 403) {
+              alert("❌ Accès refusé !\n\nVotre nom n'est pas autorisé pour ce code de scrutateur. Vérifiez que vous utilisez exactement le nom qui a été ajouté par l'organisateur.");
+            } else {
+              alert("❌ Code de scrutateur invalide ou réunion inactive.\n\nVérifiez le code et réessayez.");
+            }
+            setLoading(false);
+            return;
+          }
+        } else {
+          // Code de réunion normal - rejoindre en tant que participant
+          const response = await axios.post(`${API}/participants/join`, {
+            name,
+            meeting_code: meetingCode.toUpperCase()
+          });
+          console.log("✅ Successfully joined meeting:", response.data);
+          setParticipant(response.data);
+          
+          // Get meeting details
+          const meetingResponse = await axios.get(`${API}/meetings/${meetingCode.toUpperCase()}`);
+          setMeeting(meetingResponse.data);
+          
+          setCurrentView("participant");
+          connectWebSocket(meetingResponse.data.id);
+        }
       } catch (error) {
         console.error("❌ Error joining meeting:", error);
         alert("Erreur: " + (error.response?.data?.detail || "Impossible de rejoindre la réunion"));
