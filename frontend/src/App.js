@@ -627,7 +627,7 @@ function App() {
           <div className="space-y-6">
             {/* En-tête des sondages avec bouton créer */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold text-slate-800">Interface Organisateur</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Sondages de la réunion</h2>
               <Button
                 onClick={() => setShowCreatePollModal(true)}
                 className="btn-gradient-primary"
