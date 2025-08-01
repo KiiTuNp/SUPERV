@@ -743,6 +743,9 @@ async def generate_meeting_report(meeting_id: str):
     # Get participants data
     participants = await db.participants.find({"meeting_id": meeting_id}).to_list(1000)
     
+    # Get scrutators data
+    scrutators = await db.scrutators.find({"meeting_id": meeting_id}).to_list(1000)
+    
     # Get polls data with updated results
     polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
     
@@ -754,8 +757,8 @@ async def generate_meeting_report(meeting_id: str):
     updated_polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
     
     try:
-        # Generate PDF
-        pdf_path = generate_pdf_report(meeting, participants, updated_polls)
+        # Generate PDF with scrutators data
+        pdf_path = generate_pdf_report(meeting, participants, updated_polls, scrutators)
         
         # Create filename
         safe_title = "".join(c for c in meeting['title'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
@@ -781,6 +784,14 @@ async def generate_meeting_report(meeting_id: str):
         # Delete participants
         delete_participants_result = await db.participants.delete_many({"meeting_id": meeting_id})
         logger.info(f"Deleted {delete_participants_result.deleted_count} participants for meeting {meeting_id}")
+        
+        # Delete scrutators
+        delete_scrutators_result = await db.scrutators.delete_many({"meeting_id": meeting_id})
+        logger.info(f"Deleted {delete_scrutators_result.deleted_count} scrutators for meeting {meeting_id}")
+        
+        # Delete scrutator access records
+        delete_access_result = await db.scrutator_access.delete_many({"meeting_id": meeting_id})
+        logger.info(f"Deleted {delete_access_result.deleted_count} scrutator access records for meeting {meeting_id}")
         
         # Finally delete the meeting itself
         delete_meeting_result = await db.meetings.delete_one({"id": meeting_id})
