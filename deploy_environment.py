@@ -549,26 +549,38 @@ PDF_COMPRESSION=true
 """
 
     def _generate_frontend_env(self) -> str:
-        return f"""# Vote Secret v2.0 - Configuration Frontend Production
+        """Génère le fichier .env pour le frontend (SANS /api dans l'URL)"""
+        
+        # URL backend SANS /api (le frontend l'ajoute automatiquement)
+        frontend_url = self.config['FRONTEND_URL']
+        
+        # Extraire le domaine et protocole de l'URL frontend
+        from urllib.parse import urlparse
+        parsed = urlparse(frontend_url)
+        
+        # Construire l'URL backend sans /api
+        if self.config['SSL_MODE'] != 'none':
+            backend_url = f"https://{parsed.netloc}"
+        else:
+            backend_url = f"http://{parsed.netloc}"
+        
+        # IMPORTANT: Ne PAS ajouter /api ici - le frontend l'ajoute automatiquement
+        return f"""# Vote Secret v2.0 - Configuration Frontend
+# Généré automatiquement le {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
-# URL du backend
-REACT_APP_BACKEND_URL={self.config['BACKEND_URL']}
+# URL du backend SANS /api (le frontend ajoute /api automatiquement)
+REACT_APP_BACKEND_URL={backend_url}
 
-# Configuration application
-REACT_APP_APP_NAME=Vote Secret
+# WebSocket configuration
+WDS_SOCKET_PORT=443
+
+# Application info
+REACT_APP_NAME=Vote Secret v2.0
 REACT_APP_VERSION=2.0.0
-REACT_APP_DOMAIN={self.config['DOMAIN']}
+REACT_APP_DESCRIPTION=Plateforme de vote anonyme pour assemblées
 
 # Build configuration
 GENERATE_SOURCEMAP=false
-REACT_APP_ENV=production
-
-# Monitoring
-REACT_APP_MONITORING_ENABLED={self.config['MONITORING_ENABLED']}
-
-# Limites UI
-REACT_APP_MAX_PARTICIPANTS={self.config['MAX_PARTICIPANTS']}
-REACT_APP_MAX_POLLS={self.config['MAX_POLLS']}
 """
 
     def _generate_nginx_config(self) -> str:
