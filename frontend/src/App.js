@@ -39,6 +39,53 @@ function App() {
   const [reportVoteData, setReportVoteData] = useState(null);
   const [reportGenerationInProgress, setReportGenerationInProgress] = useState(false);
 
+  // Heartbeat system for organizer presence
+  useEffect(() => {
+    let heartbeatInterval;
+    
+    if (currentView === "organizer" && meeting && !isScrutator) {
+      // Envoyer un heartbeat toutes les 60 secondes
+      heartbeatInterval = setInterval(async () => {
+        try {
+          await axios.post(`${API}/meetings/${meeting.id}/heartbeat`, {
+            meeting_id: meeting.id,
+            organizer_name: meeting.organizer_name
+          });
+          setLastHeartbeat(Date.now());
+        } catch (error) {
+          console.error("Erreur lors de l'envoi du heartbeat:", error);
+        }
+      }, 60000); // 60 secondes
+    }
+    
+    return () => {
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
+    };
+  }, [currentView, meeting, isScrutator]);
+
+  // Check if meeting can be closed
+  useEffect(() => {
+    const checkCanClose = async () => {
+      if (meeting && currentView === "organizer" && !isScrutator) {
+        try {
+          const response = await axios.get(`${API}/meetings/${meeting.id}/can-close`);
+          setCanCloseMeeting(response.data.can_close);
+        } catch (error) {
+          console.error("Erreur lors de la vérification:", error);
+        }
+      }
+    };
+
+    if (meeting) {
+      checkCanClose();
+      // Vérifier périodiquement
+      const interval = setInterval(checkCanClose, 30000); // 30 secondes
+      return () => clearInterval(interval);
+    }
+  }, [meeting, currentView, isScrutator]);
+
   // Particle background effect
   useEffect(() => {
     const createParticle = () => {
