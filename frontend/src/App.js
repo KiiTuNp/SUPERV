@@ -2572,41 +2572,45 @@ function App() {
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-orange-800 mb-3">Sans scrutateurs</h4>
+                      <h4 className="font-semibold text-orange-800 mb-3">Sans scrutateurs (Procédure simplifiée)</h4>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>L'organisateur génère directement le rapport</span>
+                          <span>L'organisateur génère directement le rapport final</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Suppression immédiate des données</span>
+                          <span>Suppression immédiate et automatique des données</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Notification aux participants</span>
+                          <span>Notification instantanée aux participants</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-orange-700">
+                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                          <span>Responsabilité totale de l'organisateur</span>
                         </div>
                       </div>
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold text-orange-800 mb-3">Avec scrutateurs</h4>
+                      <h4 className="font-semibold text-orange-800 mb-3">Avec scrutateurs (Procédure renforcée)</h4>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Demande de génération par l'organisateur</span>
+                          <span>Demande formelle de génération par l'organisateur</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Vote à la majorité des scrutateurs</span>
+                          <span><strong>Vote à la majorité absolue</strong> des scrutateurs requis</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Génération uniquement si approuvé</span>
+                          <span>Génération <strong>uniquement si majorité approuve</strong></span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-orange-700">
                           <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Double validation = légitimité renforcée</span>
+                          <span><strong>Double validation</strong> = légitimité juridique renforcée</span>
                         </div>
                       </div>
                     </div>
