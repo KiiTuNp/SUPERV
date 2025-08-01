@@ -554,6 +554,13 @@ function App() {
         setShowReportModal(false);
         setDownloadingReport(false);
         
+        // Store meeting info for notifications before clearing
+        const meetingInfo = {
+          title: meeting.title,
+          organizerName: meeting.organizer_name || "Organisateur",
+          meetingCode: meeting.meeting_code
+        };
+        
         // Show success message and redirect after a brief delay
         setTimeout(() => {
           alert("✅ Rapport téléchargé avec succès!\n\n📝 Toutes les données de la réunion ont été supprimées.\n\n🏠 Retour à l'accueil...");
