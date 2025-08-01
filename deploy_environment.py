@@ -620,6 +620,7 @@ server {{
         return 301 https://$server_name$request_uri;
     }}
 }}
+
 """
             ssl_config = f"""
     # SSL Configuration (Let's Encrypt)
@@ -635,8 +636,7 @@ server {{
     ssl_session_timeout 10m;
     
     # HSTS
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-"""
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;"""
         elif self.config['SSL_MODE'] == 'existing':
             redirect_config = f"""
 # Redirect HTTP to HTTPS
@@ -645,6 +645,7 @@ server {{
     server_name {self.config['DOMAIN']};
     return 301 https://$server_name$request_uri;
 }}
+
 """
             ssl_config = f"""
     # SSL Configuration (Certificats existants)
@@ -660,8 +661,7 @@ server {{
     ssl_session_timeout 10m;
     
     # HSTS
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-"""
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;"""
 
         return f"""# Vote Secret v2.0 - Configuration Nginx Production avec SSL
 # Généré automatiquement
@@ -671,24 +671,8 @@ limit_req_zone $binary_remote_addr zone=api:10m rate={self.config['RATE_LIMIT_RE
 limit_req_zone $binary_remote_addr zone=general:10m rate=100r/m;
 {redirect_config}
 # Main server configuration
-server {{
-    listen 80;{ssl_config}
+server {{{ssl_config}
     server_name {self.config['DOMAIN']};
-    
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:;" always;
-    
-    # Gzip compression
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 1024;
-    gzip_proxied any;
-    gzip_comp_level 6;
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
     
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -724,12 +708,10 @@ server {{
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
         
-        # WebSocket support
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_read_timeout 86400;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
     }}
     
     # Frontend routes
@@ -737,6 +719,7 @@ server {{
         limit_req zone=general burst=20 nodelay;
         
         root /opt/vote-secret/frontend/build;
+        index index.html;
         try_files $uri $uri/ /index.html;
         
         # Cache static assets
