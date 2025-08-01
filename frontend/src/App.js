@@ -1176,14 +1176,21 @@ function App() {
                     Annuler
                   </Button>
                   <Button 
-                    onClick={() => {
-                      setShowReportModal(false);
-                      downloadReport();
-                    }}
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={downloadReport}
+                    disabled={downloadingReport}
+                    className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Confirmer et télécharger
+                    {downloadingReport ? (
+                      <>
+                        <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Génération en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Confirmer et télécharger
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
