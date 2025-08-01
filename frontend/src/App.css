@@ -97,9 +97,9 @@
 }
 
 .btn-gradient-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
-  scale: 1.02;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.3);
+  scale: 1.01;
 }
 
 .btn-gradient-warning {
