@@ -978,6 +978,17 @@ function App() {
                                 <span className="font-medium">Gagnant: {winnerOption.text}</span>
                               </div>
                             )}
+                            
+                            {poll.status === "closed" && totalVotes > 0 && !winnerOption && (() => {
+                              // Vérifier s'il y a égalité
+                              const maxVotes = Math.max(...poll.options.map(opt => opt.votes));
+                              return maxVotes > 0; // Afficher égalité seulement s'il y a des votes
+                            })() && (
+                              <div className="flex items-center gap-1 bg-orange-500 bg-opacity-80 px-2 py-1 rounded-full">
+                                <span className="text-white">⚖️</span>
+                                <span className="font-medium text-white">Égalité</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
