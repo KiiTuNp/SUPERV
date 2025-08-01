@@ -21,6 +21,9 @@ function App() {
   const [meeting, setMeeting] = useState(null);
   const [participant, setParticipant] = useState(null);
   const [ws, setWs] = useState(null);
+  const [meetingClosed, setMeetingClosed] = useState(false);
+  const [closedMeetingInfo, setClosedMeetingInfo] = useState(null);
+  const [redirectCountdown, setRedirectCountdown] = useState(10);
 
   // Particle background effect
   useEffect(() => {
