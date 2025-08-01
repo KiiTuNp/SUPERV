@@ -71,34 +71,34 @@ function App() {
             {/* Participant Action - Prominent */}
             <div className="order-1 lg:order-1">
               <Card className="glass-card-strong border-0 shadow-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white pb-8">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pb-8">
                   <div className="flex items-center justify-center mb-4">
                     <UserPlus className="w-12 h-12" />
                   </div>
                   <CardTitle className="text-2xl md:text-3xl font-bold text-center">
                     Rejoindre une Réunion
                   </CardTitle>
-                  <CardDescription className="text-indigo-100 text-center text-lg">
+                  <CardDescription className="text-blue-100 text-center text-lg">
                     Participez à un vote avec votre code de réunion
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-8">
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <span className="text-indigo-600 font-bold text-sm">1</span>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-bold text-sm">1</span>
                       </div>
                       <span>Entrez votre nom et le code de réunion</span>
                     </div>
                     <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-purple-600 font-bold text-sm">2</span>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-bold text-sm">2</span>
                       </div>
                       <span>Attendez l'approbation de l'organisateur</span>
                     </div>
                     <div className="flex items-center gap-3 text-slate-600">
-                      <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
-                        <span className="text-cyan-600 font-bold text-sm">3</span>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-bold text-sm">3</span>
                       </div>
                       <span>Votez en toute confidentialité</span>
                     </div>
