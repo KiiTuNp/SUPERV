@@ -383,8 +383,8 @@
 
 /* Modern Input Focus States */
 .input-modern:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #1e40af;
+  box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
   background: rgba(255, 255, 255, 0.95);
 }
 
