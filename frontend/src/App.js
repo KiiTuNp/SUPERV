@@ -2474,6 +2474,32 @@ function App() {
         window.location.reload(); // Simple refresh for now
       }
       
+      if (data.type === "leadership_transferred") {
+        // Leadership transferred to scrutator
+        if (isScrutator && scrutatorName === data.new_leader) {
+          alert(`🔄 Leadership transféré à vous !\n\nVous êtes maintenant responsable de cette réunion suite à l'absence de l'organisateur.`);
+          // Recharger pour obtenir les nouvelles permissions
+          window.location.reload();
+        } else if (isScrutator) {
+          alert(`🔄 Leadership transféré à ${data.new_leader} suite à l'absence de l'organisateur.`);
+        }
+      }
+      
+      if (data.type === "organizer_absent") {
+        // Organizer is absent - show modal for participants
+        if (currentView === "participant") {
+          setShowOrganizerAbsentModal(true);
+        }
+      }
+      
+      if (data.type === "meeting_auto_deleted") {
+        // Meeting automatically deleted
+        alert(`🗑️ Réunion supprimée automatiquement\n\nRaison: ${data.reason}\n\n${data.message}`);
+        setCurrentView("home");
+        setMeeting(null);
+        setParticipant(null);
+      }
+      
       if (data.type === "meeting_closed") {
         // Meeting has been closed - notify participants and redirect
         if (currentView === "participant") {
