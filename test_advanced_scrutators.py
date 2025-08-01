@@ -298,6 +298,13 @@ class AdvancedScrutatorTester:
         try:
             if scenario_data.get('generation_approved'):
                 meeting_id = scenario_data['meeting']['id']
+                
+                # First, let's check the meeting state after approval
+                response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/organizer")
+                if response.status_code == 200:
+                    meeting_data = response.json()
+                    print(f"    📊 Meeting state after approval: report_generation_pending={meeting_data['meeting'].get('report_generation_pending')}")
+                
                 start_time = time.time()
                 response = self.session.get(f"{BASE_URL}/meetings/{meeting_id}/report")
                 response_time = time.time() - start_time
@@ -309,6 +316,13 @@ class AdvancedScrutatorTester:
                         all_passed &= self.log_result("9. Generate PDF After Approval", True, f"PDF generated successfully ({file_size} bytes)", response_time)
                     else:
                         all_passed &= self.log_result("9. Generate PDF After Approval", False, f"Wrong content type: {content_type}", response_time)
+                elif response.status_code == 400:
+                    # This might be the expected behavior - the flag was reset after approval
+                    error_data = response.json()
+                    if "nécessite l'approbation" in error_data.get('detail', ''):
+                        all_passed &= self.log_result("9. Generate PDF After Approval", False, f"BACKEND BUG: Flag reset after approval - {error_data['detail']}", response_time)
+                    else:
+                        all_passed &= self.log_result("9. Generate PDF After Approval", False, f"HTTP 400: {error_data}", response_time)
                 else:
                     all_passed &= self.log_result("9. Generate PDF After Approval", False, f"HTTP {response.status_code}: {response.text}", response_time)
             else:
