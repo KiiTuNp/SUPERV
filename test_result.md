@@ -40,7 +40,7 @@
 
 **Date:** 2025-01-27  
 **Tester:** Testing Agent  
-**Backend URL:** https://acca2cb3-6c6a-4574-853d-844f59bfc1cb.preview.emergentagent.com/api
+**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
 
 ### ✅ PASSED TESTS (20/21)
 
@@ -108,7 +108,7 @@
 
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
-**Frontend URL:** https://acca2cb3-6c6a-4574-853d-844f59bfc1cb.preview.emergentagent.com
+**Frontend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com
 
 ### ✅ PASSED TESTS (11/11)
 
@@ -231,7 +231,7 @@
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Issue Reported:** "La génération du rapport PDF ne fonctionne pas"  
-**Backend URL:** https://acca2cb3-6c6a-4574-853d-844f59bfc1cb.preview.emergentagent.com/api
+**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
 
 ### ✅ FOCUSED PDF REPORT TESTS (3/3 PASSED)
 
@@ -328,7 +328,7 @@ The issue was likely related to frontend implementation (POST vs GET) which you 
 **Date:** 2025-01-31  
 **Tester:** Testing Agent  
 **Issue Reported:** "Quand on appuie sur 'Confirmer et télécharger' pour télécharger le PDF, le modal se ferme et le téléchargement ne se fait pas"  
-**Backend URL:** https://acca2cb3-6c6a-4574-853d-844f59bfc1cb.preview.emergentagent.com/api
+**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
 
 ### ✅ COMPREHENSIVE SCENARIO TESTS (8/8 STEPS PASSED)
 

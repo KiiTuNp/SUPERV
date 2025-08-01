@@ -24,7 +24,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 # Configuration
-BASE_URL = "https://acca2cb3-6c6a-4574-853d-844f59bfc1cb.preview.emergentagent.com/api"
+BASE_URL = "https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api"
 
 class PDFDownloadTester:
     def __init__(self):
