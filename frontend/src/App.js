@@ -554,6 +554,12 @@ function App() {
       }
     };
 
+    const updatePollOption = (index, value) => {
+      const updated = [...newPollOptions];
+      updated[index] = value;
+      setNewPollOptions(updated);
+    };
+
     const removePollOption = (index) => {
       if (newPollOptions.length > 2) {
         setNewPollOptions(newPollOptions.filter((_, i) => i !== index));
