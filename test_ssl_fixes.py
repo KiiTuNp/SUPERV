@@ -172,9 +172,9 @@ def test_file_generation():
     
     try:
         sys.path.append('/app')
-        from deploy_environment import EnvironmentSetup
+        from deploy_environment import ProductionEnvironmentSetup
         
-        env_setup = EnvironmentSetup()
+        env_setup = ProductionEnvironmentSetup()
         env_setup.config = {
             'DOMAIN': 'vote.super-csn.ca',
             'SSL_MODE': 'letsencrypt',
