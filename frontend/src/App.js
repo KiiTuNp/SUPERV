@@ -415,6 +415,7 @@ function App() {
     const [showCreatePollModal, setShowCreatePollModal] = useState(false);
     const [showParticipantsModal, setShowParticipantsModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+    const [downloadingReport, setDownloadingReport] = useState(false);
 
     useEffect(() => {
       if (meeting) {
