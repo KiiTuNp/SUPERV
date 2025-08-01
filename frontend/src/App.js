@@ -1249,7 +1249,7 @@ function App() {
         setClosedMeetingInfo(null);
         setRedirectCountdown(10);
       }
-    }, [meetingClosed, redirectCountdown]);
+    }, [meetingClosed, redirectCountdown, setCurrentView, setMeeting, setParticipant, setMeetingClosed, setClosedMeetingInfo, setRedirectCountdown]);
 
     const checkParticipantStatus = async () => {
       try {
