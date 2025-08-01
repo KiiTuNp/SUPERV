@@ -23,7 +23,13 @@ function App() {
   const [ws, setWs] = useState(null);
   const [meetingClosed, setMeetingClosed] = useState(false);
   const [closedMeetingInfo, setClosedMeetingInfo] = useState(null);
-  const [redirectCountdown, setRedirectCountdown] = useState(10);
+  const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
+  const [scrutatorName, setScrutatorName] = useState('');  // Nom du scrutateur connecté
+
+  // Report generation voting states
+  const [showReportVoteModal, setShowReportVoteModal] = useState(false);
+  const [reportVoteData, setReportVoteData] = useState(null);
+  const [reportGenerationInProgress, setReportGenerationInProgress] = useState(false);
 
   // Particle background effect
   useEffect(() => {
