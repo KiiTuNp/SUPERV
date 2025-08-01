@@ -317,6 +317,61 @@ async def organizer_heartbeat(meeting_id: str, heartbeat_data: OrganizerHeartbea
     
     return {"status": "heartbeat_received"}
 
+@api_router.get("/meetings/{meeting_id}/can-close")
+async def can_close_meeting(meeting_id: str):
+    """Vérifier si la réunion peut être fermée (rapport téléchargé)"""
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    return {
+        "can_close": meeting.get("report_downloaded", False),
+        "reason": "Rapport déjà téléchargé" if meeting.get("report_downloaded", False) else "Le rapport doit être téléchargé avant de fermer la réunion"
+    }
+
+@api_router.get("/meetings/{meeting_id}/partial-report")
+async def generate_partial_report(meeting_id: str):
+    """Générer un rapport partiel quand l'organisateur est absent"""
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Vérifier que l'organisateur est bien absent
+    if meeting.get("organizer_present", True):
+        raise HTTPException(status_code=400, detail="Rapport partiel disponible seulement quand l'organisateur est absent")
+    
+    # Générer le rapport partiel (sans supprimer les données)
+    participants = await db.participants.find({"meeting_id": meeting_id}).to_list(1000)
+    scrutators = await db.scrutators.find({"meeting_id": meeting_id}).to_list(1000)
+    polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
+    
+    # Mettre à jour les résultats des sondages
+    for poll in polls:
+        await update_poll_results(poll["id"])
+    
+    updated_polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
+    
+    try:
+        # Générer le PDF avec mention "RAPPORT PARTIEL"
+        meeting_data = meeting.copy()
+        meeting_data["title"] = f"[RAPPORT PARTIEL] {meeting_data['title']}"
+        
+        pdf_path = generate_pdf_report(meeting_data, participants, updated_polls, scrutators)
+        
+        safe_title = "".join(c for c in meeting['title'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        filename = f"Rapport_Partiel_{safe_title}_{meeting['meeting_code']}.pdf"
+        
+        return FileResponse(
+            path=pdf_path,
+            filename=filename,
+            media_type='application/pdf',
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating partial report for meeting {meeting_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération du rapport partiel: {str(e)}")
+
 @api_router.get("/meetings/{meeting_code}")
 async def get_meeting_by_code(meeting_code: str):
     meeting = await db.meetings.find_one({"meeting_code": meeting_code, "status": "active"})
