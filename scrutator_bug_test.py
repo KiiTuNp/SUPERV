@@ -426,8 +426,8 @@ class ScrutatorBugTester:
                         
                 except websockets.exceptions.ConnectionClosed:
                     return False, "Connection closed"
-                except websockets.exceptions.InvalidStatusCode as e:
-                    return False, f"Invalid status code: {e.status_code}"
+                except websockets.exceptions.WebSocketException as e:
+                    return False, f"WebSocket error: {str(e)}"
                 except Exception as e:
                     return False, f"Connection error: {str(e)}"
             
