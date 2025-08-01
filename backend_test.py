@@ -2442,7 +2442,8 @@ class VoteSecretTester:
         advanced_tests = [
             ("Scrutator Functionality", self.test_scrutator_functionality),
             ("Scrutator Validation", self.test_scrutator_validation),
-            ("Advanced Scrutator Workflow", self.test_advanced_scrutator_workflow_with_approval_and_voting)
+            ("Advanced Scrutator Workflow", self.test_advanced_scrutator_workflow_with_approval_and_voting),
+            ("🎯 NEW: Participant Results Display Modifications", self.test_participant_polls_endpoint_modifications)
         ]
         
         passed = 0
