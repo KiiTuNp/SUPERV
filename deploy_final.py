@@ -509,12 +509,22 @@ def worker_abort(worker):
             print_warning("Service Vote Secret non actif")
             print(stdout)
         
-        # Test de connectivité backend
-        success, _, _ = run_command("curl -s http://127.0.0.1:8001/health", "Test backend", check_success=False)
+        # Test de connectivité backend avec le bon endpoint
+        success, _, _ = run_command("curl -s http://127.0.0.1:8001/api/health", "Test backend", check_success=False)
         if success:
             print_success("Backend répond correctement")
         else:
-            print_warning("Backend ne répond pas (peut être normal si l'endpoint /health n'existe pas)")
+            print_warning("Backend ne répond pas - vérification détaillée...")
+            # Test plus détaillé
+            success, stdout, stderr = run_command("curl -v http://127.0.0.1:8001/api/health", "Test backend détaillé", check_success=False)
+            if stderr:
+                print_info(f"Détails: {stderr}")
+            
+            # Vérifier si le service est actif
+            success, service_status, _ = run_command("sudo systemctl status vote-secret --no-pager -l", "Statut service détaillé", check_success=False)
+            if service_status:
+                print_info("Statut du service:")
+                print(service_status)
         
         # Redémarrage de Nginx pour s'assurer de la configuration
         success, _, _ = run_command("sudo systemctl reload nginx", "Rechargement Nginx")
