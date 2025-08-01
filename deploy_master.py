@@ -55,6 +55,16 @@ def prompt_continue(message: str = "Continuer ?") -> bool:
             return False
         print_warning("Réponse invalide.")
 
+def prompt_input(message: str, default: str = "") -> str:
+    """Demande une saisie utilisateur avec valeur par défaut"""
+    prompt = f"\n{Colors.BLUE}{message}"
+    if default:
+        prompt += f" (défaut: {default})"
+    prompt += f"{Colors.ENDC}: "
+    
+    response = input(prompt).strip()
+    return response if response else default
+
 class MasterDeployment:
     """Orchestrateur principal du déploiement"""
     
