@@ -213,6 +213,110 @@ async def create_meeting(meeting_data: MeetingCreate):
     await db.meetings.insert_one(meeting.dict())
     return meeting
 
+@api_router.post("/meetings/{meeting_id}/generate-recovery")
+async def generate_recovery_url(meeting_id: str):
+    """Générer une URL de récupération avec mot de passe pour l'organisateur"""
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Générer un mot de passe aléatoire
+    import secrets
+    import string
+    alphabet = string.ascii_letters + string.digits
+    recovery_password = ''.join(secrets.choice(alphabet) for _ in range(12))
+    
+    # Générer l'URL de récupération
+    recovery_code = str(uuid.uuid4())
+    recovery_url = f"/recover/{recovery_code}"
+    
+    # Mettre à jour la réunion
+    await db.meetings.update_one(
+        {"id": meeting_id},
+        {"$set": {
+            "recovery_url": recovery_url,
+            "recovery_password": recovery_password
+        }}
+    )
+    
+    # Stocker les informations de récupération
+    await db.recovery_sessions.insert_one({
+        "id": str(uuid.uuid4()),
+        "recovery_code": recovery_code,
+        "meeting_id": meeting_id,
+        "password": recovery_password,
+        "created_at": datetime.utcnow(),
+        "expires_at": datetime.utcnow().replace(hour=23, minute=59, second=59, microsecond=999999)  # Expire à la fin de la journée
+    })
+    
+    return {
+        "recovery_url": recovery_url,
+        "recovery_password": recovery_password,
+        "message": "URL de récupération générée avec succès"
+    }
+
+@api_router.post("/meetings/recover")
+async def recover_meeting_access(recovery_data: RecoveryRequest):
+    """Récupérer l'accès à une réunion avec l'URL et le mot de passe"""
+    # Extraire le code de récupération de l'URL
+    recovery_code = recovery_data.meeting_id.replace("/recover/", "")
+    
+    # Vérifier la session de récupération
+    recovery_session = await db.recovery_sessions.find_one({
+        "recovery_code": recovery_code,
+        "expires_at": {"$gt": datetime.utcnow()}
+    })
+    
+    if not recovery_session:
+        raise HTTPException(status_code=404, detail="Lien de récupération invalide ou expiré")
+    
+    if recovery_session["password"] != recovery_data.password:
+        raise HTTPException(status_code=403, detail="Mot de passe incorrect")
+    
+    # Récupérer la réunion
+    meeting = await db.meetings.find_one({"id": recovery_session["meeting_id"]})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Marquer l'organisateur comme présent et mettre à jour la dernière activité
+    await db.meetings.update_one(
+        {"id": recovery_session["meeting_id"]},
+        {"$set": {
+            "organizer_present": True,
+            "organizer_last_seen": datetime.utcnow(),
+            "leadership_transferred_to": None
+        }}
+    )
+    
+    return {
+        "meeting": Meeting(**meeting),
+        "message": "Accès récupéré avec succès"
+    }
+
+@api_router.post("/meetings/{meeting_id}/heartbeat")
+async def organizer_heartbeat(meeting_id: str, heartbeat_data: OrganizerHeartbeat):
+    """Signal de vie de l'organisateur"""
+    meeting = await db.meetings.find_one({"id": meeting_id})
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Réunion non trouvée")
+    
+    # Vérifier que c'est bien l'organisateur ou le scrutateur ayant reçu le leadership
+    if (meeting["organizer_name"] != heartbeat_data.organizer_name and 
+        meeting.get("leadership_transferred_to") != heartbeat_data.organizer_name):
+        raise HTTPException(status_code=403, detail="Non autorisé")
+    
+    # Mettre à jour la présence
+    await db.meetings.update_one(
+        {"id": meeting_id},
+        {"$set": {
+            "organizer_present": True,
+            "organizer_last_seen": datetime.utcnow(),
+            "auto_deletion_scheduled": None  # Annuler la suppression automatique
+        }}
+    )
+    
+    return {"status": "heartbeat_received"}
+
 @api_router.get("/meetings/{meeting_code}")
 async def get_meeting_by_code(meeting_code: str):
     meeting = await db.meetings.find_one({"meeting_code": meeting_code, "status": "active"})
