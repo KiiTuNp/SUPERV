@@ -86,6 +86,57 @@ function App() {
     }
   }, [meeting, currentView, isScrutator]);
 
+  // Recovery functions
+  const handleRecovery = async (recoveryUrl, password) => {
+    try {
+      const response = await axios.post(`${API}/meetings/recover`, {
+        meeting_id: recoveryUrl,
+        password: password
+      });
+      
+      setMeeting(response.data.meeting);
+      setCurrentView("organizer");
+      connectWebSocket(response.data.meeting.id);
+      setShowRecoveryModal(false);
+      
+      alert("Accès récupéré avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la récupération:", error);
+      alert("Erreur lors de la récupération: " + (error.response?.data?.detail || "Erreur inconnue"));
+    }
+  };
+
+  const downloadPartialReport = async () => {
+    if (!meeting?.id) return;
+    
+    try {
+      const response = await fetch(`${API}/meetings/${meeting.id}/partial-report`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/pdf' }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `Rapport_Partiel_${meeting.meeting_code}.pdf`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      alert("Rapport partiel téléchargé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors du téléchargement:", error);
+      alert("Erreur lors du téléchargement du rapport partiel: " + error.message);
+    }
+  };
+
   // Particle background effect
   useEffect(() => {
     const createParticle = () => {
