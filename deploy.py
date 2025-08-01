@@ -385,11 +385,13 @@ class DeploymentManager:
         print_info("Installation de MongoDB 8.0...")
         
         if self.system_info.distro in ['ubuntu', 'debian']:
+            # Séquence correcte pour MongoDB selon l'utilisateur
             mongo_commands = [
+                ("sudo apt-get install gnupg curl", "Installation des prérequis"),
                 ("curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor", "Ajout de la clé GPG MongoDB"),
-                (f"echo 'deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/{self.system_info.distro} $(lsb_release -cs)/mongodb-org/8.0 multiverse' | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list", "Ajout du dépôt MongoDB"),
-                ("sudo apt update", "Mise à jour des sources"),
-                ("sudo apt install -y mongodb-org", "Installation MongoDB")
+                ("echo 'deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse' | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list", "Ajout du dépôt MongoDB"),
+                ("sudo apt-get update", "Mise à jour des sources"),
+                ("sudo apt-get install -y mongodb-org", "Installation MongoDB")
             ]
         elif self.system_info.distro in ['centos', 'rhel', 'rocky', 'almalinux']:
             # Créer le fichier repo MongoDB
