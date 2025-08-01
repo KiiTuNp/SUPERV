@@ -14,7 +14,7 @@ import os
 import sys
 
 # Configuration
-BACKEND_URL = "https://068d0d89-bf36-41bf-ba1d-76e3bffe12be.preview.emergentagent.com/api"
+BACKEND_URL = "https://8c46219a-4d23-4d71-859e-4aa3cf1d38ff.preview.emergentagent.com/api"
 WEBSOCKET_URL = "wss://068d0d89-bf36-41bf-ba1d-76e3bffe12be.preview.emergentagent.com/ws"
 
 class VoteSecretTester:
