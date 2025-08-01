@@ -988,17 +988,18 @@ function App() {
 
     if (status === "pending") {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 bg-pattern-dots flex items-center justify-center p-4">
-          <Card className="glass-card-strong w-full max-w-md border-0 shadow-2xl">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
+          <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
             <CardContent className="text-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Clock className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-4 gradient-text">En attente d'approbation</h2>
+              <h2 className="text-2xl font-bold mb-4 text-slate-800">En attente d'approbation</h2>
               <p className="text-slate-600 mb-6">
-                Votre demande de participation est en cours d'examen par l'organisateur.
+                Votre demande de participation a été envoyée à l'organisateur.
+                Veuillez patienter pendant qu'il examine votre demande.
               </p>
-              <div className="glass-card p-4 bg-gradient-to-r from-slate-50 to-gray-50">
+              <div className="glass-card p-4 bg-gradient-to-r from-blue-50 to-blue-100">
                 <p className="text-sm text-slate-700">
                   <strong>Réunion:</strong> {meeting?.title}<br />
                   <strong>Participant:</strong> {participant?.name}
@@ -1012,10 +1013,10 @@ function App() {
 
     if (status === "rejected") {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 bg-pattern-dots flex items-center justify-center p-4">
-          <Card className="glass-card-strong w-full max-w-md border-0 shadow-2xl">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 bg-pattern-dots flex items-center justify-center p-4">
+          <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
             <CardContent className="text-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <AlertCircle className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-4 text-red-600">Accès refusé</h2>
