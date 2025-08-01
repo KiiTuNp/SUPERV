@@ -2140,8 +2140,7 @@ class VoteSecretTester:
             # Create poll
             poll_data = {
                 "question": "Approuvez-vous le budget 2025 ?",
-                "options": ["Oui", "Non", "Abstention"],
-                "show_results_real_time": True
+                "options": ["Oui", "Non", "Abstention"]
             }
             
             meeting_id = scenario_data['meeting']['id']
