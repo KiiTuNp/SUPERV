@@ -536,13 +536,13 @@ function App() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-grid p-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <Card className="glass-card-strong mb-8 border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
-              <div className="flex flex-col md:flex-row items-center justify-between">
-                <div className="flex items-center gap-4 mb-4 md:mb-0">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 p-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header avec code de réunion mis en évidence et participants */}
+          <Card className="glass-card border-0 shadow-lg mb-8">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                     <Vote className="w-6 h-6" />
                   </div>
@@ -553,54 +553,171 @@ function App() {
                     </CardDescription>
                   </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-blue-100 text-sm mb-1">Code de réunion</p>
-                  <div className="meeting-code bg-white bg-opacity-20 px-4 py-2 rounded-xl">
-                    {meeting?.meeting_code}
+                
+                {/* Code de réunion mis en évidence */}
+                <div className="bg-white bg-opacity-15 rounded-xl p-4 border border-white border-opacity-20">
+                  <p className="text-blue-100 text-sm font-medium mb-2">Code de réunion</p>
+                  <div className="flex items-center gap-3">
+                    <div className="meeting-code text-white text-2xl font-mono font-bold tracking-widest">
+                      {meeting?.meeting_code}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-white border-opacity-30 text-white hover:bg-white hover:text-blue-600"
+                      onClick={() => navigator.clipboard.writeText(meeting?.meeting_code)}
+                    >
+                      Copier
+                    </Button>
                   </div>
+                </div>
+
+                {/* Participants avec bouton */}
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-blue-100 text-sm font-medium">Participants</p>
+                    <p className="text-white text-xl font-bold">{participants.length}</p>
+                  </div>
+                  <Button
+                    onClick={() => setShowParticipantsModal(true)}
+                    className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600 border border-white border-opacity-30"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Gérer
+                  </Button>
                 </div>
               </div>
             </CardHeader>
           </Card>
 
-          <Tabs defaultValue="participants" className="space-y-6">
-            <TabsList className="tabs-modern grid w-full grid-cols-2 md:grid-cols-4 h-14">
-              <TabsTrigger value="participants" className="tab-modern h-10">
-                <Users className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Participants</span>
-                <span className="sm:hidden">Part.</span>
-                <Badge variant="secondary" className="ml-2 bg-white bg-opacity-80">
-                  {participants.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="polls" className="tab-modern h-10">
-                <Vote className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Sondages</span>
-                <span className="sm:hidden">Sond.</span>
-                <Badge variant="secondary" className="ml-2 bg-white bg-opacity-80">
-                  {polls.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="create-poll" className="tab-modern h-10">
+          {/* Section principale - Sondages */}
+          <div className="space-y-6">
+            {/* En-tête des sondages avec bouton créer */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold text-slate-800">Sondages de la réunion</h2>
+              <Button
+                onClick={() => setShowCreatePollModal(true)}
+                className="btn-gradient-primary"
+              >
                 <Sparkles className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Créer</span>
-                <span className="sm:hidden">+</span>
-              </TabsTrigger>
-              <TabsTrigger value="report" className="tab-modern h-10">
-                <FileText className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Rapport</span>
-                <span className="sm:hidden">PDF</span>
-              </TabsTrigger>
-            </TabsList>
+                Créer un sondage
+              </Button>
+            </div>
 
-            <TabsContent value="participants">
+            {/* Liste des sondages */}
+            {polls.length > 0 ? (
+              <div className="space-y-6">
+                {polls.map((poll) => (
+                  <Card key={poll.id} className="glass-card border-0 shadow-lg">
+                    <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <CardTitle className="text-lg">{poll.question}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          {poll.status === "draft" && (
+                            <Button 
+                              size="sm" 
+                              onClick={() => startPoll(poll.id)}
+                              className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600"
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              Lancer
+                            </Button>
+                          )}
+                          {poll.status === "active" && (
+                            <>
+                              <Badge className="bg-green-500 text-white">
+                                <Clock className="w-3 h-3 mr-1" />
+                                En cours
+                              </Badge>
+                              <Button 
+                                size="sm" 
+                                onClick={() => closePoll(poll.id)}
+                                className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600"
+                              >
+                                <Square className="w-4 h-4 mr-1" />
+                                Fermer
+                              </Button>
+                            </>
+                          )}
+                          {poll.status === "closed" && (
+                            <Badge className="bg-slate-500 text-white">Fermé</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {poll.options.map((option) => {
+                          const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                          const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+                          
+                          return (
+                            <div key={option.id} className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="font-medium text-slate-700">{option.text}</span>
+                                <span className="font-bold text-slate-600">
+                                  {option.votes} votes ({percentage.toFixed(1)}%)
+                                </span>
+                              </div>
+                              <Progress value={percentage} className="h-3" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {poll.timer_duration && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <p className="text-sm text-blue-700 flex items-center gap-2">
+                            <Timer className="w-4 h-4" />
+                            Durée du minuteur: {poll.timer_duration} secondes
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
               <Card className="glass-card border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Gestion des Participants
-                  </CardTitle>
-                </CardHeader>
+                <CardContent className="text-center py-16">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Vote className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-800 mb-2">Aucun sondage créé</h3>
+                  <p className="text-slate-500 mb-6">Créez votre premier sondage pour commencer les votes</p>
+                  <Button
+                    onClick={() => setShowCreatePollModal(true)}
+                    className="btn-gradient-primary"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Créer un sondage
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Bouton rapport en bas */}
+          <div className="mt-12 flex justify-center">
+            <Card className="glass-card border border-blue-200 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Générer le rapport final</h3>
+                <p className="text-slate-500 mb-4 text-sm">
+                  Télécharger le rapport PDF et supprimer définitivement toutes les données
+                </p>
+                <Button
+                  onClick={downloadReport}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Télécharger le rapport
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     {participants.map((participant) => (
