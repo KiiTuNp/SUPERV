@@ -372,7 +372,7 @@ proc_name = 'vote-secret'
 
 # Server mechanics
 daemon = False
-pidfile = '/var/run/vote-secret.pid'
+pidfile = '/var/log/vote-secret/vote-secret.pid'
 user = 'vote-secret'
 group = 'vote-secret'
 tmp_upload_dir = None
@@ -400,9 +400,15 @@ def worker_abort(worker):
     worker.log.info("Worker aborted (pid: %s)", worker.pid)
 """
         
-        # Création du répertoire de logs
+        # Création du répertoire de logs AVANT de créer la config
         success, _, _ = run_command("sudo mkdir -p /var/log/vote-secret", "Création répertoire logs")
+        if not success:
+            print_error("Impossible de créer le répertoire de logs")
+            return False
+            
         success, _, _ = run_command("sudo chown vote-secret:vote-secret /var/log/vote-secret", "Permissions logs")
+        if not success:
+            print_warning("Impossible de définir les permissions logs - l'utilisateur vote-secret doit exister")
         
         # Écriture de la configuration Gunicorn
         config_path = self.deployment_path / 'config' / 'gunicorn.conf.py'
@@ -411,10 +417,15 @@ def worker_abort(worker):
             f.write(gunicorn_config)
         
         success, _, _ = run_command(
-            f"sudo mv /tmp/gunicorn.conf.py {config_path} && sudo chown vote-secret:vote-secret {config_path}",
+            f"sudo mkdir -p {config_path.parent} && sudo mv /tmp/gunicorn.conf.py {config_path} && sudo chown vote-secret:vote-secret {config_path}",
             "Installation configuration Gunicorn"
         )
         
+        if not success:
+            print_error("Échec installation configuration Gunicorn")
+            return False
+        
+        print_success("Configuration Gunicorn créée avec logs dans /var/log/vote-secret/")
         return prompt_continue()
 
     def step_5_create_systemd_service(self) -> bool:
