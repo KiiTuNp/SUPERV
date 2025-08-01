@@ -136,6 +136,28 @@ class ProductionEnvironmentSetup:
         """Collecte les informations serveur"""
         print_step(1, self.total_steps, "Informations Serveur")
         
+        # Mode de déploiement
+        print_info("Choisissez le mode de déploiement:")
+        print("  [1] Simple VPS Ubuntu (recommandé pour la plupart des cas)")
+        print("  [2] Production avancée (utilisateur dédié, sécurité renforcée)")
+        
+        deploy_mode_choice = prompt_input(
+            "Mode de déploiement", 
+            default="1"
+        )
+        
+        if deploy_mode_choice == "2":
+            self.config['DEPLOY_MODE'] = 'advanced'
+            self.config['DEPLOY_USER'] = 'vote-secret'
+            self.config['APP_DIR'] = '/opt/vote-secret'
+            print_info("Mode avancé sélectionné : utilisateur dédié vote-secret, répertoire /opt/vote-secret")
+        else:
+            self.config['DEPLOY_MODE'] = 'simple'
+            ubuntu_user = prompt_input("Nom d'utilisateur Ubuntu", default="ubuntu")
+            self.config['DEPLOY_USER'] = ubuntu_user
+            self.config['APP_DIR'] = f'/home/{ubuntu_user}/vote-secret'
+            print_info(f"Mode simple sélectionné : utilisateur {ubuntu_user}, répertoire {self.config['APP_DIR']}")
+        
         # Informations serveur
         self.config['SERVER_NAME'] = prompt_input(
             "Nom du serveur (pour logs)", 
