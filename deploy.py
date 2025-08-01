@@ -70,39 +70,51 @@ def prompt_continue(message: str = "Continuer avec l'étape suivante ?") -> bool
             return False
         print_warning("Réponse invalide. Utilisez 'o' pour oui ou 'n' pour non.")
 
-def run_command(command: str, description: str = "", check_success: bool = True) -> Tuple[bool, str, str]:
+def run_command(command: str, description: str = "", check_success: bool = True, interactive: bool = False) -> Tuple[bool, str, str]:
     """Exécute une commande système avec gestion d'erreur"""
     if description:
         print(f"{Colors.BLUE}🔄 {description}...{Colors.ENDC}")
     
     try:
-        process = subprocess.run(
-            command,
-            shell=True,
-            capture_output=True,
-            text=True,
-            timeout=300  # 5 minutes timeout
-        )
-        
-        stdout = process.stdout.strip()
-        stderr = process.stderr.strip()
-        success = process.returncode == 0
-        
-        if success:
-            if description:
-                print_success(f"{description} - Terminé")
-            return True, stdout, stderr
+        if interactive:
+            # Pour les commandes interactives, afficher la commande et laisser l'utilisateur la voir
+            print(f"{Colors.CYAN}Commande: {command}{Colors.ENDC}")
+            process = subprocess.run(
+                command,
+                shell=True,
+                text=True,
+                timeout=600  # 10 minutes pour les commandes interactives
+            )
+            success = process.returncode == 0
+            return success, "", ""
         else:
-            if check_success:
-                print_error(f"{description} - Échec")
-                if stderr:
-                    print(f"{Colors.FAIL}Erreur: {stderr}{Colors.ENDC}")
-                if stdout:
-                    print(f"{Colors.WARNING}Sortie: {stdout}{Colors.ENDC}")
-            return False, stdout, stderr
+            process = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minutes timeout
+            )
+            
+            stdout = process.stdout.strip()
+            stderr = process.stderr.strip()
+            success = process.returncode == 0
+            
+            if success:
+                if description:
+                    print_success(f"{description} - Terminé")
+                return True, stdout, stderr
+            else:
+                if check_success:
+                    print_error(f"{description} - Échec")
+                    if stderr:
+                        print(f"{Colors.FAIL}Erreur: {stderr}{Colors.ENDC}")
+                    if stdout:
+                        print(f"{Colors.WARNING}Sortie: {stdout}{Colors.ENDC}")
+                return False, stdout, stderr
             
     except subprocess.TimeoutExpired:
-        print_error(f"{description} - Timeout (>5 minutes)")
+        print_error(f"{description} - Timeout")
         return False, "", "Timeout"
     except Exception as e:
         print_error(f"{description} - Exception: {str(e)}")
