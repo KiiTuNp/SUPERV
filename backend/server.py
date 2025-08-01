@@ -80,11 +80,19 @@ class MeetingStatus(str, Enum):
     COMPLETED = "completed"
 
 # Models
+class Scrutator(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    meeting_id: str
+    added_at: datetime = Field(default_factory=datetime.utcnow)
+
 class Meeting(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     organizer_name: str
     meeting_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8].upper())
+    scrutator_code: Optional[str] = None  # Code spécial pour les scrutateurs
+    scrutators: List[str] = Field(default_factory=list)  # Liste des noms de scrutateurs
     status: MeetingStatus = MeetingStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
