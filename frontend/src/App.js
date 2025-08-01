@@ -1238,6 +1238,11 @@ function App() {
         setStatus(response.data.status);
       } catch (error) {
         console.error("Error checking status:", error);
+        
+        // If we get a 404, the meeting might have been deleted
+        if (error.response?.status === 404) {
+          handleMeetingClosed();
+        }
       }
     };
 
@@ -1249,6 +1254,23 @@ function App() {
         setPolls(response.data);
       } catch (error) {
         console.error("Error loading polls:", error);
+        
+        // If we get a 404, the meeting has been deleted
+        if (error.response?.status === 404) {
+          handleMeetingClosed();
+        }
+      }
+    };
+
+    const handleMeetingClosed = () => {
+      if (!meetingClosed) {
+        setClosedMeetingInfo({
+          title: meeting?.title || "Réunion",
+          organizerName: meeting?.organizer_name || "Organisateur",
+          meetingCode: meeting?.meeting_code || "N/A"
+        });
+        setMeetingClosed(true);
+        setRedirectCountdown(10);
       }
     };
 
