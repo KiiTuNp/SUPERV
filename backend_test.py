@@ -2134,12 +2134,20 @@ class VoteSecretTester:
         return all_passed
 
     def run_all_tests(self):
-        """Run all backend tests"""
-        print("🚀 Starting Vote Secret Backend API Tests")
-        print("=" * 60)
+        """Run all backend tests with priority on bug fix validation"""
+        print("🚀 STARTING COMPREHENSIVE BACKEND API TESTING")
+        print("=" * 70)
+        print(f"Backend URL: {BASE_URL}")
+        print(f"WebSocket URL: {WS_URL}")
+        print("=" * 70)
+        
+        # PRIORITY: Test the bug fix first
+        bug_fix_tests = [
+            ("🎯 BUG FIX TEST - Workflow Scrutateurs Complet", self.test_bug_fix_scrutator_workflow_complete),
+        ]
         
         # Core functionality tests
-        tests = [
+        core_tests = [
             ("Health Check", self.test_health_check),
             ("Create Meeting", self.test_create_meeting),
             ("Meeting Validation", self.test_meeting_validation),
@@ -2160,22 +2168,57 @@ class VoteSecretTester:
             ("CORS Configuration", self.test_cors_headers),
             ("Performance Load Test", self.test_performance_load),
             ("Error Handling", self.test_error_handling),
+        ]
+        
+        # Advanced functionality tests
+        advanced_tests = [
             ("Scrutator Functionality", self.test_scrutator_functionality),
             ("Scrutator Validation", self.test_scrutator_validation),
             ("Advanced Scrutator Workflow", self.test_advanced_scrutator_workflow_with_approval_and_voting)
         ]
         
         passed = 0
-        total = len(tests)
+        total = 0
         
-        for test_name, test_func in tests:
+        # Run bug fix test FIRST - This is the most critical
+        print("\n🔥 PRIORITY: TESTING BUG FIX")
+        print("=" * 50)
+        for test_name, test_func in bug_fix_tests:
+            total += 1
             try:
                 if test_func():
                     passed += 1
+                time.sleep(0.1)  # Small delay between tests
             except Exception as e:
-                self.log_result(test_name, False, f"Test execution error: {str(e)}")
+                self.log_result(test_name, False, f"Test exception: {str(e)}")
+        
+        # Run core tests
+        print("\n📋 CORE FUNCTIONALITY TESTS")
+        print("=" * 40)
+        for test_name, test_func in core_tests:
+            total += 1
+            try:
+                if test_func():
+                    passed += 1
+                time.sleep(0.1)  # Small delay between tests
+            except Exception as e:
+                self.log_result(test_name, False, f"Test exception: {str(e)}")
+        
+        # Run advanced tests
+        print("\n🔬 ADVANCED FUNCTIONALITY TESTS")
+        print("=" * 40)
+        for test_name, test_func in advanced_tests:
+            total += 1
+            try:
+                if test_func():
+                    passed += 1
+                time.sleep(0.1)
+            except Exception as e:
+                self.log_result(test_name, False, f"Test exception: {str(e)}")
         
         # WebSocket test (async)
+        print("\n🌐 WEBSOCKET TEST")
+        print("=" * 25)
         try:
             ws_result = asyncio.run(self.test_websocket_connection())
             if ws_result:
@@ -2185,13 +2228,26 @@ class VoteSecretTester:
             self.log_result("WebSocket Connection", False, f"WebSocket test error: {str(e)}")
             total += 1
         
-        print("\n" + "=" * 60)
-        print(f"🏁 Test Results: {passed}/{total} tests passed")
+        # Print summary
+        print("\n" + "=" * 70)
+        print("📊 TEST SUMMARY")
+        print("=" * 70)
+        
+        success_rate = (passed / total * 100) if total > 0 else 0
+        
+        for result in self.results:
+            print(f"{result['status']} {result['test']}: {result['message']} ({result['response_time']})")
+        
+        print(f"\n🎯 OVERALL RESULTS: {passed}/{total} tests passed ({success_rate:.1f}%)")
         
         if passed == total:
-            print("🎉 All tests passed! Backend is production ready.")
+            print("🎉 ALL TESTS PASSED! Backend is fully functional.")
+        elif success_rate >= 90:
+            print("✅ EXCELLENT: Backend is production-ready with minor issues.")
+        elif success_rate >= 75:
+            print("⚠️  GOOD: Backend is mostly functional with some issues to address.")
         else:
-            print(f"⚠️  {total - passed} tests failed. Review issues above.")
+            print("❌ CRITICAL: Backend has significant issues that need immediate attention.")
         
         return passed, total, self.results
 
