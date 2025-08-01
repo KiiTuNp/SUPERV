@@ -726,16 +726,21 @@ server {{
     # HSTS
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;"""
 
-        return f"""# Vote Secret v2.0 - Configuration Nginx Production avec SSL
-# Généré automatiquement
+        return f"""# Vote Secret v2.0 - Configuration Nginx avec SSL
+# Généré automatiquement le {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 # Rate limiting
 limit_req_zone $binary_remote_addr zone=api:10m rate={self.config['RATE_LIMIT_REQUESTS']}r/m;
 limit_req_zone $binary_remote_addr zone=general:10m rate=100r/m;
+
 {redirect_config}
 # Main server configuration
 server {{{ssl_config}
     server_name {self.config['DOMAIN']};
+    
+    # Document root - Frontend build files
+    root {www_path};
+    index index.html index.htm;
     
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -752,12 +757,12 @@ server {{{ssl_config}
     gzip_comp_level 6;
     gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
     
-    # Static files
-    location /static/ {{
-        alias /opt/vote-secret/frontend/build/static/;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }}
+    # Client settings
+    client_max_body_size 10M;
+    client_body_timeout 12;
+    client_header_timeout 12;
+    keepalive_timeout 15;
+    send_timeout 10;
     
     # API routes
     location /api/ {{
@@ -771,28 +776,34 @@ server {{{ssl_config}
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
         
+        # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
     }}
     
-    # Frontend routes
+    # Frontend - Single Page Application
     location / {{
         limit_req zone=general burst=20 nodelay;
-        
-        root /opt/vote-secret/frontend/build;
-        index index.html;
         try_files $uri $uri/ /index.html;
         
         # Cache static assets
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {{
+        location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {{
             expires 1y;
             add_header Cache-Control "public, immutable";
+            add_header X-Content-Type-Options "nosniff";
+        }}
+        
+        # Cache HTML with short expiration
+        location ~* \\.html$ {{
+            expires 5m;
+            add_header Cache-Control "public, no-cache";
         }}
     }}
     
-    # Health check
+    # Health check endpoint
     location /health {{
         access_log off;
         return 200 "healthy\\n";
@@ -801,6 +812,16 @@ server {{{ssl_config}
     
     # Monitoring (if enabled)
     {"location /metrics { proxy_pass http://127.0.0.1:" + self.config.get('METRICS_PORT', '9090') + "; allow 127.0.0.1; deny all; }" if self.config['MONITORING_ENABLED'] else ""}
+    
+    # Security: Block access to sensitive files
+    location ~ /\\.(ht|env|git) {{
+        deny all;
+        return 404;
+    }}
+    
+    # Logging
+    access_log /var/log/nginx/vote-secret-access.log;
+    error_log /var/log/nginx/vote-secret-error.log;
 }}
 """
 
