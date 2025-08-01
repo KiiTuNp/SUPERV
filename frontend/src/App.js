@@ -517,14 +517,15 @@ function App() {
         
         // Make API call to generate and download PDF
         const response = await fetch(`${API}/meetings/${meeting.id}/report`, {
-          method: 'POST',
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Accept': 'application/pdf',
           },
         });
         
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`Erreur ${response.status}: ${errorText}`);
         }
         
         // Get the PDF blob
