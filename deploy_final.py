@@ -297,6 +297,45 @@ class FinalDeployment:
             return False
         
         print_success("Build frontend terminé")
+        
+        # Copie du build vers /var/www pour le serveur web
+        app_name = self.config.get('SERVER_NAME', 'vote-secret')
+        www_path = f"/var/www/{app_name}"
+        build_path = frontend_path / 'build'
+        
+        if not build_path.exists():
+            print_error("Répertoire build/ non trouvé après la compilation")
+            return False
+        
+        # Créer le répertoire web et définir les permissions
+        success, _, _ = run_command(f"sudo mkdir -p {www_path}", "Création répertoire web")
+        if not success:
+            return False
+        
+        # Copier les fichiers buildés
+        success, _, _ = run_command(
+            f"sudo cp -r {build_path}/* {www_path}/",
+            "Copie build frontend vers /var/www"
+        )
+        if not success:
+            print_error("Échec copie des fichiers web")
+            return False
+        
+        # Définir les bonnes permissions pour le serveur web
+        success, _, _ = run_command(
+            f"sudo chown -R www-data:www-data {www_path}",
+            "Configuration permissions serveur web"
+        )
+        if not success:
+            print_warning("Impossible de définir les permissions www-data")
+        
+        # Permissions lecture pour tous
+        success, _, _ = run_command(
+            f"sudo chmod -R 755 {www_path}",
+            "Configuration permissions lecture"
+        )
+        
+        print_success(f"Frontend déployé dans {www_path}")
         return prompt_continue()
 
     def step_4_create_gunicorn_config(self) -> bool:
