@@ -1104,6 +1104,178 @@ function App() {
           </div>
         )}
 
+        {/* Modal de gestion des scrutateurs */}
+        {showScrutatorModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden bg-white">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="w-5 h-5" />
+                    Gestion des Scrutateurs
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowScrutatorModal(false)}
+                    variant="outline"
+                    size="sm"
+                    className="border-white text-white hover:bg-white hover:text-purple-600"
+                  >
+                    ×
+                  </Button>
+                </div>
+                <CardDescription className="text-purple-100 text-sm">
+                  🔐 Fonction sécurisée - Les scrutateurs auront accès à l'interface organisateur
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 overflow-y-auto max-h-[70vh]">
+                <div className="space-y-6">
+                  
+                  {/* Explication et mise en garde */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-amber-600" />
+                      Information importante sur les scrutateurs
+                    </h3>
+                    
+                    <div className="text-sm text-amber-700 space-y-2">
+                      <p><strong>Qu'est-ce qu'un scrutateur ?</strong></p>
+                      <p>Un scrutateur est une personne autorisée qui peut accéder à l'interface organisateur pour surveiller le déroulement du vote en temps réel.</p>
+                      
+                      <p className="mt-3"><strong>Privilèges des scrutateurs :</strong></p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li>Accès complet à l'interface organisateur</li>
+                        <li>Visualisation en temps réel des participants et votes</li>
+                        <li>Consultation des résultats des sondages</li>
+                        <li>Surveillance du processus de vote</li>
+                      </ul>
+                      
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                        <p className="text-red-800 font-semibold">⚠️ Mesures de sécurité importantes :</p>
+                        <ul className="list-disc list-inside space-y-1 ml-2 text-red-700">
+                          <li>Ne partagez le code scrutateur qu'avec des personnes de confiance</li>
+                          <li>Les scrutateurs peuvent voir toutes les données de la réunion</li>
+                          <li>Seuls les noms que vous ajoutez peuvent utiliser le code</li>
+                          <li>Le code scrutateur est différent du code de réunion</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Liste des scrutateurs (si déjà ajoutés) */}
+                  {scrutators.length > 0 && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        Scrutateurs autorisés ({scrutators.length})
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+                        {scrutators.map((scrutator, index) => (
+                          <div key={index} className="bg-white rounded-lg p-3 border border-green-100">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
+                                {index + 1}
+                              </div>
+                              <span className="text-slate-700 font-medium">{scrutator.name || scrutator}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {scrutatorCode && (
+                        <div className="bg-white rounded-lg p-4 border border-green-100">
+                          <h4 className="font-semibold text-green-800 mb-2">Code scrutateur généré :</h4>
+                          <div className="flex items-center gap-3">
+                            <div className="font-mono text-lg font-bold text-green-600 bg-green-100 px-3 py-1 rounded-lg">
+                              {scrutatorCode}
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-green-300 text-green-600 hover:bg-green-100"
+                              onClick={() => navigator.clipboard.writeText(scrutatorCode)}
+                            >
+                              Copier
+                            </Button>
+                          </div>
+                          <p className="text-green-600 text-sm mt-2">
+                            ⚠️ Partagez ce code uniquement avec les personnes listées ci-dessus
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Ajouter des scrutateurs */}
+                  {!scrutatorCodeGenerated && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <UserPlus className="w-5 h-5 text-blue-600" />
+                        Ajouter des scrutateurs
+                      </h3>
+                      
+                      <div className="space-y-3">
+                        {scrutatorNames.map((name, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              value={name}
+                              onChange={(e) => updateScrutatorName(index, e.target.value)}
+                              placeholder={`Nom du scrutateur ${index + 1}`}
+                              className="input-modern"
+                            />
+                            {scrutatorNames.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeScrutatorName(index)}
+                                className="w-10 h-10 flex-shrink-0 border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                ×
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addScrutatorName}
+                          className="border-blue-300 hover:bg-blue-50 text-blue-600"
+                        >
+                          + Ajouter un autre scrutateur
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-200">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowScrutatorModal(false)}
+                    className="border-slate-300 hover:bg-slate-50"
+                  >
+                    {scrutatorCodeGenerated ? "Fermer" : "Annuler"}
+                  </Button>
+                  {!scrutatorCodeGenerated && (
+                    <Button 
+                      onClick={addScrutators}
+                      disabled={scrutatorNames.every(name => !name.trim())}
+                      className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Générer le code scrutateur
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Modal de génération de rapport avec résumé détaillé */}
         {showReportModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
