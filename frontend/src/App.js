@@ -918,6 +918,189 @@ function App() {
             </Card>
           </div>
         )}
+
+        {/* Modal de génération de rapport avec résumé détaillé */}
+        {showReportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden bg-white">
+              <CardHeader className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Résumé du Rapport Final
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowReportModal(false)}
+                    variant="outline"
+                    size="sm"
+                    className="border-white text-white hover:bg-white hover:text-red-600"
+                  >
+                    ×
+                  </Button>
+                </div>
+                <CardDescription className="text-red-100 text-sm">
+                  ⚠️ Action irréversible - Toutes les données seront supprimées après téléchargement
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 overflow-y-auto max-h-[70vh]">
+                {/* Résumé des données qui seront dans le rapport */}
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-blue-600" />
+                      Contenu du rapport PDF
+                    </h3>
+                    
+                    {/* Informations de la réunion */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white rounded-lg p-3 border border-blue-100">
+                        <h4 className="font-semibold text-slate-700 mb-2">Informations générales</h4>
+                        <ul className="text-sm text-slate-600 space-y-1">
+                          <li>• Titre: <strong>{meeting?.title}</strong></li>
+                          <li>• Code: <strong>{meeting?.meeting_code}</strong></li>
+                          <li>• Date: <strong>{new Date().toLocaleDateString('fr-FR')}</strong></li>
+                          <li>• Heure: <strong>{new Date().toLocaleTimeString('fr-FR')}</strong></li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3 border border-blue-100">
+                        <h4 className="font-semibold text-slate-700 mb-2">Statistiques</h4>
+                        <ul className="text-sm text-slate-600 space-y-1">
+                          <li>• Participants: <strong>{participants.filter(p => p.approval_status === 'approved').length} approuvés</strong></li>
+                          <li>• Sondages: <strong>{polls.length} total</strong></li>
+                          <li>• Votes: <strong>{polls.reduce((sum, poll) => sum + poll.options.reduce((voteSum, opt) => voteSum + opt.votes, 0), 0)} total</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Liste des participants approuvés */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-green-600" />
+                      Participants approuvés ({participants.filter(p => p.approval_status === 'approved').length})
+                    </h3>
+                    
+                    {participants.filter(p => p.approval_status === 'approved').length > 0 ? (
+                      <div className="bg-white rounded-lg p-3 border border-green-100">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {participants.filter(p => p.approval_status === 'approved').map((participant, index) => (
+                            <div key={participant.id} className="text-sm text-slate-600 flex items-center gap-2">
+                              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">
+                                {index + 1}
+                              </div>
+                              <span>{participant.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500 italic">Aucun participant approuvé</p>
+                    )}
+                  </div>
+
+                  {/* Liste des sondages */}
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                      <Vote className="w-5 h-5 text-purple-600" />
+                      Sondages et résultats ({polls.length})
+                    </h3>
+                    
+                    {polls.length > 0 ? (
+                      <div className="space-y-3">
+                        {polls.map((poll, index) => (
+                          <div key={poll.id} className="bg-white rounded-lg p-3 border border-purple-100">
+                            <div className="flex items-start gap-3">
+                              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xs flex-shrink-0">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-slate-700 mb-2">{poll.question}</h4>
+                                <div className="text-sm text-slate-600">
+                                  <p className="mb-1">Statut: <span className={`font-medium ${
+                                    poll.status === 'active' ? 'text-green-600' : 
+                                    poll.status === 'closed' ? 'text-blue-600' : 'text-slate-600'
+                                  }`}>{
+                                    poll.status === 'active' ? 'En cours' :
+                                    poll.status === 'closed' ? 'Fermé' : 'Brouillon'
+                                  }</span></p>
+                                  <div className="mt-2">
+                                    <p className="font-medium mb-1">Options et votes:</p>
+                                    {poll.options.map((option) => (
+                                      <div key={option.id} className="ml-2 text-xs text-slate-500">
+                                        • {option.text}: {option.votes} votes
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500 italic">Aucun sondage créé</p>
+                    )}
+                  </div>
+
+                  {/* Avertissement sur la suppression */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-600" />
+                      Que se passe-t-il après le téléchargement ?
+                    </h3>
+                    
+                    <div className="bg-white rounded-lg p-3 border border-red-100">
+                      <ul className="text-sm text-red-700 space-y-2">
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">1.</span>
+                          <span>Le rapport PDF sera automatiquement téléchargé sur votre appareil</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">2.</span>
+                          <span>Toutes les données de cette réunion seront <strong>définitivement supprimées</strong> de nos serveurs</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">3.</span>
+                          <span>Les participants ne pourront plus accéder aux résultats</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">4.</span>
+                          <span>Le code de réunion <strong>{meeting?.meeting_code}</strong> deviendra invalide</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">5.</span>
+                          <span>Cette action est <strong>irréversible</strong> - aucune récupération possible</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-200">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowReportModal(false)}
+                    className="border-slate-300 hover:bg-slate-50"
+                  >
+                    Annuler
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setShowReportModal(false);
+                      downloadReport();
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Confirmer et télécharger
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   };
