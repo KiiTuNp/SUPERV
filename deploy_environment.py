@@ -747,8 +747,37 @@ server {{{ssl_config}
 }}
 """
 
-    def _generate_systemd_service(self) -> str:
-        """Génère la configuration SystemD (pour environnements avec systemd)"""
+    def _generate_systemd_service_simple(self) -> str:
+        """Génère une configuration SystemD simplifiée pour VPS Ubuntu (recommandée)"""
+        # Utiliser l'utilisateur ubuntu par défaut ou celui spécifié
+        user = self.config.get('DEPLOY_USER', 'ubuntu')
+        app_dir = self.config.get('APP_DIR', '/home/ubuntu/vote-secret')
+        
+        return f"""[Unit]
+Description=Vote Secret v2.0 Backend Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User={user}
+WorkingDirectory={app_dir}/backend
+Environment=PATH={app_dir}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONPATH={app_dir}/backend
+ExecStart={app_dir}/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 --timeout 120 --keepalive 5 --max-requests 1000 server:app
+Restart=always
+RestartSec=3
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+"""
+
+    def _generate_systemd_service_advanced(self) -> str:
+        """Génère une configuration SystemD avancée (pour production sécurisée)"""
         return f"""[Unit]
 Description=Vote Secret v2.0 Backend Service
 After=network.target mongodb.service
@@ -787,6 +816,16 @@ SyslogIdentifier=vote-secret
 [Install]
 WantedBy=multi-user.target
 """
+
+    def _generate_systemd_service(self) -> str:
+        """Génère la configuration SystemD selon le mode de déploiement"""
+        # Mode simple par défaut pour VPS Ubuntu
+        deploy_mode = self.config.get('DEPLOY_MODE', 'simple')
+        
+        if deploy_mode == 'advanced':
+            return self._generate_systemd_service_advanced()
+        else:
+            return self._generate_systemd_service_simple()
 
     def _generate_supervisor_service(self) -> str:
         """Génère la configuration Supervisor (pour environnements conteneurisés)"""
