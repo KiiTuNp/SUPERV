@@ -2324,6 +2324,38 @@ function App() {
         // Refresh polls for both organizer and participants
         window.location.reload(); // Simple refresh for now
       }
+      
+      if (data.type === "meeting_closed") {
+        // Meeting has been closed - notify participants and redirect
+        if (currentView === "participant") {
+          console.log("Meeting closed notification received:", data);
+          setClosedMeetingInfo({
+            title: data.meeting_title,
+            organizerName: data.organizer_name,
+            reason: data.reason,
+            message: data.message
+          });
+          setMeetingClosed(true);
+          setRedirectCountdown(10);
+          
+          // Start countdown timer
+          const countdownInterval = setInterval(() => {
+            setRedirectCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                // Redirect to home page
+                setCurrentView("home");
+                setMeeting(null);
+                setParticipant(null);
+                setMeetingClosed(false);
+                setClosedMeetingInfo(null);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+      }
     };
     
     websocket.onerror = (error) => {
