@@ -1290,20 +1290,6 @@ function App() {
                       className="input-modern"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-3 text-slate-700">
-                      Résultats en temps réel
-                    </label>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Switch
-                        checked={showResultsRealTime}
-                        onCheckedChange={setShowResultsRealTime}
-                      />
-                      <label className="text-sm text-slate-600">
-                        {showResultsRealTime ? "Activé" : "Désactivé"}
-                      </label>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
