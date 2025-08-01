@@ -1993,6 +1993,48 @@ function App() {
         }
       }
       
+      if (data.type === "scrutator_join_request" || data.type === "scrutator_approved") {
+        // Refresh scrutator list for organizer
+        if (currentView === "organizer" && !isScrutator) {
+          window.location.reload(); // Simple refresh for now
+        }
+      }
+      
+      if (data.type === "report_generation_requested") {
+        // Afficher le modal de vote pour les scrutateurs
+        if (isScrutator) {
+          setReportVoteData({
+            requested_by: data.requested_by,
+            scrutator_count: data.scrutator_count,
+            majority_needed: data.majority_needed
+          });
+          setShowReportVoteModal(true);
+        }
+      }
+      
+      if (data.type === "scrutator_vote_submitted") {
+        // Mettre à jour les informations de vote en temps réel
+        console.log(`Vote de ${data.scrutator_name}: ${data.vote ? 'Oui' : 'Non'} (${data.votes_cast}/${data.total_scrutators})`);
+      }
+      
+      if (data.type === "report_generation_approved") {
+        // La génération a été approuvée - permettre le téléchargement
+        setReportGenerationInProgress(false);
+        if (!isScrutator) {
+          alert(`✅ Génération du rapport approuvée par les scrutateurs !\n\n${data.yes_votes} votes positifs sur ${data.majority_needed} requis.`);
+          // Déclencher automatiquement le téléchargement
+          downloadReportDirect();
+        }
+      }
+      
+      if (data.type === "report_generation_rejected") {
+        // La génération a été rejetée
+        setReportGenerationInProgress(false);
+        if (!isScrutator) {
+          alert(`❌ Génération du rapport rejetée par les scrutateurs.\n\n${data.no_votes} votes négatifs sur ${data.majority_needed} requis.`);
+        }
+      }
+      
       if (data.type === "poll_started" || data.type === "poll_closed" || data.type === "vote_submitted") {
         // Refresh polls for both organizer and participants
         window.location.reload(); // Simple refresh for now
