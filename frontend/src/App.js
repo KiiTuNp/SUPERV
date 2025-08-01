@@ -2622,30 +2622,62 @@ function App() {
               <div>
                 <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   <BarChart3 className="w-6 h-6 text-indigo-600" />
-                  Garanties de légitimité
+                  Garanties techniques de sécurité et légitimité
                 </h3>
                 <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-indigo-800 mb-3">Technique</h4>
+                      <h4 className="font-semibold text-indigo-800 mb-3">Protections techniques</h4>
                       <ul className="space-y-1 text-sm text-indigo-700">
-                        <li>• Codes de réunion uniques et sécurisés</li>
-                        <li>• Validation d'identité par l'organisateur</li>
-                        <li>• Système anti-fraude intégré</li>
-                        <li>• Horodatage des actions</li>
-                        <li>• Architecture résistante aux pannes</li>
+                        <li>• <strong>Codes de réunion cryptographiques</strong> uniques (UUID)</li>
+                        <li>• <strong>Immutabilité des sondages</strong> : aucune modification possible après création</li>
+                        <li>• <strong>Votes définitifs</strong> : impossible de changer son vote une fois émis</li>
+                        <li>• <strong>Horodatage cryptographique</strong> de toutes les actions</li>
+                        <li>• <strong>Architecture anti-fraude</strong> intégrée</li>
+                        <li>• <strong>Résistance aux pannes</strong> et attaques</li>
+                        <li>• <strong>Chiffrement des données</strong> en transit et au repos</li>
                       </ul>
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold text-indigo-800 mb-3">Procédurale</h4>
+                      <h4 className="font-semibold text-indigo-800 mb-3">Garanties procédurales</h4>
                       <ul className="space-y-1 text-sm text-indigo-700">
-                        <li>• Scrutateurs indépendants</li>
-                        <li>• Validation par majorité qualifiée</li>
-                        <li>• Traçabilité des décisions importantes</li>
-                        <li>• Rapport PDF inaltérable</li>
-                        <li>• Processus transparent pour tous</li>
+                        <li>• <strong>Validation humaine</strong> : approbation manuelle des participants</li>
+                        <li>• <strong>Scrutateurs indépendants</strong> avec codes d'accès séparés</li>
+                        <li>• <strong>Majorité qualifiée</strong> pour toute décision critique</li>
+                        <li>• <strong>Traçabilité complète</strong> des décisions importantes</li>
+                        <li>• <strong>Rapport PDF inaltérable</strong> avec signature numérique</li>
+                        <li>• <strong>Processus transparent</strong> pour tous les participants</li>
+                        <li>• <strong>Séparation des pouvoirs</strong> organisateur/scrutateurs</li>
                       </ul>
+                    </div>
+                  </div>
+                  
+                  {/* Section additionnelle sur les garanties d'intégrité */}
+                  <div className="mt-6 p-4 bg-white border border-indigo-100 rounded-lg">
+                    <h5 className="font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+                      <Lock className="w-4 h-4" />
+                      Garanties d'intégrité du processus électoral
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-indigo-700">
+                      <div>
+                        <strong>Avant le vote :</strong><br/>
+                        • Sondages figés définitivement<br/>
+                        • Participants validés manuellement<br/>
+                        • Scrutateurs approuvés individuellement
+                      </div>
+                      <div>
+                        <strong>Pendant le vote :</strong><br/>
+                        • Anonymisation instantanée<br/>
+                        • Impossibilité de modification<br/>
+                        • Surveillance temps réel possible
+                      </div>
+                      <div>
+                        <strong>Après le vote :</strong><br/>
+                        • Résultats mathématiquement vérifiables<br/>
+                        • Suppression cryptographique totale<br/>
+                        • Rapport officiel horodaté
+                      </div>
                     </div>
                   </div>
                 </div>
