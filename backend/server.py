@@ -698,6 +698,41 @@ async def get_meeting_polls(meeting_id: str):
     polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
     return [Poll(**poll) for poll in polls]
 
+@api_router.get("/meetings/{meeting_id}/polls/participant")
+async def get_meeting_polls_for_participant(meeting_id: str):
+    """Get polls for participants - hide detailed results for active polls"""
+    polls = await db.polls.find({"meeting_id": meeting_id}).to_list(1000)
+    
+    participant_polls = []
+    for poll_data in polls:
+        poll = Poll(**poll_data)
+        
+        # Si le sondage n'est pas fermé, masquer les résultats détaillés
+        if poll.status != PollStatus.CLOSED:
+            # Calculer seulement le nombre total de votes
+            total_votes = sum(opt.votes for opt in poll.options)
+            
+            # Masquer les détails des votes pour chaque option
+            masked_options = []
+            for option in poll.options:
+                masked_option = option.dict()
+                masked_option["votes"] = 0  # Masquer le nombre de votes par option
+                masked_options.append(PollOption(**masked_option))
+            
+            # Créer une version masquée du poll
+            masked_poll = poll.dict()
+            masked_poll["options"] = masked_options
+            masked_poll["total_votes_count"] = total_votes  # Ajouter le total seulement
+            
+            participant_polls.append(masked_poll)
+        else:
+            # Sondage fermé - afficher tous les résultats
+            poll_dict = poll.dict()
+            poll_dict["total_votes_count"] = sum(opt.votes for opt in poll.options)
+            participant_polls.append(poll_dict)
+    
+    return participant_polls
+
 # Voting endpoints
 @api_router.post("/votes")
 async def submit_vote(vote_data: VoteCreate):
