@@ -59,34 +59,44 @@ class MasterDeployment:
     
     def __init__(self):
         self.project_root = Path(__file__).parent
+        self.state_file = self.project_root / '.deployment_state.json'
         self.deployment_scripts = [
             {
+                'id': 'prerequisites',
                 'script': 'deploy.py',
                 'name': 'Installation Prérequis Système',
                 'description': 'Installation Python, Node.js, MongoDB et prérequis système',
-                'required': True
+                'required': True,
+                'dependencies': []
             },
             {
+                'id': 'environment',
                 'script': 'deploy_environment.py', 
                 'name': 'Configuration Environnement',
                 'description': 'Configuration des variables d\'environnement et paramètres',
-                'required': True
+                'required': True,
+                'dependencies': []
             },
             {
+                'id': 'nginx',
                 'script': 'deploy_nginx.py',
                 'name': 'Configuration Serveur Web',
                 'description': 'Installation et configuration Nginx avec SSL',
-                'required': True
+                'required': True,
+                'dependencies': ['prerequisites', 'environment']
             },
             {
+                'id': 'final',
                 'script': 'deploy_final.py',
                 'name': 'Déploiement Final',
                 'description': 'Services systemd et mise en production',
-                'required': True
+                'required': True,
+                'dependencies': ['prerequisites', 'environment', 'nginx']
             }
         ]
         self.completed_steps = []
         self.start_time = time.time()
+        self.deployment_state = self._load_deployment_state()
     
     def welcome(self):
         print_header("VOTE SECRET v2.0 - DÉPLOIEMENT PRODUCTION MAÎTRE")
