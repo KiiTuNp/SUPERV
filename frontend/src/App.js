@@ -26,6 +26,7 @@ function App() {
   const [redirectCountdown, setRedirectCountdown] = useState(10);
   const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
   const [scrutatorName, setScrutatorName] = useState('');  // Nom du scrutateur connecté
+  const [showInfoModal, setShowInfoModal] = useState(false);  // Modal d'information sur le système
 
   // Report generation voting states
   const [showReportVoteModal, setShowReportVoteModal] = useState(false);
