@@ -838,29 +838,30 @@ server {{{ssl_config}
 """
 
     def _generate_systemd_service_simple(self) -> str:
-        """Génère une configuration SystemD simplifiée pour VPS Ubuntu (recommandée)"""
-        # Utiliser l'utilisateur ubuntu par défaut ou celui spécifié
+        """Génère une configuration SystemD simple avec Uvicorn"""
         user = self.config.get('DEPLOY_USER', 'ubuntu')
-        app_dir = self.config.get('APP_DIR', '/home/ubuntu/vote-secret')
+        deployment_path = self.config.get('DEPLOYMENT_PATH', f'/home/{user}/vote-secret')
         
         return f"""[Unit]
-Description=Vote Secret v2.0 Backend Service
-After=network.target
+Description=Vote Secret v2.0 Backend Service (Uvicorn)
+After=network.target mongod.service
 Wants=network.target
 
 [Service]
 Type=simple
 User={user}
-WorkingDirectory={app_dir}/backend
-Environment=PATH={app_dir}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-Environment=PYTHONPATH={app_dir}/backend
-ExecStart={app_dir}/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 --timeout 120 --keepalive 5 --max-requests 1000 server:app
+Group={user}
+WorkingDirectory={deployment_path}/backend
+Environment=PATH={deployment_path}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONPATH={deployment_path}/backend
+ExecStart={deployment_path}/venv/bin/uvicorn server:app --host 127.0.0.1 --port 8001 --log-level info
 Restart=always
 RestartSec=3
 
 # Logs
 StandardOutput=journal
 StandardError=journal
+SyslogIdentifier=vote-secret
 
 [Install]
 WantedBy=multi-user.target
