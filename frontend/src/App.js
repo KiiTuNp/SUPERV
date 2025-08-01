@@ -718,331 +718,205 @@ function App() {
             </Card>
           </div>
         </div>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {participants.map((participant) => (
-                      <div key={participant.id} className="glass-card p-4 border border-blue-200 hover:border-blue-300 transition-colors">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                              {participant.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-800">{participant.name}</p>
-                              <p className="text-sm text-slate-500">
-                                Rejoint le {new Date(participant.joined_at).toLocaleTimeString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {participant.approval_status === "pending" && (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => approveParticipant(participant.id, true)}
-                                  className="btn-gradient-success"
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Approuver
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  onClick={() => approveParticipant(participant.id, false)}
-                                  className="border-blue-300 hover:bg-blue-50"
-                                >
-                                  Rejeter
-                                </Button>
-                              </>
-                            )}
-                            {participant.approval_status === "approved" && (
-                              <Badge className="status-approved">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Approuvé
-                              </Badge>
-                            )}
-                            {participant.approval_status === "rejected" && (
-                              <Badge className="status-rejected">Rejeté</Badge>
-                            )}
-                          </div>
+        {/* Modal de gestion des participants */}
+        {showParticipantsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Gestion des Participants ({participants.length})
+                  </CardTitle>
+                  <Button
+                    onClick={() => setShowParticipantsModal(false)}
+                    variant="outline"
+                    size="sm"
+                    className="border-white text-white hover:bg-white hover:text-blue-600"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 overflow-y-auto max-h-96">
+                <div className="space-y-4">
+                  {participants.map((participant) => (
+                    <div key={participant.id} className="flex items-center justify-between p-4 border border-blue-200 rounded-lg bg-white">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                          {participant.name.charAt(0).toUpperCase()}
                         </div>
-                      </div>
-                    ))}
-                    {participants.length === 0 && (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <UserPlus className="w-8 h-8 text-white" />
-                        </div>
-                        <p className="text-slate-500 text-lg">Aucun participant n'a encore rejoint la réunion</p>
-                        <p className="text-slate-400 text-sm mt-2">Partagez le code : <span className="font-mono font-bold text-blue-600">{meeting?.meeting_code}</span></p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="polls">
-              <div className="space-y-6">
-                {polls.map((poll) => (
-                  <Card key={poll.id} className="glass-card border-0 shadow-lg">
-                    <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <CardTitle className="text-lg">{poll.question}</CardTitle>
-                        <div className="flex items-center gap-2">
-                          {poll.status === "draft" && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => startPoll(poll.id)}
-                              className="btn-gradient-success"
-                            >
-                              <Play className="w-4 h-4 mr-1" />
-                              Lancer
-                            </Button>
-                          )}
-                          {poll.status === "active" && (
-                            <>
-                              <Badge className="bg-white bg-opacity-20 text-white border-white">
-                                <Clock className="w-3 h-3 mr-1" />
-                                En cours
-                              </Badge>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => closePoll(poll.id)}
-                                className="border-white text-white hover:bg-white hover:text-blue-600 transition-colors"
-                              >
-                                <Square className="w-4 h-4 mr-1" />
-                                Fermer
-                              </Button>
-                            </>
-                          )}
-                          {poll.status === "closed" && (
-                            <Badge className="bg-white bg-opacity-20 text-white">Fermé</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {poll.options.map((option) => {
-                          const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-                          const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
-                          
-                          return (
-                            <div key={option.id} className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="font-medium">{option.text}</span>
-                                <span className="font-bold text-slate-600">
-                                  {option.votes} votes ({percentage.toFixed(1)}%)
-                                </span>
-                              </div>
-                              <Progress value={percentage} className="h-3 progress-animated" />
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {poll.timer_duration && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                          <p className="text-sm text-blue-700 flex items-center gap-2">
-                            <Timer className="w-4 h-4" />
-                            Durée du minuteur: {poll.timer_duration} secondes
+                        <div>
+                          <p className="font-semibold text-slate-800">{participant.name}</p>
+                          <p className="text-sm text-slate-500">
+                            Rejoint le {new Date(participant.joined_at).toLocaleTimeString()}
                           </p>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-                {polls.length === 0 && (
-                  <Card className="glass-card border-0 shadow-lg">
-                    <CardContent className="text-center py-12">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Vote className="w-8 h-8 text-white" />
                       </div>
-                      <p className="text-slate-500 text-lg">Aucun sondage créé pour le moment</p>
-                      <p className="text-slate-400 text-sm mt-2">Créez votre premier sondage dans l'onglet "Créer"</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
+                      <div className="flex items-center gap-2">
+                        {participant.approval_status === "pending" && (
+                          <>
+                            <Button 
+                              size="sm" 
+                              onClick={() => approveParticipant(participant.id, true)}
+                              className="btn-gradient-success"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approuver
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => approveParticipant(participant.id, false)}
+                              className="border-blue-300 hover:bg-blue-50"
+                            >
+                              Rejeter
+                            </Button>
+                          </>
+                        )}
+                        {participant.approval_status === "approved" && (
+                          <Badge className="status-approved">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Approuvé
+                          </Badge>
+                        )}
+                        {participant.approval_status === "rejected" && (
+                          <Badge className="status-rejected">Rejeté</Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {participants.length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <UserPlus className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <p className="text-slate-500 text-lg">Aucun participant pour le moment</p>
+                      <p className="text-slate-400 text-sm mt-2">Partagez le code : <span className="font-mono font-bold text-blue-600">{meeting?.meeting_code}</span></p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-            <TabsContent value="create-poll">
-              <Card className="glass-card border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
+        {/* Modal de création de sondage */}
+        {showCreatePollModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5" />
                     Créer un Nouveau Sondage
                   </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
+                  <Button
+                    onClick={() => setShowCreatePollModal(false)}
+                    variant="outline"
+                    size="sm"
+                    className="border-white text-white hover:bg-white hover:text-blue-600"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold mb-3 text-slate-700">Question du sondage</label>
+                  <Input
+                    value={newPollQuestion}
+                    onChange={(e) => setNewPollQuestion(e.target.value)}
+                    placeholder="ex: Approuvez-vous cette proposition ?"
+                    className="h-12 input-modern"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold mb-3 text-slate-700">Options de réponse</label>
+                  <div className="space-y-3">
+                    {newPollOptions.map((option, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={option}
+                          onChange={(e) => updatePollOption(index, e.target.value)}
+                          placeholder={`Option ${index + 1}`}
+                          className="input-modern"
+                        />
+                        {newPollOptions.length > 2 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removePollOption(index)}
+                            className="w-10 h-10 flex-shrink-0"
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addPollOption}
+                      className="border-blue-300 hover:bg-blue-50"
+                    >
+                      + Ajouter une option
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-3 text-slate-700">Question du sondage</label>
+                    <label className="block text-sm font-semibold mb-3 text-slate-700">
+                      Minuteur (optionnel)
+                    </label>
                     <Input
-                      value={newPollQuestion}
-                      onChange={(e) => setNewPollQuestion(e.target.value)}
-                      placeholder="ex: Approuvez-vous cette proposition ?"
-                      className="h-12 input-modern"
+                      type="number"
+                      value={timerDuration}
+                      onChange={(e) => setTimerDuration(e.target.value)}
+                      placeholder="Durée en secondes"
+                      className="input-modern"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-semibold mb-3 text-slate-700">Options de réponse</label>
-                    <div className="space-y-3">
-                      {newPollOptions.map((option, index) => (
-                        <div key={index} className="flex gap-2">
-                          <Input
-                            value={option}
-                            onChange={(e) => updatePollOption(index, e.target.value)}
-                            placeholder={`Option ${index + 1}`}
-                            className="input-modern"
-                          />
-                          {newPollOptions.length > 2 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removePollOption(index)}
-                              className="w-10 h-10 flex-shrink-0"
-                            >
-                              ×
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addPollOption}
-                        className="border-blue-300 hover:bg-blue-50"
-                      >
-                        + Ajouter une option
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold mb-3 text-slate-700">
-                        Minuteur (optionnel, en secondes)
-                      </label>
-                      <Input
-                        type="number"
-                        value={timerDuration}
-                        onChange={(e) => setTimerDuration(e.target.value)}
-                        placeholder="ex: 60"
-                        className="input-modern"
+                    <label className="block text-sm font-semibold mb-3 text-slate-700">
+                      Résultats en temps réel
+                    </label>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Switch
+                        checked={showResultsRealTime}
+                        onCheckedChange={setShowResultsRealTime}
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold mb-3 text-slate-700">
-                        Affichage des résultats
+                      <label className="text-sm text-slate-600">
+                        {showResultsRealTime ? "Activé" : "Désactivé"}
                       </label>
-                      <div className="flex items-center space-x-3 h-10">
-                        <Switch
-                          checked={showResultsRealTime}
-                          onCheckedChange={setShowResultsRealTime}
-                        />
-                        <span className="text-sm text-slate-600">
-                          {showResultsRealTime ? "Temps réel pour participants" : "Masqués pour participants"}
-                        </span>
-                      </div>
                     </div>
                   </div>
+                </div>
 
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowCreatePollModal(false)}
+                  >
+                    Annuler
+                  </Button>
                   <Button 
                     onClick={createPoll}
                     disabled={!newPollQuestion || newPollOptions.some(opt => !opt.trim())}
-                    className="w-full h-12 btn-gradient-primary"
+                    className="btn-gradient-primary"
                   >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Créer le Sondage
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Créer le sondage
                   </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="report">
-              <Card className="glass-card border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-t-xl">
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Rapport Final de la Réunion
-                  </CardTitle>
-                  <CardDescription className="text-red-100">
-                    Téléchargez le rapport PDF contenant tous les résultats. 
-                    <strong> Attention: Cette action supprimera définitivement toutes les données de la réunion.</strong>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="glass-card bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-6 rounded-xl">
-                    <h3 className="font-bold text-yellow-800 mb-3 flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5" />
-                      Important
-                    </h3>
-                    <ul className="text-sm text-yellow-700 space-y-2">
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-yellow-600 rounded-full mt-2 flex-shrink-0"></span>
-                        Le rapport PDF contiendra la liste des participants approuvés
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-yellow-600 rounded-full mt-2 flex-shrink-0"></span>
-                        Tous les résultats de sondages avec votes et pourcentages
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-yellow-600 rounded-full mt-2 flex-shrink-0"></span>
-                        Une fois téléchargé, toutes les données seront supprimées
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-yellow-600 rounded-full mt-2 flex-shrink-0"></span>
-                        Cette action est irréversible
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="glass-card bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 p-6 rounded-xl">
-                    <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5" />
-                      Résumé de la Réunion
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-700">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {participants.filter(p => p.approval_status === 'approved').length}
-                        </div>
-                        <div>Participants approuvés</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{polls.length}</div>
-                        <div>Sondages créés</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {polls.filter(p => p.status === 'closed').length}
-                        </div>
-                        <div>Sondages fermés</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button 
-                    onClick={downloadReport}
-                    className="w-full h-14 btn-gradient-danger text-lg font-bold"
-                  >
-                    <Download className="w-6 h-6 mr-2" />
-                    Télécharger le Rapport Final et Terminer la Réunion
-                  </Button>
-
-                  <p className="text-xs text-slate-500 text-center">
-                    En cliquant sur ce bouton, vous acceptez la suppression définitive de toutes les données de cette réunion
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     );
   };
