@@ -744,6 +744,7 @@ server {{{ssl_config}
 """
 
     def _generate_systemd_service(self) -> str:
+        """Génère la configuration SystemD (pour environnements avec systemd)"""
         return f"""[Unit]
 Description=Vote Secret v2.0 Backend Service
 After=network.target mongodb.service
@@ -781,6 +782,29 @@ SyslogIdentifier=vote-secret
 
 [Install]
 WantedBy=multi-user.target
+"""
+
+    def _generate_supervisor_service(self) -> str:
+        """Génère la configuration Supervisor (pour environnements conteneurisés)"""
+        return f"""[program:vote-secret]
+command=/opt/vote-secret/venv/bin/gunicorn --config /opt/vote-secret/config/gunicorn.conf.py server:app
+directory=/opt/vote-secret/backend
+user=vote-secret
+group=vote-secret
+environment=PATH="/opt/vote-secret/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",PYTHONPATH="/opt/vote-secret/backend"
+autostart=true
+autorestart=true
+startretries=3
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/vote-secret.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3
+stderr_logfile=/var/log/supervisor/vote-secret-error.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=3
+killasgroup=true
+stopasgroup=true
+priority=999
 """
 
     def _generate_gunicorn_config(self) -> str:
