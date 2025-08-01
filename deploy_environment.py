@@ -512,8 +512,115 @@ REACT_APP_MAX_POLLS={self.config['MAX_POLLS']}
 """
 
     def _generate_nginx_config(self) -> str:
+        """Génère la configuration Nginx avec option HTTP temporaire"""
+        return self._generate_nginx_config_http()
+    
+    def _generate_nginx_config_http(self) -> str:
+        """Génère une configuration HTTP temporaire (avant SSL)"""
+        return f"""# Vote Secret v2.0 - Configuration Nginx Temporaire (HTTP)
+# Généré automatiquement - Configuration initiale avant SSL
+
+# Rate limiting
+limit_req_zone $binary_remote_addr zone=api:10m rate={self.config['RATE_LIMIT_REQUESTS']}r/m;
+limit_req_zone $binary_remote_addr zone=general:10m rate=100r/m;
+
+# Main server configuration (HTTP only)
+server {{
+    listen 80;
+    server_name {self.config['DOMAIN']};
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:;" always;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+    
+    # Let's Encrypt challenge (nécessaire pour certbot)
+    location /.well-known/acme-challenge/ {{
+        root /var/www/html;
+    }}
+    
+    # Static files
+    location /static/ {{
+        alias /opt/vote-secret/frontend/build/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }}
+    
+    # API routes
+    location /api/ {{
+        limit_req zone=api burst={self.config['RATE_LIMIT_BURST']} nodelay;
+        
+        proxy_pass http://127.0.0.1:8001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }}
+    
+    # Frontend routes
+    location / {{
+        limit_req zone=general burst=20 nodelay;
+        
+        root /opt/vote-secret/frontend/build;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+        
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {{
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }}
+    }}
+    
+    # Health check
+    location /health {{
+        access_log off;
+        return 200 "healthy\\n";
+        add_header Content-Type text/plain;
+    }}
+}}
+"""
+    
+    def _generate_nginx_config_ssl(self) -> str:
+        """Génère la configuration finale avec SSL"""
         ssl_config = ""
+        redirect_config = ""
+        
         if self.config['SSL_MODE'] == 'letsencrypt':
+            redirect_config = f"""
+# Redirect HTTP to HTTPS
+server {{
+    listen 80;
+    server_name {self.config['DOMAIN']};
+    
+    # Let's Encrypt challenge (toujours accessible en HTTP)
+    location /.well-known/acme-challenge/ {{
+        root /var/www/html;
+    }}
+    
+    # Redirect all other traffic to HTTPS
+    location / {{
+        return 301 https://$server_name$request_uri;
+    }}
+}}
+"""
             ssl_config = f"""
     # SSL Configuration (Let's Encrypt)
     listen 443 ssl http2;
@@ -531,6 +638,14 @@ REACT_APP_MAX_POLLS={self.config['MAX_POLLS']}
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 """
         elif self.config['SSL_MODE'] == 'existing':
+            redirect_config = f"""
+# Redirect HTTP to HTTPS
+server {{
+    listen 80;
+    server_name {self.config['DOMAIN']};
+    return 301 https://$server_name$request_uri;
+}}
+"""
             ssl_config = f"""
     # SSL Configuration (Certificats existants)
     listen 443 ssl http2;
@@ -548,24 +663,32 @@ REACT_APP_MAX_POLLS={self.config['MAX_POLLS']}
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 """
 
-        return f"""# Vote Secret v2.0 - Configuration Nginx Production
+        return f"""# Vote Secret v2.0 - Configuration Nginx Production avec SSL
 # Généré automatiquement
 
 # Rate limiting
 limit_req_zone $binary_remote_addr zone=api:10m rate={self.config['RATE_LIMIT_REQUESTS']}r/m;
 limit_req_zone $binary_remote_addr zone=general:10m rate=100r/m;
-
-# Redirect HTTP to HTTPS
-server {{
-    listen 80;
-    server_name {self.config['DOMAIN']};
-    return 301 https://$server_name$request_uri;
-}}
-
+{redirect_config}
 # Main server configuration
 server {{
     listen 80;{ssl_config}
     server_name {self.config['DOMAIN']};
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:;" always;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
     
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
