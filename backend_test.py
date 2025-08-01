@@ -1723,8 +1723,7 @@ class VoteSecretTester:
         try:
             poll_data = {
                 "question": "Êtes-vous d'accord avec la proposition ?",
-                "options": ["Oui", "Non"],
-                "show_results_real_time": True
+                "options": ["Oui", "Non"]
             }
             
             meeting_id = scenario_data['meeting']['id']
