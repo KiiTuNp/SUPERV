@@ -267,7 +267,7 @@ class VoteSecretTester:
             return False
 
     def test_create_poll(self):
-        """Test poll creation"""
+        """Test poll creation WITHOUT show_results_real_time field (NEW MODIFICATION)"""
         if 'meeting' not in self.test_data:
             self.log_result("Create Poll", False, "No meeting data available")
             return False
@@ -276,8 +276,8 @@ class VoteSecretTester:
             poll_data = {
                 "question": "Êtes-vous favorable à l'augmentation du budget de 15% ?",
                 "options": ["Oui, je suis favorable", "Non, je m'oppose", "Je m'abstiens"],
-                "timer_duration": 300,
-                "show_results_real_time": True
+                "timer_duration": 300
+                # NOTE: show_results_real_time field removed as per new modifications
             }
             
             meeting_id = self.test_data['meeting']['id']
