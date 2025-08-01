@@ -816,13 +816,11 @@ class VoteSecretTester:
             polls_data = [
                 {
                     "question": "Approuvez-vous le budget 2025 ?",
-                    "options": ["Oui", "Non", "Abstention"],
-                    "show_results_real_time": True
+                    "options": ["Oui", "Non", "Abstention"]
                 },
                 {
                     "question": "Validez-vous les nouveaux statuts ?",
-                    "options": ["Approuvé", "Rejeté", "Report"],
-                    "show_results_real_time": True
+                    "options": ["Approuvé", "Rejeté", "Report"]
                 }
             ]
             
