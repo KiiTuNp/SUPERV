@@ -537,12 +537,12 @@ function App() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 p-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Header avec code de réunion mis en évidence et participants */}
-          <Card className="glass-card border-0 shadow-lg mb-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <div className="w-full">
+          {/* Header pleine largeur */}
+          <Card className="glass-card border-0 shadow-lg mb-8 rounded-none">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                     <Vote className="w-6 h-6" />
@@ -573,29 +573,41 @@ function App() {
                   </div>
                 </div>
 
-                {/* Participants avec bouton */}
+                {/* Participants avec statistiques détaillées */}
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="text-blue-100 text-sm font-medium">Participants</p>
-                    <p className="text-white text-xl font-bold">{participants.length}</p>
+                    <div className="text-white">
+                      <span className="text-xl font-bold">{participants.filter(p => p.approval_status === 'approved').length}</span>
+                      <span className="text-blue-200 text-sm"> approuvés</span>
+                      {participants.filter(p => p.approval_status === 'pending').length > 0 && (
+                        <>
+                          <br />
+                          <span className="text-lg font-semibold text-yellow-300">{participants.filter(p => p.approval_status === 'pending').length}</span>
+                          <span className="text-yellow-200 text-sm"> en attente</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <Button
                     onClick={() => setShowParticipantsModal(true)}
                     className="bg-white bg-opacity-20 hover:bg-white hover:text-blue-600 border border-white border-opacity-30"
                   >
                     <Users className="w-4 h-4 mr-2" />
-                    Gérer
+                    Gérer les participants
                   </Button>
                 </div>
               </div>
             </CardHeader>
           </Card>
+        </div>
 
-          {/* Section principale - Sondages */}
+        <div className="max-w-6xl mx-auto p-4">
+          {/* Section principale - Interface Organisateur */}
           <div className="space-y-6">
             {/* En-tête des sondages avec bouton créer */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold text-slate-800">Sondages de la réunion</h2>
+              <h2 className="text-2xl font-bold text-slate-800">Interface Organisateur</h2>
               <Button
                 onClick={() => setShowCreatePollModal(true)}
                 className="btn-gradient-primary"
@@ -718,7 +730,7 @@ function App() {
                 })}
               </div>
             ) : (
-              <Card className="glass-card border-0 shadow-lg">
+              <Card className="glass-card border-0 shadow-lg bg-white">
                 <CardContent className="text-center py-16">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Vote className="w-8 h-8 text-blue-600" />
