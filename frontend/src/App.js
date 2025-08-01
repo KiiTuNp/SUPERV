@@ -533,11 +533,11 @@ function App() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 bg-pattern-grid p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-grid p-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <Card className="glass-card-strong mb-8 border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-t-2xl">
+          <Card className="glass-card-strong mb-8 border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-xl">
               <div className="flex flex-col md:flex-row items-center justify-between">
                 <div className="flex items-center gap-4 mb-4 md:mb-0">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
@@ -592,7 +592,7 @@ function App() {
 
             <TabsContent value="participants">
               <Card className="glass-card border-0 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white rounded-t-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-xl">
                   <CardTitle className="flex items-center gap-2">
                     <Users className="w-5 h-5" />
                     Gestion des Participants
