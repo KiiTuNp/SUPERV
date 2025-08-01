@@ -472,7 +472,6 @@ function App() {
     const [newPollQuestion, setNewPollQuestion] = useState("");
     const [newPollOptions, setNewPollOptions] = useState(["", ""]);
     const [timerDuration, setTimerDuration] = useState("");
-    const [showResultsRealTime, setShowResultsRealTime] = useState(true);
     const [showCreatePollModal, setShowCreatePollModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
     const [showScrutatorModal, setShowScrutatorModal] = useState(false);
