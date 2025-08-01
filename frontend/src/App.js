@@ -556,16 +556,16 @@ function App() {
                 </div>
                 
                 {/* Code de réunion mis en évidence */}
-                <div className="bg-white bg-opacity-15 rounded-xl p-4 border border-white border-opacity-20">
-                  <p className="text-blue-100 text-sm font-medium mb-2">Code de réunion</p>
+                <div className="bg-gradient-to-r from-orange-400 to-purple-500 rounded-xl p-4 shadow-lg">
+                  <p className="text-white text-sm font-medium mb-2">Code de réunion</p>
                   <div className="flex items-center gap-3">
-                    <div className="meeting-code text-white text-2xl font-mono font-bold tracking-widest">
+                    <div className="meeting-code text-white text-2xl font-mono font-bold tracking-widest bg-black bg-opacity-20 px-3 py-1 rounded-lg">
                       {meeting?.meeting_code}
                     </div>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-white border-opacity-30 text-white hover:bg-white hover:text-blue-600"
+                      className="border-white border-opacity-50 text-white hover:bg-white hover:text-purple-600 transition-all"
                       onClick={() => navigator.clipboard.writeText(meeting?.meeting_code)}
                     >
                       Copier
