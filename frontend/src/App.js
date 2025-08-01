@@ -269,14 +269,26 @@ function App() {
                       <span className="font-medium">Générer le rapport</span>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => setCurrentView("create")} 
-                    variant="outline" 
-                    className="w-full h-12 border-2 border-blue-200 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 hover:text-white hover:border-transparent transition-all duration-300"
-                  >
-                    <Settings className="w-5 h-5 mr-2" />
-                    Accès Organisateur
-                  </Button>
+                  
+                  {/* Boutons d'action */}
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={() => setCurrentView("create")} 
+                      className="w-full h-12 btn-gradient-primary"
+                    >
+                      <Settings className="w-5 h-5 mr-2" />
+                      Créer une nouvelle réunion
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => setShowRecoveryModal(true)}
+                      variant="outline" 
+                      className="w-full h-12 border-2 border-slate-300 hover:bg-slate-50 hover:border-slate-400 transition-all duration-300"
+                    >
+                      <Lock className="w-5 h-5 mr-2" />
+                      Récupérer une réunion existante
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
