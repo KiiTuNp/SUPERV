@@ -723,8 +723,8 @@ function App() {
                         })}
                       </div>
                       {poll.timer_duration && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg border border-rose-200">
-                          <p className="text-sm text-rose-700 flex items-center gap-2">
+                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                          <p className="text-sm text-blue-700 flex items-center gap-2">
                             <Timer className="w-4 h-4" />
                             Durée du minuteur: {poll.timer_duration} secondes
                           </p>
