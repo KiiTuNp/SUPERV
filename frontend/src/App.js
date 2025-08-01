@@ -174,7 +174,7 @@ function App() {
               </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-black text-modern-heading gradient-text mb-4">
-              Vote Secret
+              <span className="bg-gradient-to-r from-purple-600 via-orange-500 to-purple-700 bg-clip-text text-transparent">SUPER</span> Vote Secret
             </h1>
             <p className="text-xl md:text-2xl text-modern-body max-w-3xl mx-auto mb-12">
               Système de vote anonyme moderne pour assemblées avec suppression automatique des données
