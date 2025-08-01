@@ -2022,7 +2022,22 @@ function App() {
             {polls.map((poll) => {
               const hasVoted = votedPolls.has(poll.id);
               const canVote = poll.status === "active" && !hasVoted;
-              const showResults = hasVoted || (poll.show_results_real_time && poll.status !== "draft");
+              const showResults = poll.status === "closed"; // Résultats seulement si sondage fermé
+              const totalVotes = poll.total_votes_count || 0;
+              
+              // Calculer le temps écoulé depuis le lancement
+              const getTimeElapsed = () => {
+                if (poll.timer_started_at) {
+                  const startTime = new Date(poll.timer_started_at);
+                  const now = new Date();
+                  const diffMs = now - startTime;
+                  const diffSec = Math.floor(diffMs / 1000);
+                  const minutes = Math.floor(diffSec / 60);
+                  const seconds = diffSec % 60;
+                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+                return "0:00";
+              };
               
               return (
                 <div key={poll.id} className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
@@ -2052,24 +2067,50 @@ function App() {
                         )}
                       </div>
                     </div>
+                    
+                    {/* Messages d'état pour les participants */}
                     {canVote && (
                       <p className="text-blue-100 font-medium mt-2">
-                        🔒 Votez pour voir les résultats
+                        🔒 Votez pour participer au sondage
                       </p>
                     )}
-                    {hasVoted && (
+                    
+                    {hasVoted && poll.status === "active" && (
+                      <div className="mt-3 bg-white bg-opacity-20 rounded-lg p-3">
+                        <p className="text-blue-100 font-medium mb-2">
+                          ✅ Vous avez voté - En attente de la fermeture du sondage
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            <span>{totalVotes} personne{totalVotes > 1 ? 's ont' : ' a'} voté</span>
+                          </div>
+                          {poll.timer_started_at && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              <span>Temps écoulé: {getTimeElapsed()}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {hasVoted && poll.status === "closed" && (
                       <p className="text-blue-100 font-medium mt-2">
-                        ✅ Vous avez voté - Résultats {poll.show_results_real_time ? "en temps réel" : "finaux"}
+                        ✅ Vous avez voté - Résultats disponibles
                       </p>
                     )}
+                    
                     {!canVote && !hasVoted && poll.status !== "active" && (
                       <p className="text-blue-100 mt-2">
                         {poll.status === "closed" ? "Sondage terminé" : "Sondage pas encore lancé"}
                       </p>
                     )}
                   </div>
+                  
                   <div className="p-6 bg-white">
                     {canVote ? (
+                      // Interface de vote
                       <div className="space-y-3">
                         {poll.options.map((option) => (
                           <Button
@@ -2088,11 +2129,12 @@ function App() {
                           <p className="text-sm text-blue-700 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
                             <span className="font-semibold">Vote secret:</span> 
-                            Les résultats {poll.show_results_real_time ? "s'affichent" : "ne s'affichent pas"} en temps réel
+                            Les résultats s'affichent une fois le sondage fermé
                           </p>
                         </div>
                       </div>
                     ) : showResults ? (
+                      // Affichage des résultats (seulement si sondage fermé)
                       <div className="space-y-4">
                         {poll.options.map((option) => {
                           const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
@@ -2110,23 +2152,60 @@ function App() {
                             </div>
                           );
                         })}
-                        {hasVoted && (
-                          <div className="mt-4 bg-blue-50 border border-blue-200 p-4 rounded-xl">
-                            <p className="text-sm text-blue-700 flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4" />
-                              <span className="font-semibold">Vote enregistré!</span> 
-                              Les résultats se mettent à jour automatiquement
-                            </p>
+                        
+                        <div className="mt-4 bg-green-50 border border-green-200 p-4 rounded-xl">
+                          <p className="text-sm text-green-700 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="font-semibold">Sondage terminé!</span> 
+                            Résultats finaux affichés ({totalVotes} vote{totalVotes > 1 ? 's' : ''} au total)
+                          </p>
+                        </div>
+                      </div>
+                    ) : hasVoted && poll.status === "active" ? (
+                      // Affichage pour les participants qui ont voté mais sondage pas encore fermé
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Clock className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2">Vote enregistré</h3>
+                        <p className="text-slate-600 mb-4">
+                          Les résultats s'afficheront une fois le sondage fermé par l'organisateur
+                        </p>
+                        
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-sm mx-auto">
+                          <div className="flex justify-between items-center text-sm text-blue-700">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              <span>Participants ayant voté</span>
+                            </div>
+                            <span className="font-bold">{totalVotes}</span>
                           </div>
-                        )}
+                          
+                          {poll.timer_started_at && (
+                            <div className="flex justify-between items-center text-sm text-blue-700 mt-2 pt-2 border-t border-blue-200">
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                <span>Temps écoulé</span>
+                              </div>
+                              <span className="font-bold font-mono">{getTimeElapsed()}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ) : (
+                      // Affichage par défaut pour les autres cas
                       <div className="text-center py-8">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Vote className="w-6 h-6 text-blue-600" />
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Vote className="w-8 h-8 text-slate-400" />
                         </div>
-                        <p className="text-slate-500">
-                          {poll.status === "draft" ? "Ce sondage n'est pas encore actif" : "Sondage fermé"}
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                          {poll.status === "closed" ? "Sondage terminé" : "Sondage à venir"}
+                        </h3>
+                        <p className="text-slate-600">
+                          {poll.status === "closed" ? 
+                            "Ce sondage est terminé." : 
+                            "Ce sondage n'a pas encore été lancé."
+                          }
                         </p>
                       </div>
                     )}
