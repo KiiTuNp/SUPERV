@@ -850,3 +850,129 @@ Based on successful 10-participant test:
 - ✅ No information leakage in error responses
 
 **Action Required:** None. Scrutator functionality is fully operational and production-ready. All requested features have been implemented and tested successfully.
+
+---
+
+## Advanced Scrutator Workflow Testing Results (NEW FEATURE - CRITICAL BUG FOUND)
+
+### Test Summary: ✅ WORKFLOW IMPLEMENTED BUT ❌ CRITICAL BUG PREVENTS COMPLETION
+
+**Date:** 2025-01-31  
+**Tester:** Testing Agent  
+**Feature:** Advanced Scrutator Workflow with Approval and Majority Voting  
+**Backend URL:** https://dffd1ffb-03ba-4c55-8b21-65220fce6f6a.preview.emergentagent.com/api
+
+### ✅ SUCCESSFULLY TESTED COMPONENTS (8/10)
+
+#### Core Advanced Scrutator Features
+- **Assembly Creation** ✅ - "Test Scrutateurs Approbation 2025" created successfully
+- **Add 3 Scrutators** ✅ - Jean Dupont, Marie Martin, Pierre Durand added with code SC334DE8
+- **Scrutator Connection with Approval Required** ✅ - Jean Dupont correctly receives "pending_approval" status
+- **Organizer Approval Process** ✅ - Jean Dupont successfully approved by organizer
+- **Approved Scrutator Access** ✅ - Jean Dupont can access interface after approval
+- **Majority Voting System** ✅ - 2/3 majority voting logic working correctly (Jean=YES, Marie=NO, Pierre=YES)
+- **Majority Rejection System** ✅ - 2/3 rejection logic working correctly
+- **Direct Generation (No Scrutators)** ✅ - PDF generation works when no scrutators present
+
+#### API Endpoints Verified
+- **POST /meetings/{meeting_id}/scrutators** ✅ - Add scrutators working
+- **GET /meetings/{meeting_id}/scrutators** ✅ - Get scrutators list working
+- **POST /scrutators/join** ✅ - Scrutator authentication with pending approval working
+- **POST /scrutators/{scrutator_id}/approve** ✅ - Organizer approval working
+- **POST /meetings/{meeting_id}/request-report** ✅ - Report request with scrutator approval working
+- **POST /meetings/{meeting_id}/scrutator-vote** ✅ - Majority voting system working
+
+### ❌ CRITICAL BUG FOUND (2/10 FAILED)
+
+#### 🐛 Backend Logic Error in PDF Generation After Approval
+- **PDF Generation After Approval** ❌ - HTTP 400: "La génération du rapport nécessite l'approbation des scrutateurs"
+- **PDF Generation Blocking After Rejection** ❌ - Wrong error message (same as above)
+
+#### 🔍 Root Cause Analysis
+**Location:** `/app/backend/server.py`
+- **Line 466:** Sets `report_generation_pending = False` after majority approval
+- **Line 974-979:** Checks if `report_generation_pending` is `False` and throws error
+
+**Issue Flow:**
+1. ✅ Scrutators vote and reach majority (2/3 approval)
+2. ✅ System correctly identifies majority and approves generation
+3. ✅ Sets `report_generation_pending = False` (line 466)
+4. ❌ PDF endpoint sees `False` flag and rejects request (line 974)
+5. ❌ User cannot generate PDF despite majority approval
+
+#### 💡 Required Fix
+```python
+# Line 466: Replace this:
+{"$set": {"report_generation_pending": False}}
+
+# With this:
+{"$set": {"report_generation_pending": False, "report_generation_approved": True}}
+
+# Line 974-979: Update logic to check for approval flag
+if not meeting.get("report_generation_approved", False):
+    # Check if process was initiated and majority reached
+    report_votes = meeting.get("report_votes", {})
+    if not report_votes:  # No voting process initiated
+        raise HTTPException(...)
+```
+
+### Performance Assessment ✅
+- **Response Times:** Excellent (avg: 0.011s)
+- **Voting Logic:** Accurate majority calculation (3//2)+1 = 2
+- **Approval Workflow:** Smooth pending → approved transition
+- **Data Integrity:** All scrutator data properly managed
+
+### Security Assessment ✅
+- **Approval Required:** Scrutators cannot access without organizer approval
+- **Majority Protection:** PDF generation properly protected by voting
+- **Authorization:** Only approved scrutators can vote
+- **Access Control:** Unauthorized names correctly rejected (403)
+
+### Production Readiness: ❌ BLOCKED BY CRITICAL BUG
+
+**Overall Status:** Advanced scrutator workflow is 80% functional but blocked by critical backend bug.
+
+**Critical Issues:** 1 (PDF generation after approval broken)  
+**Minor Issues:** None  
+**Recommendation:** **URGENT FIX REQUIRED** - The majority voting system works perfectly but users cannot complete the workflow due to the backend logic error.
+
+**Features Confirmed Working:**
+- ✅ Complete scrutator approval workflow (pending → approved)
+- ✅ Majority voting system (2/3 approval/rejection)
+- ✅ Proper authorization and security controls
+- ✅ All API endpoints functional
+- ✅ Direct generation when no scrutators present
+
+**Critical Blocker:**
+- ❌ PDF generation fails after majority approval due to flag logic error
+- ❌ Workflow cannot be completed by end users
+
+---
+
+## Agent Communication
+
+### Testing Agent → Main Agent  
+**Date:** 2025-01-31 (Advanced Scrutator Workflow Testing Complete)  
+**Message:** Advanced scrutator workflow testing completed with critical findings. The new approval and majority voting system is implemented and working correctly, but a critical backend bug prevents workflow completion.
+
+**ADVANCED SCRUTATOR WORKFLOW TEST RESULTS:**
+- ✅ **Assembly Creation:** "Test Scrutateurs Approbation 2025" created successfully
+- ✅ **Scrutator Addition:** 3 scrutators added with proper approval workflow
+- ✅ **Approval Process:** Jean Dupont correctly goes through pending → approved workflow
+- ✅ **Majority Voting:** 2/3 voting system working perfectly (Jean=YES, Marie=NO, Pierre=YES)
+- ✅ **Rejection System:** 2/3 rejection system working correctly
+- ✅ **All API Endpoints:** All new endpoints functional and secure
+
+**CRITICAL BUG DISCOVERED:**
+- ❌ **PDF Generation After Approval:** Backend logic error prevents PDF generation after majority approval
+- 🐛 **Root Cause:** Line 466 sets `report_generation_pending = False`, but line 974 checks for this flag and throws error
+- 🎯 **Impact:** HIGH - Users cannot complete the workflow despite majority approval
+
+**URGENT ACTION REQUIRED:** 
+1. Fix backend logic in `/app/backend/server.py` lines 466 and 974-979
+2. Add `report_generation_approved` flag when majority approves
+3. Update PDF endpoint to check approval flag instead of pending flag
+
+**WORKFLOW STATUS:** 80% functional - all components work except final PDF generation step.
+
+**Evidence:** Comprehensive testing shows voting system calculates majority correctly, all security controls work, but the final step fails due to flag logic error.
