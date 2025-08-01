@@ -561,7 +561,6 @@ function App() {
           setParticipants([]);
           setPolls([]);
           setParticipant(null);
-          setVotedPolls(new Set());
         }, 500);
         
       } catch (error) {
