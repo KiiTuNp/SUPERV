@@ -1219,8 +1219,8 @@ function App() {
     if (status === "pending") {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 bg-pattern-dots flex items-center justify-center p-4">
-          <Card className="glass-card-strong w-full max-w-md border-0 shadow-lg">
-            <CardContent className="text-center py-12">
+          <div className="glass-card-strong w-full max-w-md border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
+            <div className="text-center py-12 p-6">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Clock className="w-8 h-8 text-white" />
               </div>
@@ -1229,14 +1229,14 @@ function App() {
                 Votre demande de participation a été envoyée à l'organisateur.
                 Veuillez patienter pendant qu'il examine votre demande.
               </p>
-              <div className="glass-card p-4 bg-gradient-to-r from-blue-50 to-blue-100">
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                 <p className="text-sm text-slate-700">
                   <strong>Réunion:</strong> {meeting?.title}<br />
                   <strong>Participant:</strong> {participant?.name}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       );
     }
