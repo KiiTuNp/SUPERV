@@ -898,8 +898,20 @@ function App() {
               <div className="space-y-6">
                 {polls.map((poll) => {
                   const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-                  const winnerOption = poll.status === "closed" ? 
-                    poll.options.reduce((prev, current) => (prev.votes > current.votes) ? prev : current) : null;
+                  
+                  // Logique corrigée pour déterminer le gagnant (pas d'égalité autorisée)
+                  const winnerOption = poll.status === "closed" ? (() => {
+                    if (poll.options.length === 0) return null;
+                    
+                    // Trouver le score maximum
+                    const maxVotes = Math.max(...poll.options.map(opt => opt.votes));
+                    
+                    // Trouver toutes les options avec le score maximum
+                    const winnersWithMaxVotes = poll.options.filter(opt => opt.votes === maxVotes);
+                    
+                    // Retourner le gagnant seulement s'il n'y a pas d'égalité
+                    return winnersWithMaxVotes.length === 1 ? winnersWithMaxVotes[0] : null;
+                  })() : null;
                   
                   return (
                     <div key={poll.id} className="glass-card border-0 shadow-lg bg-white rounded-2xl overflow-hidden">
