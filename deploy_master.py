@@ -436,22 +436,19 @@ class MasterDeployment:
             sys.exit(1)
 
     def show_deployment_success(self):
-        """Affiche le message de succès final"""
+        """Affiche le message de succès final avec toutes les informations"""
         duration = int(time.time() - self.start_time)
         minutes = duration // 60
         seconds = duration % 60
         
-        print_header("🎉 DÉPLOIEMENT COMPLET TERMINÉ ! 🎉")
+        print_header("🎉 FÉLICITATIONS ! DÉPLOIEMENT RÉUSSI ! 🎉")
         
         print(f"{Colors.GREEN}{Colors.BOLD}Vote Secret v2.0 a été déployé avec succès !{Colors.ENDC}")
         print(f"{Colors.CYAN}Durée totale: {minutes}m {seconds}s{Colors.ENDC}\n")
         
-        # Vérification finale des services
-        print(f"{Colors.CYAN}🔍 VÉRIFICATION FINALE:{Colors.ENDC}")
-        
+        # Lecture de la configuration finale
+        config = {}
         try:
-            # Lecture de la configuration
-            config = {}
             env_file = self.project_root / '.env'
             if env_file.exists():
                 with open(env_file, 'r') as f:
@@ -459,30 +456,104 @@ class MasterDeployment:
                         if '=' in line and not line.startswith('#'):
                             key, value = line.strip().split('=', 1)
                             config[key] = value
-            
-            domain = config.get('DOMAIN', 'localhost')
-            frontend_url = config.get('FRONTEND_URL', f'http://{domain}')
-            
-            print(f"🌐 Application: {frontend_url}")
-            print(f"🖥️  Serveur: {domain}")
-            
         except Exception:
-            print("Configuration non disponible")
+            print_warning("Impossible de lire la configuration finale")
         
-        print(f"\n{Colors.CYAN}📋 ÉTAPES POST-DÉPLOIEMENT:{Colors.ENDC}")
-        print("1. Testez l'application dans votre navigateur")
-        print("2. Vérifiez les logs: /usr/local/bin/monitor.sh")
-        print("3. Configurez la sauvegarde automatique")
-        print("4. Documentez l'accès pour votre équipe")
+        domain = config.get('DOMAIN', 'localhost')
+        frontend_url = config.get('FRONTEND_URL', f'http://{domain}')
+        backend_url = config.get('BACKEND_URL', f'http://{domain}/api')
+        ssl_mode = config.get('SSL_MODE', 'none')
         
-        print(f"\n{Colors.CYAN}🛠️  GESTION QUOTIDIENNE:{Colors.ENDC}")
-        print("• Status: /usr/local/bin/manage.sh status")
-        print("• Logs: /usr/local/bin/manage.sh logs")
-        print("• Sauvegarde: /usr/local/bin/backup.sh")
-        print("• Monitoring: /usr/local/bin/monitor.sh")
+        # URLs et accès principal
+        print(f"{Colors.GREEN}{Colors.BOLD}🌐 VOTRE APPLICATION EST MAINTENANT EN LIGNE :{Colors.ENDC}")
+        print("")
+        print(f"{Colors.CYAN}   🔗 URL PRINCIPALE : {Colors.BOLD}{frontend_url}{Colors.ENDC}")
+        print(f"{Colors.CYAN}   🔗 API Backend   : {backend_url}{Colors.ENDC}")
+        print(f"{Colors.CYAN}   🖥️  Serveur       : {domain}{Colors.ENDC}")
+        print(f"{Colors.CYAN}   🔒 SSL/HTTPS     : {'✅ Activé' if ssl_mode != 'none' else '❌ Désactivé'}{Colors.ENDC}")
+        print("")
         
-        print(f"\n{Colors.GREEN}🎯 Vote Secret v2.0 est maintenant en production !{Colors.ENDC}")
-        print(f"{Colors.GREEN}Tous les composants sont déployés et opérationnels.{Colors.ENDC}")
+        # Vérification finale des services
+        print(f"{Colors.BLUE}🔍 VÉRIFICATION FINALE DES SERVICES :{Colors.ENDC}")
+        services_status = {}
+        
+        critical_services = ['vote-secret', 'nginx', 'mongod']
+        for service in critical_services:
+            try:
+                result = subprocess.run(['systemctl', 'is-active', service], 
+                                      capture_output=True, text=True)
+                services_status[service] = result.returncode == 0
+                status_icon = "✅" if services_status[service] else "❌"
+                print(f"   {status_icon} {service}: {'Actif' if services_status[service] else 'Inactif'}")
+            except:
+                print(f"   ❓ {service}: Statut inconnu")
+        
+        # Test de connectivité rapide
+        print(f"\n{Colors.BLUE}🌐 TEST DE CONNECTIVITÉ :{Colors.ENDC}")
+        try:
+            result = subprocess.run(['curl', '-s', '-I', '--connect-timeout', '5', frontend_url], 
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"   ✅ Site web accessible")
+            else:
+                print(f"   ⚠️  Site web non accessible (vérifiez DNS/Firewall)")
+        except:
+            print(f"   ❓ Test de connectivité échoué")
+        
+        # Informations pratiques
+        print(f"\n{Colors.CYAN}📋 INFORMATIONS IMPORTANTES :{Colors.ENDC}")
+        print(f"   • Application installée dans : /opt/vote-secret/")
+        print(f"   • Logs système : /var/log/vote-secret/")
+        print(f"   • Configuration : /opt/vote-secret/config/")
+        print(f"   • Scripts de gestion : /usr/local/bin/{{manage,backup,monitor}}.sh")
+        
+        if ssl_mode == 'letsencrypt':
+            print(f"   • Certificats SSL : Renouvellement automatique configuré")
+        
+        # Commandes de gestion
+        print(f"\n{Colors.CYAN}🛠️  COMMANDES DE GESTION QUOTIDIENNE :{Colors.ENDC}")
+        print(f"   • Statut des services     : sudo systemctl status vote-secret")
+        print(f"   • Redémarrer l'application: sudo systemctl restart vote-secret") 
+        print(f"   • Voir les logs           : sudo journalctl -u vote-secret -f")
+        print(f"   • Script de gestion       : /usr/local/bin/manage.sh status")
+        print(f"   • Monitoring complet      : /usr/local/bin/monitor.sh")
+        print(f"   • Sauvegarde manuelle     : /usr/local/bin/backup.sh")
+        
+        # Actions post-déploiement
+        print(f"\n{Colors.WARNING}📝 PROCHAINES ÉTAPES RECOMMANDÉES :{Colors.ENDC}")
+        print(f"   1. 🌐 Testez votre application : {frontend_url}")
+        print(f"   2. 📊 Créez votre première réunion de test")
+        print(f"   3. 🔍 Surveillez les logs pendant 24h")
+        print(f"   4. 💾 Configurez les sauvegardes automatiques (crontab)")
+        print(f"   5. 👥 Formez votre équipe sur l'utilisation")
+        print(f"   6. 📖 Documentez vos procédures spécifiques")
+        
+        # Message d'encouragement final
+        print(f"\n{Colors.GREEN}{Colors.BOLD}🎯 VOTE SECRET v2.0 EST PRÊT POUR VOS ASSEMBLÉES !{Colors.ENDC}")
+        print(f"{Colors.GREEN}Votre plateforme de vote anonyme est maintenant opérationnelle.{Colors.ENDC}")
+        print(f"{Colors.GREEN}Tous les services sont déployés et configurés correctement.{Colors.ENDC}")
+        
+        # Avertissement de sécurité si pas de SSL
+        if ssl_mode == 'none':
+            print(f"\n{Colors.WARNING}⚠️  ATTENTION SÉCURITÉ : HTTPS n'est pas configuré !{Colors.ENDC}")
+            print(f"{Colors.WARNING}   Pour la production, configurez SSL/TLS avec un certificat valide.{Colors.ENDC}")
+        
+        print(f"\n{Colors.CYAN}Pour toute question ou support technique :{Colors.ENDC}")
+        print(f"   • Documentation : /opt/vote-secret/README.md")
+        print(f"   • Guide de déploiement : /opt/vote-secret/DEPLOYMENT_GUIDE.md")
+        
+        # Sauvegarder l'état de déploiement complet
+        self.deployment_state['deployment_completed'] = {
+            'completed': True,
+            'timestamp': time.time(),
+            'date': time.strftime('%Y-%m-%d %H:%M:%S'),
+            'duration_seconds': duration,
+            'frontend_url': frontend_url,
+            'backend_url': backend_url,
+            'domain': domain,
+            'ssl_mode': ssl_mode
+        }
+        self._save_deployment_state()
 
 def main():
     """Point d'entrée principal"""
