@@ -501,10 +501,57 @@ function App() {
       setNewPollOptions([...newPollOptions, ""]);
     };
 
-    const updatePollOption = (index, value) => {
-      const updated = [...newPollOptions];
-      updated[index] = value;
-      setNewPollOptions(updated);
+    const addScrutatorName = () => {
+      setScrutatorNames([...scrutatorNames, '']);
+    };
+
+    const removeScrutatorName = (index) => {
+      if (scrutatorNames.length > 1) {
+        const newNames = scrutatorNames.filter((_, i) => i !== index);
+        setScrutatorNames(newNames);
+      }
+    };
+
+    const updateScrutatorName = (index, value) => {
+      const newNames = [...scrutatorNames];
+      newNames[index] = value;
+      setScrutatorNames(newNames);
+    };
+
+    const addScrutators = async () => {
+      try {
+        // Filtrer les noms vides
+        const validNames = scrutatorNames.filter(name => name.trim() !== '');
+        
+        if (validNames.length === 0) {
+          alert("Veuillez entrer au moins un nom de scrutateur");
+          return;
+        }
+
+        const response = await axios.post(`${API}/meetings/${meeting.id}/scrutators`, {
+          names: validNames
+        });
+
+        setScrutatorCode(response.data.scrutator_code);
+        setScrutators(response.data.scrutators);
+        setScrutatorCodeGenerated(true);
+        
+        alert(`Code de scrutateur généré avec succès : ${response.data.scrutator_code}`);
+      } catch (error) {
+        console.error("Erreur lors de l'ajout des scrutateurs:", error);
+        alert("Erreur lors de l'ajout des scrutateurs: " + (error.response?.data?.detail || "Erreur inconnue"));
+      }
+    };
+
+    const loadScrutators = async () => {
+      try {
+        const response = await axios.get(`${API}/meetings/${meeting.id}/scrutators`);
+        setScrutators(response.data.scrutators);
+        setScrutatorCode(response.data.scrutator_code || '');
+        setScrutatorCodeGenerated(!!response.data.scrutator_code);
+      } catch (error) {
+        console.error("Erreur lors du chargement des scrutateurs:", error);
+      }
     };
 
     const removePollOption = (index) => {
