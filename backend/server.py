@@ -978,14 +978,21 @@ async def generate_meeting_report(meeting_id: str):
     
     # Si il y a des scrutateurs approuvés, vérifier l'approbation
     if len(approved_scrutators) > 0:
-        if not meeting.get("report_generation_pending", False):
-            # Pas de demande en cours - le processus n'a pas été initié correctement
-            raise HTTPException(
-                status_code=400, 
-                detail="La génération du rapport nécessite l'approbation des scrutateurs. Utilisez l'endpoint /request-report d'abord."
-            )
+        # Vérifier si la génération a été approuvée par la majorité
+        if not meeting.get("report_generation_approved", False):
+            # Pas d'approbation - vérifier si une demande est en cours
+            if meeting.get("report_generation_pending", False):
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Génération du rapport en attente d'approbation des scrutateurs. Veuillez attendre leur vote."
+                )
+            else:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="La génération du rapport nécessite l'approbation des scrutateurs. Utilisez l'endpoint /request-report d'abord."
+                )
         
-        # Vérifier si la majorité a approuvé
+        # Vérifier que la majorité a bien approuvé (sécurité supplémentaire)
         report_votes = meeting.get("report_votes", {})
         yes_votes = sum(1 for vote in report_votes.values() if vote)
         majority_needed = (len(approved_scrutators) // 2) + 1
@@ -993,7 +1000,7 @@ async def generate_meeting_report(meeting_id: str):
         if yes_votes < majority_needed:
             raise HTTPException(
                 status_code=403, 
-                detail=f"Génération du rapport non approuvée. {yes_votes}/{len(approved_scrutators)} votes positifs, {majority_needed} requis."
+                detail=f"Génération du rapport non approuvée par la majorité. {yes_votes}/{len(approved_scrutators)} votes positifs, {majority_needed} requis."
             )
     
     # Procéder à la génération normale
