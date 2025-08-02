@@ -1,53 +1,55 @@
-# Vote Secret v2.0 🗳️
+# SUPER Vote Secret 🗳️
 
-**Système de vote anonyme moderne pour assemblées avec fonctionnalités avancées et déploiement production robuste**
+**SUPER moteur de vote secret - Application moderne de vote anonyme pour assemblées**
 
 ## 🚀 Fonctionnalités
 
-### ✨ Fonctionnalités Principales
 - **Vote anonyme sécurisé** avec suppression automatique des données
-- **Interface moderne** avec design glassmorphique et responsive
-- **Système de scrutateurs** avec approbation majoritaire pour les rapports
-- **Rapports PDF** complets avec protection de fermeture
-- **Temps réel** via WebSockets pour toutes les interactions
-
-### 🔐 Fonctionnalités Avancées v2.0
-- **🔄 Récupération de réunions** : URLs sécurisées pour revenir à sa réunion
-- **🛡️ Protection de fermeture** : Impossible de fermer sans télécharger le rapport
-- **👥 Gestion d'absence organisateur** : Transfert automatique aux scrutateurs
-- **⚡ Système de heartbeat** : Détection de présence en temps réel
-- **🗂️ Rapports partiels** : Disponibles en cas d'absence organisateur
-- **⏰ Suppression intelligente** : Auto-nettoyage après 12h ou déconnexion
+- **Interface moderne** avec design coloré et responsive
+- **Système de scrutateurs** avec approbation majoritaire
+- **Rapports PDF** complets avec suppression automatique
+- **Temps réel** via WebSockets
 
 ## 🏗️ Architecture
 
-- **Frontend:** React 19 + Tailwind CSS + Shadcn/UI
-- **Backend:** FastAPI (Python) + WebSockets + Gunicorn + Uvicorn
-- **Base de données:** MongoDB avec Motor (async)
+- **Frontend:** React + Tailwind CSS + Shadcn/UI
+- **Backend:** FastAPI + Uvicorn + WebSockets  
+- **Base de données:** MongoDB
 - **PDF:** ReportLab pour génération de rapports
-- **Sécurité:** JWT, UUID, chiffrement des données
-- **Production:** Nginx + SSL/TLS + SystemD
+- **Production:** Nginx + SSL + SystemD
 
-## ⚡ Installation et Déploiement
+## ⚡ Installation Rapide
 
-### 🔧 Configuration Automatique
+### Développement
 ```bash
+# Installer les dépendances
+npm run install:all
+
+# Lancer en mode développement
+npm run dev
+```
+
+### Production
+```bash
+# Déploiement automatique
 python3 deploy_master.py
 ```
-Le script interactif orchestre tout le déploiement :
-- Installation des prérequis système (MongoDB, Nginx, Python, Node.js)
-- Configuration des environnements (.env)
-- Génération des configurations (Nginx, SystemD, Gunicorn)
-- Déploiement sécurisé avec SSL automatique
-- Tests et validation complète
 
-### 📋 Scripts de Déploiement Disponibles
+## 📝 Usage
 
-#### Script Principal
-- **`deploy_master.py`** - Orchestrateur principal du déploiement
+1. **Organisateur** : Créer une réunion et inviter des participants
+2. **Participants** : Rejoindre avec le code de réunion  
+3. **Scrutateurs** (optionnel) : Surveiller et approuver les rapports
+4. **Votes** : Créer des sondages et voter de façon anonyme
+5. **Rapport PDF** : Télécharger le rapport final (supprime toutes les données)
 
-#### Scripts Spécialisés  
-- **`deploy.py`** - Installation prérequis système (MongoDB, Python, Node.js)
+## 👨‍💻 Auteur
+
+**SimonSB** - Une app de SimonSB
+
+---
+
+*SUPER Vote Secret v2.0 - Système de vote anonyme moderne*
 - **`deploy_environment.py`** - Configuration environnements et génération configs
 - **`deploy_nginx.py`** - Installation et configuration Nginx + SSL
 - **`deploy_final.py`** - Déploiement final et services SystemD
