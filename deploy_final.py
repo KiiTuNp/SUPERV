@@ -553,7 +553,7 @@ class FinalDeployment:
                 self.step_1_create_system_user,
                 self.step_2_deploy_application,
                 self.step_3_install_dependencies,
-                self.step_4_create_gunicorn_config,
+                self.step_4_setup_logging,
                 self.step_5_create_systemd_service,
                 self.step_6_install_scripts,
                 self.step_7_start_services,
