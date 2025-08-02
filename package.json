@@ -21,21 +21,19 @@
     "url": "git+https://github.com/your-username/vote-secret.git"
   },
   "keywords": [
+    "super-vote-secret", 
     "voting",
     "assembly",
     "secret-vote",
+    "uvicorn",
     "fastapi",
     "react",
     "mongodb",
     "anonymous",
     "pdf-report"
   ],
-  "author": "Your Name",
+  "author": "SimonSB",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/your-username/vote-secret/issues"
-  },
-  "homepage": "https://github.com/your-username/vote-secret#readme",
   "devDependencies": {
     "concurrently": "^9.1.0"
   },
