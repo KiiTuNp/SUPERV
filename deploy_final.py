@@ -338,69 +338,11 @@ class FinalDeployment:
         print_success(f"Frontend déployé dans {www_path}")
         return prompt_continue()
 
-    def step_4_create_gunicorn_config(self) -> bool:
-        """Configuration Gunicorn"""
-        print_step(4, self.total_steps, "Configuration Gunicorn")
+    def step_4_setup_logging(self) -> bool:
+        """Configuration des logs pour uvicorn"""
+        print_step(4, self.total_steps, "Configuration des logs")
         
-        gunicorn_config = f"""# Vote Secret v2.0 - Configuration Gunicorn
-import multiprocessing
-import os
-
-# Server socket
-bind = "127.0.0.1:8001"
-
-# Worker processes
-workers = {self.config.get('WORKERS', '4')}
-worker_class = "uvicorn.workers.UvicornWorker"
-worker_connections = {self.config.get('WORKER_CONNECTIONS', '1000')}
-
-# Restart workers after this many requests
-max_requests = 1000
-max_requests_jitter = 50
-
-# Timeout
-timeout = 30
-keepalive = 2
-
-# Logging
-accesslog = "/var/log/vote-secret/access.log"
-errorlog = "/var/log/vote-secret/error.log"
-loglevel = "{self.config.get('LOG_LEVEL', 'info').lower()}"
-
-# Process naming
-proc_name = 'vote-secret'
-
-# Server mechanics
-daemon = False
-pidfile = '/var/log/vote-secret/vote-secret.pid'
-user = 'vote-secret'
-group = 'vote-secret'
-tmp_upload_dir = None
-
-# SSL (if needed)
-# keyfile = "/path/to/key"
-# certfile = "/path/to/cert"
-
-def when_ready(server):
-    server.log.info("Vote Secret server is ready. Listening on %s", server.address)
-
-def worker_int(worker):
-    worker.log.info("worker received INT or QUIT signal")
-
-def pre_fork(server, worker):
-    server.log.info("Worker spawned (pid: %s)", worker.pid)
-
-def post_fork(server, worker):
-    server.log.info("Worker spawned (pid: %s)", worker.pid)
-
-def post_worker_init(worker):
-    worker.log.info("Worker initialized")
-
-def worker_abort(worker):
-    worker.log.info("Worker aborted (pid: %s)", worker.pid)
-"""
-        
-        # Création du répertoire de logs AVANT de créer la config
+        # Création du répertoire de logs
         success, _, _ = run_command("sudo mkdir -p /var/log/vote-secret", "Création répertoire logs")
         if not success:
             print_error("Impossible de créer le répertoire de logs")
@@ -410,22 +352,7 @@ def worker_abort(worker):
         if not success:
             print_warning("Impossible de définir les permissions logs - l'utilisateur vote-secret doit exister")
         
-        # Écriture de la configuration Gunicorn
-        config_path = self.deployment_path / 'config' / 'gunicorn.conf.py'
-        
-        with open('/tmp/gunicorn.conf.py', 'w') as f:
-            f.write(gunicorn_config)
-        
-        success, _, _ = run_command(
-            f"sudo mkdir -p {config_path.parent} && sudo mv /tmp/gunicorn.conf.py {config_path} && sudo chown vote-secret:vote-secret {config_path}",
-            "Installation configuration Gunicorn"
-        )
-        
-        if not success:
-            print_error("Échec installation configuration Gunicorn")
-            return False
-        
-        print_success("Configuration Gunicorn créée avec logs dans /var/log/vote-secret/")
+        print_success("Répertoire de logs configuré dans /var/log/vote-secret/")
         return prompt_continue()
 
     def step_5_create_systemd_service(self) -> bool:
