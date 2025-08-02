@@ -16,9 +16,7 @@ print_error() { echo -e "${RED}❌ $1${NC}"; }
 print_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
-print_info "Mise à jour automatique pour corriger :"
-echo "  1. URL backend sans /api dans le frontend"
-echo "  2. Service SystemD avec Uvicorn au lieu de Gunicorn"
+print_info "Mise à jour automatique pour utiliser Uvicorn"
 echo ""
 
 # 1. Détecter l'installation existante
