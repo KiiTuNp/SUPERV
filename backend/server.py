@@ -536,46 +536,15 @@ async def approve_scrutator(scrutator_id: str, approval: ScrutatorApproval):
 
 @api_router.post("/meetings/{meeting_id}/request-report")
 async def request_report_generation(meeting_id: str, request_data: ReportGenerationRequest):
-    """Demander la génération du rapport - nécessite l'approbation des scrutateurs"""
+    """Génération directe du rapport - plus d'approbation des scrutateurs nécessaire"""
     
     # Vérifier que la réunion existe
     meeting = await db.meetings.find_one({"id": meeting_id})
     if not meeting:
         raise HTTPException(status_code=404, detail="Réunion non trouvée")
     
-    # Vérifier qu'il y a des scrutateurs approuvés
-    approved_scrutators = await db.scrutators.find({
-        "meeting_id": meeting_id, 
-        "approval_status": "approved"
-    }).to_list(100)
-    
-    if len(approved_scrutators) == 0:
-        # Pas de scrutateurs - génération directe comme avant
-        return {"direct_generation": True, "message": "Aucun scrutateur approuvé - génération directe"}
-    
-    # Marquer la demande de génération en cours
-    await db.meetings.update_one(
-        {"id": meeting_id},
-        {"$set": {
-            "report_generation_pending": True,
-            "report_votes": {}
-        }}
-    )
-    
-    # Notifier tous les scrutateurs approuvés
-    await manager.send_to_meeting({
-        "type": "report_generation_requested",
-        "requested_by": request_data.requested_by,
-        "scrutator_count": len(approved_scrutators),
-        "majority_needed": (len(approved_scrutators) // 2) + 1
-    }, meeting_id)
-    
-    return {
-        "scrutator_approval_required": True,
-        "scrutator_count": len(approved_scrutators),
-        "majority_needed": (len(approved_scrutators) // 2) + 1,
-        "message": "Demande envoyée aux scrutateurs"
-    }
+    # GÉNÉRATION DIRECTE - plus besoin d'approbation des scrutateurs
+    return {"direct_generation": True, "message": "Génération directe du rapport autorisée"}
 
 @api_router.post("/meetings/{meeting_id}/scrutator-vote")
 async def submit_scrutator_vote(meeting_id: str, vote_data: ScrutatorReportVote):
