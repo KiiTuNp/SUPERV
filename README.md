@@ -43,7 +43,14 @@
 ```bash
 git clone <repository-url>
 cd super-vote-secret
+cp .env.example .env
+# Edit .env with your secure passwords
 ./deploy.sh
+```
+
+**Or using Make:**
+```bash
+make deploy
 ```
 
 That's it! 🎉
