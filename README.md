@@ -1,263 +1,159 @@
-# 🗳️ SUPER Vote Secret
+# 🗳️ SUPER Vote Secret - Déploiement VPS
 
-**The ultimate anonymous voting platform for assemblies and meetings**
-
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Domain](https://img.shields.io/badge/Domain-vote.super--csn.ca-orange.svg)](https://vote.super-csn.ca)
+**Système de vote anonyme moderne pour assemblées**
 
 ---
 
-## ✨ Features
+## 🚀 Déploiement VPS - 3 Étapes
 
-🔒 **Anonymous & Secure**
-- Complete participant anonymity
-- Automatic data deletion after PDF generation
-- Real-time encrypted voting
+### Prérequis
+- VPS Ubuntu 20.04+ ou Debian 11+
+- Docker 20.10+ et Docker Compose
+- Domaine pointant vers votre VPS
 
-👥 **Multi-Role Support**
-- **Organizers**: Create meetings, manage participants
-- **Participants**: Join meetings, vote anonymously  
-- **Scrutators**: Oversee process, approve reports
-
-📊 **Professional Reports**
-- Comprehensive PDF reports
-- Real-time results visualization
-- Scrutator approval system
-
-🌐 **Modern & Responsive**
-- Beautiful gradient UI design
-- Mobile-friendly interface
-- Real-time WebSocket updates
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker & Docker Compose
-- Domain pointing to your server (vote.super-csn.ca)
-
-### One-Command Deploy
+### Installation Rapide
 
 ```bash
-git clone <repository-url>
+# 1. Cloner le repository
+git clone <votre-repository>
 cd super-vote-secret
-cp .env.example .env
-# Edit .env with your secure passwords
-./deploy.sh
+
+# 2. Lancer le script de déploiement interactif
+chmod +x deploy-vps.sh
+sudo ./deploy-vps.sh
+
+# 3. Suivre les instructions à l'écran
+# Le script vous demandera :
+# - Votre domaine (ex: vote.example.com)
+# - Votre email pour SSL
+# - Mots de passe sécurisés
 ```
 
-**Or using Make:**
-```bash
-make deploy
-```
+**C'est tout ! 🎉**
 
-That's it! 🎉
-
-Your application will be available at: **https://vote.super-csn.ca**
+Votre application sera disponible sur `https://votre-domaine.com`
 
 ---
 
-## ⚙️ Configuration
+## 📋 Ce que fait le script automatiquement
 
-### Environment Variables
-
-Copy `.env.example` to `.env` and customize:
-
-```bash
-# MongoDB Configuration
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=your-secure-password
-MONGO_DB=vote_secret
-
-# Application Configuration
-DOMAIN=vote.super-csn.ca
-ADMIN_EMAIL=admin@super-csn.ca
-
-# Security (IMPORTANT: Change in production!)
-JWT_SECRET=your-super-secret-jwt-key
-ENCRYPTION_KEY=your-32-character-encryption-key
-```
-
-### SSL Certificate
-
-SSL certificates are automatically generated via Let's Encrypt. No manual configuration needed!
+✅ **Installation des dépendances** (Docker, Docker Compose si nécessaire)  
+✅ **Configuration des variables d'environnement** (interactif)  
+✅ **Génération des certificats SSL** (Let's Encrypt automatique)  
+✅ **Démarrage de tous les services** (Nginx, Backend, Frontend, MongoDB)  
+✅ **Tests de validation** (Vérification que tout fonctionne)
 
 ---
 
-## 📋 Management Commands
+## 🔧 Configuration Avancée
+
+### Variables d'Environnement
+
+Le script créera automatiquement le fichier `.env` avec :
 
 ```bash
-# Using Make (recommended)
-make deploy          # Deploy to production
-make dev            # Start development
-make setup          # Setup development environment
-make logs           # View logs
-make status         # Check services
-make stop           # Stop services
-make update         # Update application
-make backup         # Backup database
-make clean          # Clean Docker resources
-
-# Using Scripts
-./deploy.sh         # Production deployment
-./dev-setup.sh      # Development setup
-./check.sh          # Pre-deployment validation
-./validate-docker.sh # Docker build validation
-./fix-docker.sh     # Auto-fix Docker issues
-
-# Using Docker Compose directly
-docker-compose up -d              # Start services
-docker-compose logs -f            # View logs
-docker-compose down               # Stop services
-docker-compose ps                 # Check status
-
-# Using NPM scripts
-npm run deploy      # Deploy to production
-npm run dev         # Start development
-npm run setup       # Setup development
-npm run check       # Pre-deployment check
+# Votre configuration (générée automatiquement)
+DOMAIN=votre-domaine.com
+ADMIN_EMAIL=admin@votre-domaine.com
+MONGO_ROOT_PASSWORD=mot-de-passe-securise
+JWT_SECRET=cle-jwt-securisee
+ENCRYPTION_KEY=cle-chiffrement-32-caracteres
 ```
 
-## 🔧 Troubleshooting
-
-If you encounter Docker build issues:
+### Commandes de Gestion
 
 ```bash
-# Quick fix
-./fix-docker.sh
+# Voir les logs
+docker compose logs -f
 
-# Check what's wrong
-./validate-docker.sh
+# Redémarrer l'application
+docker compose restart
 
-# Manual troubleshooting
-cat DOCKER_TROUBLESHOOTING.md
+# Mettre à jour l'application
+git pull && docker compose up -d --build
+
+# Arrêter l'application
+docker compose down
+
+# Sauvegarder la base de données
+docker exec vote-secret-mongodb mongodump --out /backup
 ```
 
 ---
 
-## 🏗️ Architecture
+## 🛠️ Structure des Services
 
 ```
-┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
-│   Nginx Proxy   │────│   Frontend   │    │   Backend   │
-│   (SSL/HTTPS)   │    │   (React)    │────│  (FastAPI)  │
-└─────────────────┘    └──────────────┘    └─────────────┘
-                                                    │
-                                           ┌─────────────┐
-                                           │   MongoDB   │
-                                           │ (Database)  │
-                                           └─────────────┘
+Internet → Nginx (SSL) → Frontend (React) + Backend (FastAPI) → MongoDB
 ```
 
-**Tech Stack:**
-- **Frontend**: React + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI + Uvicorn + WebSockets
-- **Database**: MongoDB
-- **Proxy**: Nginx with SSL/TLS
-- **Containers**: Docker + Docker Compose
+- **Frontend** : Interface utilisateur (React + Nginx)
+- **Backend** : API REST + WebSockets (FastAPI)
+- **MongoDB** : Base de données
+- **Nginx** : Reverse proxy + SSL automatique
+- **Certbot** : Gestion certificats Let's Encrypt
 
 ---
 
-## 📖 How to Use
+## 🔒 Sécurité
 
-### 1. Create a Meeting (Organizer)
-- Visit https://vote.super-csn.ca
-- Click "Créer une nouvelle réunion"
-- Enter meeting details
-- Share the meeting code with participants
-
-### 2. Add Scrutators (Optional)
-- In organizer interface, go to "Scrutators" tab
-- Add scrutator names
-- Share the scrutator code with designated scrutators
-
-### 3. Manage Participants
-- Approve/reject participant requests
-- Monitor real-time participation
-
-### 4. Create & Run Polls
-- Create polls with multiple options
-- Start/stop polls as needed
-- View real-time results
-
-### 5. Generate Report
-- Click "Générer le rapport" 
-- If scrutators exist, they must approve (majority vote)
-- PDF report downloads automatically
-- **All data is permanently deleted** after download
-
----
-
-## 🛠️ Development
-
-### Local Development
-
-```bash
-# Install dependencies
-npm run install:all
-
-# Start development servers
-npm run dev
-
-# Frontend: http://localhost:3000
-# Backend: http://localhost:8001
-```
-
-### Project Structure
-
-```
-super-vote-secret/
-├── frontend/           # React application
-│   ├── src/
-│   ├── public/
-│   ├── Dockerfile
-│   └── nginx.conf
-├── backend/            # FastAPI application
-│   ├── server.py      # Main application
-│   ├── requirements.txt
-│   └── Dockerfile
-├── nginx/             # Proxy configuration
-│   └── nginx.conf
-├── docker-compose.yml # Docker services
-├── mongo-init.js      # Database initialization
-└── deploy.sh          # Deployment script
-```
-
----
-
-## 🔐 Security Features
-
-- **Data Ephemerality**: All data deleted after report generation
-- **Anonymous Voting**: No linkage between voters and votes
-- **Encrypted Communications**: HTTPS/WSS encryption
-- **Access Control**: Role-based permissions
-- **Rate Limiting**: API abuse protection
-- **Security Headers**: CSRF, XSS, and clickjacking protection
+✅ **HTTPS obligatoire** avec certificats SSL automatiques  
+✅ **Mots de passe forts** générés automatiquement  
+✅ **Headers de sécurité** (HSTS, CSP, etc.)  
+✅ **Données éphémères** (suppression automatique après rapport)  
+✅ **Rate limiting** sur les API
 
 ---
 
 ## 📞 Support
 
-- **Domain**: [vote.super-csn.ca](https://vote.super-csn.ca)
-- **Author**: SimonSB
-- **License**: MIT
-
----
-
-## 🔄 Updates
-
-To update SUPER Vote Secret:
-
+### Logs de Débogage
 ```bash
-git pull
-docker-compose up -d --build
+# Logs de tous les services
+docker compose logs -f
+
+# Logs d'un service spécifique
+docker compose logs -f nginx
+docker compose logs -f backend
+docker compose logs -f frontend
+```
+
+### Résolution de Problèmes
+
+**Problème : Certificat SSL échoue**
+```bash
+# Vérifier que le domaine pointe bien vers le VPS
+dig votre-domaine.com
+
+# Relancer la génération SSL
+docker compose restart certbot
+```
+
+**Problème : Application inaccessible**
+```bash
+# Vérifier les services
+docker compose ps
+
+# Vérifier les ports
+sudo netstat -tulpn | grep -E ':80|:443'
 ```
 
 ---
 
-**Made with ❤️ by SimonSB** | *Une app de SimonSB*
+## 🎯 Fonctionnalités
+
+🗳️ **Vote anonyme sécurisé** avec suppression automatique des données  
+👥 **Gestion multi-rôles** : Organisateurs, Participants, Scrutateurs  
+📊 **Rapports PDF** complets avec approbation majoritaire  
+🌐 **Interface moderne** et responsive  
+⚡ **Temps réel** via WebSockets  
+🔒 **Sécurité renforcée** avec chiffrement et authentification
+
+---
+
+**Made with ❤️ by SimonSB** | Version 2.2.0
+
+Pour un déploiement réussi, lancez simplement : `sudo ./deploy-vps.sh`
 - **`deploy_environment.py`** - Configuration environnements et génération configs
 - **`deploy_nginx.py`** - Installation et configuration Nginx + SSL
 - **`deploy_final.py`** - Déploiement final et services SystemD
