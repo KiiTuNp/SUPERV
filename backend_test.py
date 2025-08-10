@@ -764,6 +764,301 @@ class VoteSecretAPITester:
         except Exception as e:
             self.log_test("Invalid Scrutator Code", False, f"Error: {str(e)}")
             return False
+
+    async def test_close_poll_for_report(self):
+        """Test 19: Close Poll to Have Data for Report"""
+        if not self.poll_data:
+            self.log_test("Close Poll for Report", False, "No poll data available")
+            return False
+            
+        try:
+            async with self.session.post(
+                f"{API_BASE_URL}/polls/{self.poll_data['id']}/close"
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    if data.get("status") == "closed":
+                        self.log_test("Close Poll for Report", True, "Poll closed successfully for report generation")
+                        return True
+                    else:
+                        self.log_test("Close Poll for Report", False, f"Unexpected response: {data}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Close Poll for Report", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Close Poll for Report", False, f"Error: {str(e)}")
+            return False
+
+    async def test_request_report_generation(self):
+        """Test 20: Request Report Generation (Scrutator Voting System)"""
+        if not self.meeting_data:
+            self.log_test("Request Report Generation", False, "No meeting data available")
+            return False
+            
+        try:
+            request_payload = {
+                "meeting_id": self.meeting_data["id"],
+                "requested_by": self.meeting_data["organizer_name"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{self.meeting_data['id']}/request-report",
+                json=request_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Should require scrutator approval since we have scrutators
+                    if data.get("scrutator_approval_required"):
+                        # Store report request data
+                        self.meeting_data["report_request"] = data
+                        
+                        self.log_test("Request Report Generation", True, 
+                                    f"Report generation requested - requires approval from {data['scrutator_count']} scrutators (majority: {data['majority_needed']})")
+                        return True
+                    elif data.get("direct_generation"):
+                        self.log_test("Request Report Generation", False, 
+                                    "Expected scrutator approval but got direct generation")
+                        return False
+                    else:
+                        self.log_test("Request Report Generation", False, f"Unexpected response: {data}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Request Report Generation", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Request Report Generation", False, f"Error: {str(e)}")
+            return False
+
+    async def test_scrutator_vote_approve(self):
+        """Test 21: First Scrutator Vote (Approve)"""
+        if not self.meeting_data or "report_request" not in self.meeting_data:
+            self.log_test("First Scrutator Vote", False, "No report request data available")
+            return False
+            
+        try:
+            vote_payload = {
+                "meeting_id": self.meeting_data["id"],
+                "scrutator_name": "Marie Dupont",  # First scrutator who joined
+                "approved": True  # Vote to approve
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{self.meeting_data['id']}/scrutator-vote",
+                json=vote_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Should be pending since we need majority
+                    if data.get("decision") == "pending":
+                        self.log_test("First Scrutator Vote", True, 
+                                    f"First vote recorded: {data['yes_votes']}/{data['total_scrutators']} yes votes, need {data['majority_needed']} for majority")
+                        return True
+                    elif data.get("decision") == "approved":
+                        # If only one scrutator, might be approved immediately
+                        if data.get("majority_needed") == 1:
+                            self.log_test("First Scrutator Vote", True, 
+                                        f"Report approved immediately (single scrutator): {data['yes_votes']}/{data['majority_needed']}")
+                            return True
+                        else:
+                            self.log_test("First Scrutator Vote", False, 
+                                        f"Unexpected immediate approval: {data}")
+                            return False
+                    else:
+                        self.log_test("First Scrutator Vote", False, f"Unexpected response: {data}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("First Scrutator Vote", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("First Scrutator Vote", False, f"Error: {str(e)}")
+            return False
+
+    async def test_scrutator_vote_majority(self):
+        """Test 22: Second Scrutator Vote (Achieve Majority)"""
+        if not self.meeting_data or "report_request" not in self.meeting_data:
+            self.log_test("Second Scrutator Vote", False, "No report request data available")
+            return False
+            
+        try:
+            vote_payload = {
+                "meeting_id": self.meeting_data["id"],
+                "scrutator_name": "Jean Martin",  # Second scrutator who joined
+                "approved": True  # Vote to approve
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{self.meeting_data['id']}/scrutator-vote",
+                json=vote_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Should be approved now with majority
+                    if data.get("decision") == "approved":
+                        self.log_test("Second Scrutator Vote", True, 
+                                    f"Majority achieved! Report generation approved: {data['yes_votes']}/{data['majority_needed']} votes")
+                        return True
+                    elif data.get("decision") == "pending":
+                        self.log_test("Second Scrutator Vote", True, 
+                                    f"Still pending: {data['yes_votes']}/{data['total_scrutators']} yes votes, need {data['majority_needed']} for majority")
+                        return True
+                    else:
+                        self.log_test("Second Scrutator Vote", False, f"Unexpected response: {data}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Second Scrutator Vote", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Second Scrutator Vote", False, f"Error: {str(e)}")
+            return False
+
+    async def test_generate_report_after_approval(self):
+        """Test 23: Generate Report After Scrutator Approval"""
+        if not self.meeting_data:
+            self.log_test("Generate Report After Approval", False, "No meeting data available")
+            return False
+            
+        try:
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{self.meeting_data['id']}/report"
+            ) as response:
+                if response.status == 200:
+                    # Check if we get a PDF file
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        # Read the PDF content to verify it's not empty
+                        pdf_content = await response.read()
+                        if len(pdf_content) > 1000:  # PDF should be at least 1KB
+                            self.log_test("Generate Report After Approval", True, 
+                                        f"PDF report generated successfully ({len(pdf_content)} bytes)")
+                            return True
+                        else:
+                            self.log_test("Generate Report After Approval", False, 
+                                        f"PDF too small ({len(pdf_content)} bytes)")
+                            return False
+                    else:
+                        self.log_test("Generate Report After Approval", False, 
+                                    f"Expected PDF, got content-type: {content_type}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Generate Report After Approval", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Generate Report After Approval", False, f"Error: {str(e)}")
+            return False
+
+    async def test_websocket_report_notifications(self):
+        """Test 24: WebSocket Notifications for Report Generation"""
+        if not self.meeting_data:
+            self.log_test("WebSocket Report Notifications", False, "No meeting data available")
+            return False
+            
+        try:
+            # Convert HTTP URL to WebSocket URL
+            ws_url = BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://')
+            websocket_url = f"{ws_url}/ws/meetings/{self.meeting_data['id']}"
+            
+            # Create a new meeting for this test to avoid conflicts
+            meeting_payload = {
+                "title": "WebSocket Test Meeting",
+                "organizer_name": "WebSocket Test Organizer"
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings",
+                json=meeting_payload
+            ) as response:
+                if response.status != 200:
+                    self.log_test("WebSocket Report Notifications", False, "Failed to create test meeting")
+                    return False
+                
+                test_meeting = await response.json()
+                
+            # Add scrutators
+            scrutator_payload = {
+                "names": ["WebSocket Scrutator"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{test_meeting['id']}/scrutators",
+                json=scrutator_payload
+            ) as response:
+                if response.status != 200:
+                    self.log_test("WebSocket Report Notifications", False, "Failed to add scrutators")
+                    return False
+                
+                scrutator_data = await response.json()
+            
+            # Test WebSocket connection and notifications
+            ws_test_url = f"{ws_url}/ws/meetings/{test_meeting['id']}"
+            
+            try:
+                async with websockets.connect(ws_test_url, timeout=10) as websocket:
+                    # Request report generation to trigger notification
+                    request_payload = {
+                        "meeting_id": test_meeting["id"],
+                        "requested_by": test_meeting["organizer_name"]
+                    }
+                    
+                    # Start listening for WebSocket messages
+                    async def listen_for_messages():
+                        try:
+                            message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                            return json.loads(message)
+                        except asyncio.TimeoutError:
+                            return None
+                    
+                    # Make the request
+                    async with self.session.post(
+                        f"{API_BASE_URL}/meetings/{test_meeting['id']}/request-report",
+                        json=request_payload
+                    ) as response:
+                        if response.status == 200:
+                            # Listen for WebSocket notification
+                            message = await listen_for_messages()
+                            
+                            if message and message.get("type") == "report_generation_requested":
+                                self.log_test("WebSocket Report Notifications", True, 
+                                            f"WebSocket notification received: {message['type']}")
+                                return True
+                            else:
+                                self.log_test("WebSocket Report Notifications", False, 
+                                            f"Expected 'report_generation_requested' notification, got: {message}")
+                                return False
+                        else:
+                            self.log_test("WebSocket Report Notifications", False, 
+                                        "Failed to request report generation")
+                            return False
+                            
+            except websockets.exceptions.ConnectionClosed:
+                self.log_test("WebSocket Report Notifications", False, "WebSocket connection closed unexpectedly")
+                return False
+            except Exception as ws_e:
+                self.log_test("WebSocket Report Notifications", False, f"WebSocket error: {str(ws_e)}")
+                return False
+                
+        except Exception as e:
+            self.log_test("WebSocket Report Notifications", False, f"Error: {str(e)}")
+            return False
             
     async def run_all_tests(self):
         """Run all backend API tests"""
