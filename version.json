@@ -1,13 +1,15 @@
 {
-  "version": "2.1.1",
+  "version": "2.1.2",
   "name": "SUPER Vote Secret",
   "description": "Anonymous voting platform for assemblies",
   "domain": "vote.super-csn.ca",
   "author": "SimonSB",
   "release_date": "2025-08-10",
   "features": [
-    "Docker containerization with Compose v2 support",
+    "Modern Docker Compose (no version attribute)",
+    "Enhanced Dockerfiles with multi-stage builds",
     "ESLint 9.x compatibility",
+    "Flexible yarn.lock handling",
     "SSL/HTTPS support", 
     "MongoDB integration",
     "PDF report generation",
@@ -23,8 +25,15 @@
   },
   "compatibility": {
     "docker": "28.3.3+",
-    "docker-compose": "v2.39.1+",
+    "docker-compose": "v2.39.1+ (v1.29+ legacy)",
     "node": "20+",
     "python": "3.11+"
-  }
+  },
+  "docker_fixes": [
+    "Removed deprecated version attribute",
+    "Fixed yarn.lock frozen-lockfile error",
+    "Enhanced healthchecks with start_period",
+    "Improved Python dependency installation",
+    "Added non-root user security"
+  ]
 }
