@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "success_rate": 60.0,
+    "production_ready": false
+  },
+  "results": [
+    {
+      "test": "Response Time - /health",
+      "success": true,
+      "message": "Avg: 23.9ms, Min: 6.3ms, Max: 85.5ms",
+      "timestamp": "2025-08-10T20:43:01.424673",
+      "details": {}
+    },
+    {
+      "test": "Response Time - /meetings",
+      "success": true,
+      "message": "Avg: 8.0ms, Min: 6.7ms, Max: 10.0ms",
+      "timestamp": "2025-08-10T20:43:01.464722",
+      "details": {}
+    },
+    {
+      "test": "Overall API Performance",
+      "success": true,
+      "message": "Average response time: 15.9ms",
+      "timestamp": "2025-08-10T20:43:01.464792",
+      "details": {}
+    },
+    {
+      "test": "Concurrent Requests",
+      "success": true,
+      "message": "Success: 10/10, Avg time: 24.0ms",
+      "timestamp": "2025-08-10T20:43:02.502331",
+      "details": {}
+    },
+    {
+      "test": "Error Handling Robustness",
+      "success": false,
+      "message": "Test execution error: not enough values to unpack (expected 5, got 4)",
+      "timestamp": "2025-08-10T20:43:03.502553",
+      "details": {}
+    },
+    {
+      "test": "PDF Generation",
+      "success": true,
+      "message": "PDF generation request processed in 7.5ms",
+      "timestamp": "2025-08-10T20:43:04.563499",
+      "details": {}
+    },
+    {
+      "test": "WebSocket Connectivity",
+      "success": false,
+      "message": "WebSocket connection failed: BaseEventLoop.create_connection() got an unexpected keyword argument 'timeout'",
+      "timestamp": "2025-08-10T20:43:05.588769",
+      "details": {}
+    }
+  ],
+  "timestamp": "2025-08-10T20:43:05.589091"
+}
