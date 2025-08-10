@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: vote-secret-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-securepassword123}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-vote_secret}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - vote-secret-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vote-secret-backend
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-securepassword123}@mongodb:27017/${MONGO_DB:-vote_secret}?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - vote-secret-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vote-secret-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_BACKEND_URL: https://vote.super-csn.ca
+    networks:
+      - vote-secret-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Reverse Proxy & SSL
+  nginx:
+    image: nginx:alpine
+    container_name: vote-secret-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_data:/var/www/certbot:ro
+      - letsencrypt_data:/etc/letsencrypt:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - vote-secret-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SSL Certificate Manager
+  certbot:
+    image: certbot/certbot
+    container_name: vote-secret-certbot
+    volumes:
+      - certbot_data:/var/www/certbot
+      - letsencrypt_data:/etc/letsencrypt
+    networks:
+      - vote-secret-network
+    command: >
+      sh -c "
+        if [ ! -f /etc/letsencrypt/live/vote.super-csn.ca/fullchain.pem ]; then
+          certbot certonly --webroot --webroot-path=/var/www/certbot --email admin@super-csn.ca --agree-tos --no-eff-email -d vote.super-csn.ca;
+        fi;
+        while :; do certbot renew --quiet; sleep 12h; done
+      "
+
+networks:
+  vote-secret-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  certbot_data:
+    driver: local
+  letsencrypt_data:
+    driver: local
