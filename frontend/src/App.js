@@ -2421,7 +2421,7 @@ function App() {
       }
       
       if (data.type === "report_generation_requested") {
-        // Afficher le modal de vote pour les scrutateurs
+        // Afficher le modal de vote pour les scrutateurs avec alertes améliorées
         if (isScrutator) {
           setReportVoteData({
             requested_by: data.requested_by,
@@ -2429,6 +2429,31 @@ function App() {
             majority_needed: data.majority_needed
           });
           setShowReportVoteModal(true);
+          
+          // Alertes visuelles et sonores pour attirer l'attention
+          try {
+            // Notification navigateur si disponible
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("🔔 SUPER Vote Secret - Action requise", {
+                body: `Votre vote est requis pour la génération du rapport final`,
+                icon: "/favicon.ico",
+                tag: "scrutator-vote",
+                requireInteraction: true
+              });
+            }
+            
+            // Son d'alerte si possible
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFA==');
+            audio.volume = 0.3;
+            audio.play().catch(() => {}); // Ignore si bloqué par le navigateur
+            
+            // Vibration sur mobile
+            if ("vibrate" in navigator) {
+              navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+          } catch (error) {
+            console.log("Alertes optionnelles non disponibles:", error);
+          }
         }
       }
       
