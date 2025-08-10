@@ -193,8 +193,9 @@ if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
     echo "✅ Perfect! No issues found. Docker build should work flawlessly."
     echo ""
     echo "🚀 Ready to build:"
-    echo "  • Test build: docker-compose -f docker-compose.test.yml build"
-    echo "  • Production build: docker-compose build"
+    echo "  • Test build: docker compose -f docker-compose.test.yml build"
+    echo "  • Production build: docker compose build"
+    echo "  • Legacy support: docker-compose build (if using v1)"
     exit 0
 elif [ $ERRORS -eq 0 ]; then
     echo "✅ Build should work with $WARNINGS warning(s)."
