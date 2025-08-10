@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Simple local testing configuration
+# Use this for quick local testing without SSL
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: vote-secret-test-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: testpass123
+      MONGO_INITDB_DATABASE: vote_secret_test
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vote-secret-test-backend
+    ports:
+      - "8001:8001"
+    environment:
+      MONGO_URL: mongodb://admin:testpass123@mongodb:27017/vote_secret_test?authSource=admin
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vote-secret-test-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_BACKEND_URL: http://localhost:8001
