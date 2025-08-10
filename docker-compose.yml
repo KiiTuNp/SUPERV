@@ -16,10 +16,11 @@ services:
     networks:
       - vote-secret-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # Backend API
   backend:
@@ -40,6 +41,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # Frontend
   frontend:
@@ -49,7 +51,7 @@ services:
     container_name: vote-secret-frontend
     restart: unless-stopped
     environment:
-      REACT_APP_BACKEND_URL: https://vote.super-csn.ca
+      REACT_APP_BACKEND_URL: https://${DOMAIN:-vote.super-csn.ca}
     networks:
       - vote-secret-network
     healthcheck:
@@ -57,6 +59,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   # Reverse Proxy & SSL
   nginx:
@@ -95,8 +98,8 @@ services:
       - vote-secret-network
     command: >
       sh -c "
-        if [ ! -f /etc/letsencrypt/live/vote.super-csn.ca/fullchain.pem ]; then
-          certbot certonly --webroot --webroot-path=/var/www/certbot --email admin@super-csn.ca --agree-tos --no-eff-email -d vote.super-csn.ca;
+        if [ ! -f /etc/letsencrypt/live/${DOMAIN:-vote.super-csn.ca}/fullchain.pem ]; then
+          certbot certonly --webroot --webroot-path=/var/www/certbot --email ${ADMIN_EMAIL:-admin@super-csn.ca} --agree-tos --no-eff-email -d ${DOMAIN:-vote.super-csn.ca};
         fi;
         while :; do certbot renew --quiet; sleep 12h; done
       "
