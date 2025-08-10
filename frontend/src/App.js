@@ -2377,8 +2377,8 @@ function App() {
                     <Shield className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">Vote Secret - Comment ça marche ?</h2>
-                    <p className="text-blue-100">Système de vote anonyme transparent et sécurisé</p>
+                    <h2 className="text-2xl font-bold">SUPER Vote Secret v4.0 - Comment ça marche ?</h2>
+                    <p className="text-blue-100">Système de vote anonyme moderne - Workflow simplifié et sécurisé</p>
                   </div>
                 </div>
                 <Button
