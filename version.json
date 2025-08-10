@@ -1,12 +1,13 @@
 {
-  "version": "2.1.0",
+  "version": "2.1.1",
   "name": "SUPER Vote Secret",
   "description": "Anonymous voting platform for assemblies",
   "domain": "vote.super-csn.ca",
   "author": "SimonSB",
   "release_date": "2025-08-10",
   "features": [
-    "Docker containerization",
+    "Docker containerization with Compose v2 support",
+    "ESLint 9.x compatibility",
     "SSL/HTTPS support", 
     "MongoDB integration",
     "PDF report generation",
@@ -15,9 +16,15 @@
     "Real-time updates"
   ],
   "deployment": {
-    "method": "Docker Compose",
+    "method": "Docker Compose v2.39.1+",
     "services": ["nginx", "frontend", "backend", "mongodb", "certbot"],
     "domain": "vote.super-csn.ca",
     "ssl": "Let's Encrypt"
+  },
+  "compatibility": {
+    "docker": "28.3.3+",
+    "docker-compose": "v2.39.1+",
+    "node": "20+",
+    "python": "3.11+"
   }
 }
