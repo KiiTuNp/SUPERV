@@ -389,8 +389,8 @@ class VoteSecretAPITester:
             ws_url = BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://')
             websocket_url = f"{ws_url}/ws/meetings/{self.meeting_data['id']}"
             
-            # Test WebSocket connection with timeout
-            async with websockets.connect(websocket_url, timeout=10) as websocket:
+            # Test WebSocket connection
+            async with websockets.connect(websocket_url) as websocket:
                 # Send a test message
                 await websocket.send("test_connection")
                 
