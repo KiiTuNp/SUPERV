@@ -1,5 +1,5 @@
-# SUPER Vote Secret - Production Docker Compose
-# Configuration optimisée pour performance et robustesse
+# SUPER Vote Secret - Docker Compose Optimisé v4.0
+# Configuration efficace et performante
 
 services:
   # MongoDB Database
@@ -16,27 +16,19 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - vote-secret-network
-    ports:
-      - "27017:27017"
+    expose:
+      - "27017"
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok", "--authenticationDatabase", "admin"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m"
+        max-file: "2"
 
   # Backend API
   backend:
