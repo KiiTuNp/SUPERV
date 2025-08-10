@@ -2449,8 +2449,8 @@ function App() {
                       <li>• Approuve manuellement chaque participant</li>
                       <li>• Crée des sondages (immutables une fois publiés)</li>
                       <li>• Contrôle l'ouverture/fermeture des votes</li>
-                      <li>• Génère le rapport final officiel</li>
-                      <li>• Invite des scrutateurs indépendants (optionnel)</li>
+                      <li>• Génère le rapport final <strong>directement</strong></li>
+                      <li>• Invite des scrutateurs observateurs (optionnel)</li>
                     </ul>
                   </div>
 
