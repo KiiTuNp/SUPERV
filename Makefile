@@ -1,4 +1,4 @@
-.PHONY: help build deploy dev setup logs status stop clean backup
+.PHONY: help build deploy dev setup logs status stop clean backup fix validate check ssl
 
 # Default target
 help:
