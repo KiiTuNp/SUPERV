@@ -36,28 +36,28 @@ deploy:
 
 build:
 	@echo "🔨 Building Docker images..."
-	docker-compose build
+	@docker compose version >/dev/null 2>&1 && docker compose build || docker-compose build
 
 logs:
 	@echo "📋 Viewing logs..."
-	docker-compose logs -f
+	@docker compose version >/dev/null 2>&1 && docker compose logs -f || docker-compose logs -f
 
 status:
 	@echo "📊 Service status:"
-	docker-compose ps
+	@docker compose version >/dev/null 2>&1 && docker compose ps || docker-compose ps
 
 stop:
 	@echo "⏹️  Stopping services..."
-	docker-compose down
+	@docker compose version >/dev/null 2>&1 && docker compose down || docker-compose down
 
 restart:
 	@echo "🔄 Restarting services..."
-	docker-compose restart
+	@docker compose version >/dev/null 2>&1 && docker compose restart || docker-compose restart
 
 update:
 	@echo "📦 Updating application..."
 	git pull
-	docker-compose up -d --build
+	@docker compose version >/dev/null 2>&1 && docker compose up -d --build || docker-compose up -d --build
 
 # Development commands
 dev:
