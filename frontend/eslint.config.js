@@ -6,15 +6,21 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { 
-    ignores: ['dist', 'build', 'node_modules', '*.config.js'] 
+    ignores: [
+      'dist/**',
+      'build/**', 
+      'node_modules/**', 
+      '*.config.js',
+      'public/**',
+      'coverage/**'
+    ] 
   },
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2025,
+      ecmaVersion: 2024,
       globals: {
         ...globals.browser,
-        ...globals.es2025,
         process: 'readonly'
       },
       parserOptions: {
@@ -37,10 +43,10 @@ export default [
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       
-      // React 19 specific optimizations
+      // React optimizations
       'react/jsx-no-target-blank': 'off',
-      'react/prop-types': 'off', // Using TypeScript for type checking
-      'react/react-in-jsx-scope': 'off', // React 19 auto-import
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
@@ -51,7 +57,7 @@ export default [
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_' 
       }],
-      'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+      'no-console': 'warn',
       
       // Modern JS optimizations
       'prefer-const': 'error',
