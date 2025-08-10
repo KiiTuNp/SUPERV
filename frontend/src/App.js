@@ -2539,54 +2539,78 @@ function App() {
                 </div>
               </div>
 
-              {/* Section: Processus de validation */}
+              {/* Section: Processus de génération simplifié */}
               <div>
                 <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   <CheckCircle className="w-6 h-6 text-orange-600" />
-                  Processus de validation
+                  Processus de génération du rapport
                 </h3>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold text-orange-800 mb-3">Sans scrutateurs (Procédure simplifiée)</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>L'organisateur génère directement le rapport final</span>
+                      <h4 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        Génération Directe Simplifiée
+                      </h4>
+                      <p className="text-sm text-orange-700 mb-4">
+                        Le système a été optimisé pour un workflow fluide et sans friction. 
+                        L'organisateur peut générer le rapport final <strong>directement</strong>, que des scrutateurs soient présents ou non.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-white p-4 rounded-lg border border-orange-100">
+                          <h5 className="font-semibold text-orange-800 mb-2">Avec scrutateurs</h5>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span>Accès automatique des scrutateurs autorisés</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span>Surveillance et transparence en temps réel</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span>Génération directe par l'organisateur</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span>Légitimité par présence d'observateurs</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Suppression immédiate et automatique des données</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Notification instantanée aux participants</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Responsabilité totale de l'organisateur</span>
+                        <div className="bg-white p-4 rounded-lg border border-orange-100">
+                          <h5 className="font-semibold text-orange-800 mb-2">Sans scrutateurs</h5>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span>Génération immédiate par l'organisateur</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span>Processus accéléré et simplifié</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span>Idéal pour consultations internes</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-orange-700">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span>Responsabilité organisateur</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
-                    <div>
-                      <h4 className="font-semibold text-orange-800 mb-3">Avec scrutateurs (Procédure renforcée)</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Demande formelle de génération par l'organisateur</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span><strong>Vote à la majorité absolue</strong> des scrutateurs requis</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span>Génération <strong>uniquement si majorité approuve</strong></span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                          <span><strong>Double validation</strong> = légitimité juridique renforcée</span>
+                    <div className="bg-green-100 border border-green-300 rounded-lg p-4">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                        <div>
+                          <h5 className="font-semibold text-green-800">Workflow optimisé</h5>
+                          <p className="text-sm text-green-700">
+                            Plus d'attente, plus de blocage : l'organisateur contrôle entièrement le processus 
+                            tout en bénéficiant de la surveillance des scrutateurs s'ils sont présents.
+                          </p>
                         </div>
                       </div>
                     </div>
