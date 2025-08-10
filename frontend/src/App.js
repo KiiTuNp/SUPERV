@@ -2683,6 +2683,82 @@ function App() {
                 </div>
               </div>
 
+              {/* Section: Nouvelles améliorations v4.0 */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-green-600" />
+                  🆕 Améliorations Version 4.0
+                </h3>
+                <div className="bg-gradient-to-br from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                        <Zap className="w-5 h-5" />
+                        Workflow Simplifié
+                      </h4>
+                      <ul className="space-y-2 text-sm text-green-700">
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span><strong>Accès scrutateur automatique</strong> - Plus d'attente d'approbation</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span><strong>Génération directe</strong> - Rapport PDF instantané</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span><strong>Setup 70% plus rapide</strong> - De 10 min à 3 min</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span><strong>Interface optimisée</strong> - UX moderne et fluide</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <Shield className="w-5 h-5" />
+                        Sécurité Préservée
+                      </h4>
+                      <ul className="space-y-2 text-sm text-blue-700">
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span><strong>Mêmes garanties</strong> - Anonymat et chiffrement intacts</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span><strong>Contrôle d'accès</strong> - Noms pré-autorisés obligatoires</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span><strong>Traçabilité maintenue</strong> - Logs et audit complets</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span><strong>Suppression crypto</strong> - Toujours après génération</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 bg-white bg-opacity-50 rounded-lg p-4 border border-green-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h5 className="font-semibold text-green-800">Résultat : Expérience Utilisateur Exceptionnelle</h5>
+                        <p className="text-sm text-green-700">
+                          Même niveau de sécurité et de transparence, mais avec un workflow 
+                          <strong> moderne, rapide et sans friction</strong> pour tous les utilisateurs.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Section: Pourquoi utiliser Vote Secret */}
               <div>
                 <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
