@@ -89,23 +89,28 @@ SSL certificates are automatically generated via Let's Encrypt. No manual config
 ## 📋 Management Commands
 
 ```bash
-# View logs
-docker-compose logs -f
+# Using Make (recommended)
+make deploy          # Deploy to production
+make dev            # Start development
+make setup          # Setup development environment
+make logs           # View logs
+make status         # Check services
+make stop           # Stop services
+make update         # Update application
+make backup         # Backup database
+make clean          # Clean Docker resources
 
-# Stop services
-docker-compose down
+# Using Docker Compose directly
+docker-compose up -d              # Start services
+docker-compose logs -f            # View logs
+docker-compose down               # Stop services
+docker-compose ps                 # Check status
 
-# Restart services
-docker-compose restart
-
-# Update application
-git pull && docker-compose up -d --build
-
-# Database backup
-docker exec vote-secret-mongodb mongodump --out /backup
-
-# Check service status
-docker-compose ps
+# Using NPM scripts
+npm run deploy      # Deploy to production
+npm run dev         # Start development
+npm run setup       # Setup development
+npm run check       # Pre-deployment check
 ```
 
 ---
