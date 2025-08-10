@@ -1180,20 +1180,13 @@ function App() {
                     </div>
                   )}
                   
-                  {reportGenerationInProgress ? (
-                    <div className="text-center">
-                      <div className="spinner-modern mx-auto mb-2"></div>
-                      <p className="text-blue-600 text-sm">En attente de l'approbation des scrutateurs...</p>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => setShowReportModal(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      <FileText className="w-4 h-4 mr-2" />
-                      Voir le résumé du rapport
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => setShowReportModal(true)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Voir le résumé du rapport
+                  </Button>
                 </div>
               </div>
             </div>
