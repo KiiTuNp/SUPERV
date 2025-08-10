@@ -80,3 +80,15 @@ ssl:
 	@echo "🔒 Renewing SSL certificates..."
 	docker-compose exec certbot certbot renew
 	docker-compose restart nginx
+
+fix:
+	@echo "🔧 Auto-fixing Docker build issues..."
+	./fix-docker.sh
+
+validate:
+	@echo "✅ Validating Docker configuration..."
+	./validate-docker.sh
+
+check:
+	@echo "📋 Running pre-deployment checks..."
+	./check.sh
