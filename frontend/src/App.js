@@ -768,49 +768,7 @@ function App() {
 
     // Fonction d'approbation des scrutateurs supprimée - accès automatique maintenant
 
-    const requestReportGeneration = async () => {
-      try {
-        const response = await axios.post(`${API}/meetings/${meeting.id}/request-report`, {
-          meeting_id: meeting.id,
-          requested_by: meeting.organizer_name
-        });
-
-        if (response.data.direct_generation) {
-          // Pas de scrutateurs - génération directe
-          downloadReportDirect();
-        } else {
-          // Scrutateurs présents - attendre leur approbation
-          setReportGenerationInProgress(true);
-          alert(`Demande envoyée aux ${response.data.scrutator_count} scrutateurs. Majorité requise: ${response.data.majority_needed} votes positifs.`);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la demande de génération:", error);
-        alert("Erreur: " + (error.response?.data?.detail || "Erreur inconnue"));
-      }
-    };
-
-    const submitScrutatorVote = async (approved) => {
-      try {
-        const response = await axios.post(`${API}/meetings/${meeting.id}/scrutator-vote`, {
-          meeting_id: meeting.id,
-          scrutator_name: scrutatorName,
-          approved
-        });
-
-        setShowReportVoteModal(false);
-        
-        if (response.data.decision === "approved") {
-          alert(`✅ Génération du rapport approuvée !\n\n${response.data.yes_votes} votes positifs sur ${response.data.majority_needed} requis.`);
-        } else if (response.data.decision === "rejected") {
-          alert(`❌ Génération du rapport rejetée.\n\n${response.data.no_votes} votes négatifs sur ${response.data.majority_needed} requis.`);
-        } else {
-          alert(`🗳️ Vote enregistré !\n\n${response.data.message}`);
-        }
-      } catch (error) {
-        console.error("Erreur lors du vote:", error);
-        alert("Erreur lors du vote: " + (error.response?.data?.detail || "Erreur inconnue"));
-      }
-    };
+    // Fonctions de vote des scrutateurs supprimées - génération directe maintenant
 
     const updatePollOption = (index, value) => {
       const updated = [...newPollOptions];
