@@ -1,7 +1,10 @@
+# SUPER Vote Secret - Production Docker Compose
+# Configuration optimisée pour performance et robustesse
+
 services:
   # MongoDB Database
   mongodb:
-    image: mongo:7.0
+    image: mongo:7.0-jammy
     container_name: vote-secret-mongodb
     restart: unless-stopped
     environment:
@@ -13,89 +16,125 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - vote-secret-network
+    ports:
+      - "27017:27017"
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok", "--authenticationDatabase", "admin"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
+          cpus: '1.0'
         reservations:
-          memory: 256M
+          memory: 512M
+          cpus: '0.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     container_name: vote-secret-backend
     restart: unless-stopped
     environment:
       MONGO_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB:-vote_secret}?authSource=admin
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      PYTHONPATH: /app
+      PYTHONUNBUFFERED: 1
     depends_on:
       mongodb:
         condition: service_healthy
     networks:
       - vote-secret-network
     ports:
-      - "8001:8001"  # Exposé pour les tests de santé directs
+      - "8001:8001"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health', timeout=5)"]
+      test: ["CMD", "python", "-c", "import requests; r=requests.get('http://localhost:8001/api/health', timeout=5); assert r.status_code==200 and 'healthy' in r.text"]
       interval: 30s
-      timeout: 10s
+      timeout: 15s
       retries: 3
-      start_period: 40s
+      start_period: 60s
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G
+          cpus: '1.0'
         reservations:
           memory: 256M
+          cpus: '0.3'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        NODE_ENV: production
+        REACT_APP_BACKEND_URL: https://${DOMAIN}
     container_name: vote-secret-frontend
     restart: unless-stopped
     environment:
+      NODE_ENV: production
       REACT_APP_BACKEND_URL: https://${DOMAIN}
+      GENERATE_SOURCEMAP: false
     networks:
       - vote-secret-network
     ports:
-      - "3000:3000"  # Exposé pour les tests de santé directs
+      - "3000:3000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--timeout=10", "http://localhost:3000/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 15s
       retries: 3
-      start_period: 40s
+      start_period: 45s
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
+          cpus: '0.5'
         reservations:
           memory: 128M
+          cpus: '0.2'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Reverse Proxy & SSL
   nginx:
-    image: nginx:alpine
+    image: nginx:1.25-alpine
     container_name: vote-secret-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+      - "8443:8443"  # Fallback SSL port
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - certbot_data:/var/www/certbot:ro
       - letsencrypt_data:/etc/letsencrypt:ro
+      - nginx_cache:/var/cache/nginx
+      - nginx_logs:/var/log/nginx
     depends_on:
       backend:
         condition: service_healthy
@@ -104,90 +143,155 @@ services:
     networks:
       - vote-secret-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
-      interval: 30s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "--timeout=5", "http://localhost:80/health"]
+      interval: 15s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # SSL Certificate Manager
+  certbot:
+    image: certbot/certbot:latest
+    container_name: vote-secret-certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_data:/var/www/certbot
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_logs:/var/log/letsencrypt
+    networks:
+      - vote-secret-network
+    environment:
+      DOMAIN: ${DOMAIN}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+    command: >
+      sh -c '
+        echo "🔒 Certbot starting for domain: $$DOMAIN";
+        
+        # Wait for nginx to be ready
+        sleep 45;
+        
+        # Check if certificate already exists
+        if [ -f "/etc/letsencrypt/live/$$DOMAIN/fullchain.pem" ]; then
+          echo "✅ SSL certificate already exists for $$DOMAIN";
+          # Create/update default symlink
+          ln -sf /etc/letsencrypt/live/$$DOMAIN /etc/letsencrypt/live/default 2>/dev/null || true;
+        else
+          echo "🔑 Generating new SSL certificate for $$DOMAIN...";
+          
+          # Attempt certificate generation with proper validation
+          for attempt in 1 2 3; do
+            echo "🔄 SSL attempt $$attempt/3 for $$DOMAIN";
+            
+            # Test HTTP accessibility first
+            if wget --spider --tries=3 --timeout=10 http://$$DOMAIN/.well-known/acme-challenge/ 2>/dev/null; then
+              echo "✅ HTTP challenge path accessible";
+            else
+              echo "⚠️  HTTP challenge path not accessible - continuing anyway";
+            fi
+            
+            # Generate certificate
+            if certbot certonly \
+              --webroot \
+              --webroot-path=/var/www/certbot \
+              --email $$ADMIN_EMAIL \
+              --agree-tos \
+              --no-eff-email \
+              --non-interactive \
+              --preferred-challenges http \
+              --rsa-key-size 4096 \
+              --must-staple \
+              -d $$DOMAIN \
+              --verbose; then
+              
+              echo "✅ SSL certificate generated successfully for $$DOMAIN";
+              ln -sf /etc/letsencrypt/live/$$DOMAIN /etc/letsencrypt/live/default;
+              
+              # Test certificate validity
+              if openssl x509 -in /etc/letsencrypt/live/$$DOMAIN/fullchain.pem -noout -dates; then
+                echo "✅ Certificate validation successful";
+                break;
+              else
+                echo "❌ Certificate validation failed";
+              fi
+            else
+              echo "❌ SSL generation attempt $$attempt failed";
+              [ $$attempt -eq 3 ] && echo "❌ All SSL attempts failed - HTTP mode will be used";
+            fi
+            
+            sleep 30;
+          done
+        fi
+        
+        # Continuous renewal loop
+        while true; do
+          echo "🔄 Checking certificate renewal (every 12 hours)";
+          certbot renew --quiet --no-self-upgrade;
+          sleep 12h;
+        done
+      '
     deploy:
       resources:
         limits:
           memory: 128M
-        reservations:
-          memory: 64M
-
-  # SSL Certificate Manager
-  certbot:
-    image: certbot/certbot
-    container_name: vote-secret-certbot
-    volumes:
-      - certbot_data:/var/www/certbot
-      - letsencrypt_data:/etc/letsencrypt
-    networks:
-      - vote-secret-network
-    environment:
-      - DOMAIN=${DOMAIN:-vote.example.com}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-    command: >
-      sh -c "
-        echo 'Démarrage Certbot pour $${DOMAIN}...';
-        
-        # Attendre que Nginx soit prêt
-        sleep 30;
-        
-        # Vérifier si le certificat existe déjà
-        if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
-          echo 'Génération du certificat SSL pour $${DOMAIN}...';
-          
-          # Tentative de génération du certificat
-          certbot certonly \
-            --webroot \
-            --webroot-path=/var/www/certbot \
-            --email $${ADMIN_EMAIL} \
-            --agree-tos \
-            --no-eff-email \
-            --non-interactive \
-            -d $${DOMAIN};
-            
-          if [ $$? -eq 0 ]; then
-            echo '✅ Certificat SSL généré avec succès pour $${DOMAIN}';
-            # Créer un lien symbolique pour nginx
-            ln -sf /etc/letsencrypt/live/$${DOMAIN} /etc/letsencrypt/live/default;
-          else
-            echo '❌ Erreur lors de la génération du certificat SSL';
-            echo 'Vérifiez que le domaine $${DOMAIN} pointe vers ce serveur';
-          fi
-        else
-          echo '✅ Certificat SSL déjà existant pour $${DOMAIN}';
-          # S'assurer que le lien symbolique existe
-          ln -sf /etc/letsencrypt/live/$${DOMAIN} /etc/letsencrypt/live/default;
-        fi;
-        
-        # Boucle de renouvellement automatique
-        while :; do 
-          echo 'Vérification du renouvellement SSL...';
-          certbot renew --quiet; 
-          sleep 12h; 
-        done
-      "
-    deploy:
-      resources:
-        limits:
-          memory: 64M
+          cpus: '0.2'
         reservations:
           memory: 32M
+          cpus: '0.1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   vote-secret-network:
     driver: bridge
     name: vote-secret-network
+    driver_opts:
+      com.docker.network.bridge.name: br-vote-secret
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
 
 volumes:
   mongodb_data:
     driver: local
     name: vote-secret-mongodb-data
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/mongodb
+  
   certbot_data:
     driver: local
     name: vote-secret-certbot-data
+    
   letsencrypt_data:
     driver: local
     name: vote-secret-letsencrypt-data
+    
+  nginx_cache:
+    driver: local
+    name: vote-secret-nginx-cache
+    
+  nginx_logs:
+    driver: local
+    name: vote-secret-nginx-logs
+    
+  certbot_logs:
+    driver: local
+    name: vote-secret-certbot-logs
