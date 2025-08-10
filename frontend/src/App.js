@@ -2287,65 +2287,8 @@ function App() {
         }
       }
       
-      if (data.type === "report_generation_requested") {
-        // Afficher le modal de vote pour les scrutateurs avec alertes améliorées
-        if (isScrutator) {
-          setReportVoteData({
-            requested_by: data.requested_by,
-            scrutator_count: data.scrutator_count,
-            majority_needed: data.majority_needed
-          });
-          setShowReportVoteModal(true);
-          
-          // Alertes visuelles et sonores pour attirer l'attention
-          try {
-            // Notification navigateur si disponible
-            if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("🔔 SUPER Vote Secret - Action requise", {
-                body: `Votre vote est requis pour la génération du rapport final`,
-                icon: "/favicon.ico",
-                tag: "scrutator-vote",
-                requireInteraction: true
-              });
-            }
-            
-            // Son d'alerte si possible
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcCjiR1/LNeSsFJHfH8N2QQAoUXrTp66hVFA==');
-            audio.volume = 0.3;
-            audio.play().catch(() => {}); // Ignore si bloqué par le navigateur
-            
-            // Vibration sur mobile
-            if ("vibrate" in navigator) {
-              navigator.vibrate([200, 100, 200, 100, 200]);
-            }
-          } catch (error) {
-            console.log("Alertes optionnelles non disponibles:", error);
-          }
-        }
-      }
-      
-      if (data.type === "scrutator_vote_submitted") {
-        // Mettre à jour les informations de vote en temps réel
-        console.log(`Vote de ${data.scrutator_name}: ${data.vote ? 'Oui' : 'Non'} (${data.votes_cast}/${data.total_scrutators})`);
-      }
-      
-      if (data.type === "report_generation_approved") {
-        // La génération a été approuvée - permettre le téléchargement
-        setReportGenerationInProgress(false);
-        if (!isScrutator) {
-          alert(`✅ Génération du rapport approuvée par les scrutateurs !\n\n${data.yes_votes} votes positifs sur ${data.majority_needed} requis.`);
-          // Déclencher automatiquement le téléchargement
-          window.location.href = `${API}/meetings/${meeting.id}/report`;
-        }
-      }
-      
-      if (data.type === "report_generation_rejected") {
-        // La génération a été rejetée
-        setReportGenerationInProgress(false);
-        if (!isScrutator) {
-          alert(`❌ Génération du rapport rejetée par les scrutateurs.\n\n${data.no_votes} votes négatifs sur ${data.majority_needed} requis.`);
-        }
-      }
+      // Suppression de toute la logique WebSocket des votes scrutateurs
+      // Plus nécessaire avec génération directe des rapports
       
       if (data.type === "poll_started" || data.type === "poll_closed" || data.type === "vote_submitted") {
         // Refresh polls for both organizer and participants
