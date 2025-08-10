@@ -1092,6 +1092,13 @@ class VoteSecretAPITester:
                 self.test_start_poll,
                 self.test_submit_vote,
                 self.test_get_poll_results,
+                self.test_close_poll_for_report,
+                # NEW SCRUTATOR VOTING SYSTEM TESTS
+                self.test_request_report_generation,
+                self.test_scrutator_vote_approve,
+                self.test_scrutator_vote_majority,
+                self.test_generate_report_after_approval,
+                self.test_websocket_report_notifications,
                 # WEBSOCKET TEST
                 self.test_websocket_connection,
             ]
