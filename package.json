@@ -9,12 +9,18 @@
     "dev:frontend": "cd frontend && yarn start",
     "build": "npm run build:frontend",
     "build:frontend": "cd frontend && yarn build",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "cd backend && python -m uvicorn server:app --host 0.0.0.0 --port 8001",
-    "start:frontend": "cd frontend && serve -s build -l 3000",
+    "start": "npm run docker:up",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
     "install:all": "npm run install:backend && npm run install:frontend",
     "install:backend": "cd backend && pip install -r requirements.txt",
-    "install:frontend": "cd frontend && yarn install"
+    "install:frontend": "cd frontend && yarn install",
+    "deploy": "./deploy.sh",
+    "check": "./check.sh",
+    "setup": "./dev-setup.sh"
   },
   "repository": {
     "type": "git",
