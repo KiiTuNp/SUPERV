@@ -1358,35 +1358,11 @@ function App() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {scrutator.approval_status === "pending" && (
-                                <>
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => approveScrutator(scrutator.id, true)}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                                  >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    Approuver
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline" 
-                                    onClick={() => approveScrutator(scrutator.id, false)}
-                                    className="border-purple-300 hover:bg-purple-50"
-                                  >
-                                    Rejeter
-                                  </Button>
-                                </>
-                              )}
-                              {scrutator.approval_status === "approved" && (
-                                <Badge className="bg-purple-600 text-white">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Approuvé
-                                </Badge>
-                              )}
-                              {scrutator.approval_status === "rejected" && (
-                                <Badge className="bg-red-600 text-white">Rejeté</Badge>
-                              )}
+                              {/* Plus besoin d'approbation - accès automatique */}
+                              <Badge className="bg-purple-600 text-white">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Actif
+                              </Badge>
                             </div>
                           </div>
                         ))}
