@@ -758,22 +758,7 @@ function App() {
       }
     };
 
-    const approveScrutator = async (scrutatorId, approved) => {
-      try {
-        await axios.post(`${API}/scrutators/${scrutatorId}/approve`, {
-          scrutator_id: scrutatorId,
-          approved
-        });
-        
-        // Recharger la liste des scrutateurs
-        loadScrutators();
-        
-        alert(approved ? "Scrutateur approuvé avec succès" : "Scrutateur rejeté");
-      } catch (error) {
-        console.error("Erreur lors de l'approbation du scrutateur:", error);
-        alert("Erreur lors de l'approbation: " + (error.response?.data?.detail || "Erreur inconnue"));
-      }
-    };
+    // Fonction d'approbation des scrutateurs supprimée - accès automatique maintenant
 
     const requestReportGeneration = async () => {
       try {
