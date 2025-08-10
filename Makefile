@@ -1,99 +1,129 @@
-.PHONY: help build deploy dev setup logs status stop clean backup fix validate check ssl
+# SUPER Vote Secret - Makefile
+# Convenient commands for development and deployment
+
+.PHONY: help deploy dev build test clean logs status health
 
 # Default target
 help:
-	@echo "🗳️  SUPER Vote Secret - Docker Commands"
-	@echo "======================================"
+	@echo "SUPER Vote Secret - Available Commands:"
 	@echo ""
 	@echo "Production Commands:"
 	@echo "  make deploy     - Deploy to production"
-	@echo "  make build      - Build all images"
-	@echo "  make logs       - View all logs"
-	@echo "  make status     - Check service status"
+	@echo "  make build      - Build production images"
+	@echo "  make start      - Start production services"
 	@echo "  make stop       - Stop all services"
 	@echo "  make restart    - Restart all services"
-	@echo "  make update     - Update and rebuild"
 	@echo ""
 	@echo "Development Commands:"
 	@echo "  make dev        - Start development environment"
-	@echo "  make setup      - Setup development environment"
+	@echo "  make dev-build  - Build development images"
+	@echo "  make dev-stop   - Stop development services"
 	@echo ""
-	@echo "Troubleshooting Commands:"
-	@echo "  make fix        - Auto-fix Docker build issues"
-	@echo "  make validate   - Validate Docker configuration" 
-	@echo "  make check      - Run pre-deployment checks"
+	@echo "Monitoring Commands:"
+	@echo "  make logs       - Show all logs"
+	@echo "  make status     - Show service status"
+	@echo "  make health     - Check application health"
 	@echo ""
 	@echo "Maintenance Commands:"
+	@echo "  make clean      - Clean Docker resources"
 	@echo "  make backup     - Backup database"
-	@echo "  make clean      - Clean up Docker resources"
-	@echo "  make ssl        - Renew SSL certificates"
-	@echo ""
+	@echo "  make update     - Update and restart services"
 
 # Production commands
 deploy:
-	@echo "🚀 Deploying SUPER Vote Secret..."
+	@echo "🚀 Deploying SUPER Vote Secret to production..."
 	./deploy.sh
 
 build:
-	@echo "🔨 Building Docker images..."
-	@docker compose version >/dev/null 2>&1 && docker compose build || docker-compose build
+	@echo "🔨 Building production images..."
+	docker-compose build --no-cache
 
-logs:
-	@echo "📋 Viewing logs..."
-	@docker compose version >/dev/null 2>&1 && docker compose logs -f || docker-compose logs -f
-
-status:
-	@echo "📊 Service status:"
-	@docker compose version >/dev/null 2>&1 && docker compose ps || docker-compose ps
+start:
+	@echo "▶️  Starting production services..."
+	docker-compose up -d
 
 stop:
-	@echo "⏹️  Stopping services..."
-	@docker compose version >/dev/null 2>&1 && docker compose down || docker-compose down
+	@echo "⏹️  Stopping all services..."
+	docker-compose down
 
 restart:
-	@echo "🔄 Restarting services..."
-	@docker compose version >/dev/null 2>&1 && docker compose restart || docker-compose restart
-
-update:
-	@echo "📦 Updating application..."
-	git pull
-	@docker compose version >/dev/null 2>&1 && docker compose up -d --build || docker-compose up -d --build
+	@echo "🔄 Restarting all services..."
+	docker-compose restart
 
 # Development commands
 dev:
 	@echo "🛠️  Starting development environment..."
-	npm run dev
+	docker-compose -f docker-compose.dev.yml up -d
+	@echo ""
+	@echo "Services available at:"
+	@echo "  Frontend: http://localhost:3000"
+	@echo "  Backend:  http://localhost:8001"
+	@echo "  MongoDB:  mongodb://admin:devpassword123@localhost:27017"
 
-setup:
-	@echo "⚙️  Setting up development environment..."
-	./dev-setup.sh
+dev-build:
+	@echo "🔨 Building development images..."
+	docker-compose -f docker-compose.dev.yml build
+
+dev-stop:
+	@echo "⏹️  Stopping development services..."
+	docker-compose -f docker-compose.dev.yml down
+
+# Monitoring commands
+logs:
+	@echo "📋 Showing service logs..."
+	docker-compose logs -f --tail=100
+
+status:
+	@echo "📊 Service status:"
+	docker-compose ps
+
+health:
+	@echo "🏥 Checking application health..."
+	@echo ""
+	@echo "Backend Health:"
+	@curl -s http://localhost:8001/api/health 2>/dev/null || echo "Backend not accessible"
+	@echo ""
+	@echo "Frontend Health:"  
+	@curl -s http://localhost:3000/health 2>/dev/null || echo "Frontend not accessible"
+	@echo ""
+	@echo "Nginx Health:"
+	@curl -s http://localhost:80/health 2>/dev/null || echo "Nginx not accessible"
 
 # Maintenance commands
-backup:
-	@echo "💾 Creating database backup..."
-	mkdir -p ./backups
-	docker exec vote-secret-mongodb mongodump --out /tmp/backup
-	docker cp vote-secret-mongodb:/tmp/backup ./backups/$(shell date +%Y%m%d_%H%M%S)
-	@echo "✅ Backup created in ./backups/"
-
 clean:
-	@echo "🧹 Cleaning up Docker resources..."
-	docker system prune -f
+	@echo "🧹 Cleaning Docker resources..."
+	docker-compose down --volumes --remove-orphans
+	docker system prune -af
 	docker volume prune -f
 
-ssl:
-	@echo "🔒 Renewing SSL certificates..."
+backup:
+	@echo "💾 Creating database backup..."
+	@mkdir -p backups
+	docker-compose exec -T mongodb mongodump --authenticationDatabase admin --out /tmp/backup
+	docker cp $$(docker-compose ps -q mongodb):/tmp/backup backups/mongodb-$$(date +%Y%m%d-%H%M%S)
+	@echo "✅ Backup created in backups/ directory"
+
+update:
+	@echo "🔄 Updating application..."
+	git pull
+	docker-compose build --no-cache
+	docker-compose up -d
+	@echo "✅ Update completed"
+
+# SSL certificate management
+ssl-status:
+	@echo "🔒 SSL Certificate Status:"
+	docker-compose exec certbot certbot certificates
+
+ssl-renew:
+	@echo "🔄 Renewing SSL certificates..."
 	docker-compose exec certbot certbot renew
-	docker-compose restart nginx
 
-fix:
-	@echo "🔧 Auto-fixing Docker build issues..."
-	./fix-docker.sh
+# Database management
+db-shell:
+	@echo "🗄️  Opening MongoDB shell..."
+	docker-compose exec mongodb mongosh --authenticationDatabase admin
 
-validate:
-	@echo "✅ Validating Docker configuration..."
-	./validate-docker.sh
-
-check:
-	@echo "📋 Running pre-deployment checks..."
-	./check.sh
+db-stats:
+	@echo "📊 Database statistics:"
+	docker-compose exec -T mongodb mongosh --quiet --authenticationDatabase admin --eval "db.adminCommand('serverStatus')"

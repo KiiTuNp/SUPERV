@@ -1,7 +1,10 @@
+# SUPER Vote Secret - Development Docker Compose
+# Optimized for development workflow
+
 services:
-  # MongoDB for Development
+  # MongoDB for development
   mongodb:
-    image: mongo:7.0
+    image: mongo:7.0-jammy
     container_name: vote-secret-dev-mongodb
     restart: unless-stopped
     ports:
@@ -12,40 +15,61 @@ services:
       MONGO_INITDB_DATABASE: vote_secret_dev
     volumes:
       - mongodb_dev_data:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
-      - vote-secret-dev
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+      - vote-secret-dev-network
 
-  # Development Backend (optional - can run locally)
-  backend-dev:
+  # Backend for development
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: builder
     container_name: vote-secret-dev-backend
     restart: unless-stopped
     ports:
       - "8001:8001"
     environment:
       MONGO_URL: mongodb://admin:devpassword123@mongodb:27017/vote_secret_dev?authSource=admin
-    depends_on:
-      mongodb:
-        condition: service_healthy
+      JWT_SECRET: dev-jwt-secret-key
+      ENCRYPTION_KEY: dev-encryption-key-32chars
+      NODE_ENV: development
+      PYTHON_ENV: development
     volumes:
       - ./backend:/app
+    depends_on:
+      - mongodb
     networks:
-      - vote-secret-dev
+      - vote-secret-dev-network
     command: ["python", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 
+  # Frontend for development
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: vote-secret-dev-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      REACT_APP_BACKEND_URL: http://localhost:8001
+      GENERATE_SOURCEMAP: true
+      FAST_REFRESH: true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - vote-secret-dev-network
+    command: ["yarn", "start"]
+
 networks:
-  vote-secret-dev:
+  vote-secret-dev-network:
     driver: bridge
+    name: vote-secret-dev-network
 
 volumes:
   mongodb_dev_data:
     driver: local
+    name: vote-secret-dev-mongodb-data
