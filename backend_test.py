@@ -769,23 +769,35 @@ class VoteSecretAPITester:
         """Run all backend API tests"""
         print("🚀 Starting Vote Secret Backend API Tests")
         print(f"📡 Testing API at: {API_BASE_URL}")
+        print("🔍 Testing NEW FEATURE: Automatic Scrutator Access System")
         print("=" * 60)
         
         await self.setup_session()
         
         try:
-            # Core API Tests
+            # Core API Tests + New Scrutator Tests
             tests = [
                 self.test_health_check,
                 self.test_mongodb_connectivity,
                 self.test_create_meeting,
                 self.test_get_meeting_by_code,
+                # NEW SCRUTATOR TESTS
+                self.test_add_scrutators,
+                self.test_scrutator_automatic_access,
+                self.test_scrutator_organizer_interface_access,
+                self.test_get_meeting_scrutators,
+                self.test_second_scrutator_join,
+                self.test_unauthorized_scrutator_join,
+                self.test_invalid_scrutator_code,
+                # EXISTING PARTICIPANT TESTS
                 self.test_participant_join,
                 self.test_approve_participant,
+                # POLL TESTS
                 self.test_create_poll,
                 self.test_start_poll,
                 self.test_submit_vote,
                 self.test_get_poll_results,
+                # WEBSOCKET TEST
                 self.test_websocket_connection,
             ]
             
