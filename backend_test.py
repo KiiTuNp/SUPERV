@@ -452,6 +452,318 @@ class VoteSecretAPITester:
         except Exception as e:
             self.log_test("MongoDB Connectivity", False, f"Database error: {str(e)}")
             return False
+
+    async def test_add_scrutators(self):
+        """Test 12: Add Scrutators to Meeting"""
+        if not self.meeting_data:
+            self.log_test("Add Scrutators", False, "No meeting data available")
+            return False
+            
+        try:
+            scrutator_payload = {
+                "names": ["Marie Dupont", "Jean Martin", "Sophie Bernard"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{self.meeting_data['id']}/scrutators",
+                json=scrutator_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate response structure
+                    required_fields = ["scrutator_code", "scrutators", "message"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Add Scrutators", False, f"Missing fields: {missing_fields}")
+                        return False
+                        
+                    # Store scrutator data for subsequent tests
+                    self.meeting_data["scrutator_code"] = data["scrutator_code"]
+                    self.meeting_data["scrutators"] = data["scrutators"]
+                    
+                    self.log_test("Add Scrutators", True, 
+                                f"Added {len(data['scrutators'])} scrutators with code: {data['scrutator_code']}")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Add Scrutators", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Add Scrutators", False, f"Error: {str(e)}")
+            return False
+
+    async def test_scrutator_automatic_access(self):
+        """Test 13: Scrutator Automatic Access (NEW FEATURE)"""
+        if not self.meeting_data or "scrutator_code" not in self.meeting_data:
+            self.log_test("Scrutator Automatic Access", False, "No scrutator code available")
+            return False
+            
+        try:
+            # Test joining as a scrutator with automatic approval
+            join_payload = {
+                "name": "Marie Dupont",  # First scrutator from the list
+                "scrutator_code": self.meeting_data["scrutator_code"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/scrutators/join",
+                json=join_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate response structure
+                    required_fields = ["meeting", "scrutator_name", "access_type", "status"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Scrutator Automatic Access", False, f"Missing fields: {missing_fields}")
+                        return False
+                    
+                    # Check that scrutator gets IMMEDIATE access (approved status)
+                    if data["status"] != "approved":
+                        self.log_test("Scrutator Automatic Access", False, 
+                                    f"Expected 'approved' status, got: {data['status']}")
+                        return False
+                    
+                    # Check access type
+                    if data["access_type"] != "scrutator":
+                        self.log_test("Scrutator Automatic Access", False, 
+                                    f"Expected 'scrutator' access_type, got: {data['access_type']}")
+                        return False
+                    
+                    # Store scrutator data for subsequent tests
+                    self.meeting_data["scrutator_data"] = data
+                    
+                    self.log_test("Scrutator Automatic Access", True, 
+                                f"Scrutator '{data['scrutator_name']}' got immediate access with status: {data['status']}")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Scrutator Automatic Access", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Scrutator Automatic Access", False, f"Error: {str(e)}")
+            return False
+
+    async def test_scrutator_organizer_interface_access(self):
+        """Test 14: Scrutator Access to Organizer Interface"""
+        if not self.meeting_data or "scrutator_data" not in self.meeting_data:
+            self.log_test("Scrutator Organizer Interface Access", False, "No scrutator data available")
+            return False
+            
+        try:
+            # Test that scrutator can access organizer view
+            meeting_id = self.meeting_data["id"]
+            
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{meeting_id}/organizer"
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate response structure
+                    required_fields = ["meeting", "participants", "polls"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Scrutator Organizer Interface Access", False, f"Missing fields: {missing_fields}")
+                        return False
+                    
+                    # Verify meeting data is accessible
+                    if data["meeting"]["id"] != meeting_id:
+                        self.log_test("Scrutator Organizer Interface Access", False, "Wrong meeting data returned")
+                        return False
+                    
+                    self.log_test("Scrutator Organizer Interface Access", True, 
+                                "Scrutator can access organizer interface successfully")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Scrutator Organizer Interface Access", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Scrutator Organizer Interface Access", False, f"Error: {str(e)}")
+            return False
+
+    async def test_get_meeting_scrutators(self):
+        """Test 15: Get Meeting Scrutators List"""
+        if not self.meeting_data:
+            self.log_test("Get Meeting Scrutators", False, "No meeting data available")
+            return False
+            
+        try:
+            meeting_id = self.meeting_data["id"]
+            
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{meeting_id}/scrutators"
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate response structure
+                    required_fields = ["scrutator_code", "scrutators"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Get Meeting Scrutators", False, f"Missing fields: {missing_fields}")
+                        return False
+                    
+                    # Check that we have at least one scrutator (the one that joined)
+                    if not data["scrutators"] or len(data["scrutators"]) == 0:
+                        self.log_test("Get Meeting Scrutators", False, "No scrutators found")
+                        return False
+                    
+                    # Check that the joined scrutator is in the list with approved status
+                    joined_scrutator = None
+                    for scrutator in data["scrutators"]:
+                        if scrutator["name"] == "Marie Dupont":
+                            joined_scrutator = scrutator
+                            break
+                    
+                    if not joined_scrutator:
+                        self.log_test("Get Meeting Scrutators", False, "Joined scrutator not found in list")
+                        return False
+                    
+                    if joined_scrutator["approval_status"] != "approved":
+                        self.log_test("Get Meeting Scrutators", False, 
+                                    f"Scrutator status should be 'approved', got: {joined_scrutator['approval_status']}")
+                        return False
+                    
+                    self.log_test("Get Meeting Scrutators", True, 
+                                f"Found {len(data['scrutators'])} scrutators, joined scrutator is approved")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Get Meeting Scrutators", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Get Meeting Scrutators", False, f"Error: {str(e)}")
+            return False
+
+    async def test_second_scrutator_join(self):
+        """Test 16: Second Scrutator Join (Test Automatic Approval)"""
+        if not self.meeting_data or "scrutator_code" not in self.meeting_data:
+            self.log_test("Second Scrutator Join", False, "No scrutator code available")
+            return False
+            
+        try:
+            # Test joining as a second scrutator
+            join_payload = {
+                "name": "Jean Martin",  # Second scrutator from the list
+                "scrutator_code": self.meeting_data["scrutator_code"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/scrutators/join",
+                json=join_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Check that second scrutator also gets immediate access
+                    if data["status"] != "approved":
+                        self.log_test("Second Scrutator Join", False, 
+                                    f"Expected 'approved' status, got: {data['status']}")
+                        return False
+                    
+                    if data["access_type"] != "scrutator":
+                        self.log_test("Second Scrutator Join", False, 
+                                    f"Expected 'scrutator' access_type, got: {data['access_type']}")
+                        return False
+                    
+                    self.log_test("Second Scrutator Join", True, 
+                                f"Second scrutator '{data['scrutator_name']}' got immediate access")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Second Scrutator Join", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Second Scrutator Join", False, f"Error: {str(e)}")
+            return False
+
+    async def test_unauthorized_scrutator_join(self):
+        """Test 17: Unauthorized Scrutator Join (Should Fail)"""
+        if not self.meeting_data or "scrutator_code" not in self.meeting_data:
+            self.log_test("Unauthorized Scrutator Join", False, "No scrutator code available")
+            return False
+            
+        try:
+            # Test joining with a name not in the authorized list
+            join_payload = {
+                "name": "Unauthorized Person",  # Not in the scrutator list
+                "scrutator_code": self.meeting_data["scrutator_code"]
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/scrutators/join",
+                json=join_payload
+            ) as response:
+                if response.status == 403:
+                    # This is expected - unauthorized person should be rejected
+                    self.log_test("Unauthorized Scrutator Join", True, 
+                                "Unauthorized scrutator correctly rejected")
+                    return True
+                elif response.status == 200:
+                    # This should not happen - unauthorized person got access
+                    self.log_test("Unauthorized Scrutator Join", False, 
+                                "Unauthorized scrutator incorrectly got access")
+                    return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Unauthorized Scrutator Join", False, 
+                                f"Unexpected HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Unauthorized Scrutator Join", False, f"Error: {str(e)}")
+            return False
+
+    async def test_invalid_scrutator_code(self):
+        """Test 18: Invalid Scrutator Code (Should Fail)"""
+        try:
+            # Test joining with invalid scrutator code
+            join_payload = {
+                "name": "Marie Dupont",
+                "scrutator_code": "INVALID123"  # Invalid code
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/scrutators/join",
+                json=join_payload
+            ) as response:
+                if response.status == 404:
+                    # This is expected - invalid code should be rejected
+                    self.log_test("Invalid Scrutator Code", True, 
+                                "Invalid scrutator code correctly rejected")
+                    return True
+                elif response.status == 200:
+                    # This should not happen - invalid code got access
+                    self.log_test("Invalid Scrutator Code", False, 
+                                "Invalid scrutator code incorrectly accepted")
+                    return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Invalid Scrutator Code", False, 
+                                f"Unexpected HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Invalid Scrutator Code", False, f"Error: {str(e)}")
+            return False
             
     async def run_all_tests(self):
         """Run all backend API tests"""
