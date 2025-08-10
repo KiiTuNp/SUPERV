@@ -10,86 +10,86 @@
       "test": "Health Check",
       "success": true,
       "message": "API is healthy and responsive",
-      "timestamp": "2025-08-10T19:32:52.117153",
+      "timestamp": "2025-08-10T20:25:02.110365",
       "details": {}
     },
     {
       "test": "Database Connectivity",
       "success": true,
       "message": "Database connection verified",
-      "timestamp": "2025-08-10T19:32:52.629244",
+      "timestamp": "2025-08-10T20:25:02.625198",
       "details": {}
     },
     {
       "test": "Meeting Creation",
       "success": true,
-      "message": "Meeting created with code: 21F221FE",
-      "timestamp": "2025-08-10T19:32:53.145093",
+      "message": "Meeting created with code: A9E32B83",
+      "timestamp": "2025-08-10T20:25:03.154546",
       "details": {}
     },
     {
       "test": "Meeting Retrieval",
       "success": true,
-      "message": "Successfully retrieved meeting: 21F221FE",
-      "timestamp": "2025-08-10T19:32:53.653387",
+      "message": "Successfully retrieved meeting: A9E32B83",
+      "timestamp": "2025-08-10T20:25:03.668843",
       "details": {}
     },
     {
       "test": "Participant Join",
       "success": true,
-      "message": "Participant joined with ID: 39ac7c45-f8ca-472c-a5dc-7219b1b181ee",
-      "timestamp": "2025-08-10T19:32:54.163697",
+      "message": "Participant joined with ID: a8e712db-53a7-4491-aed5-e866707ad020",
+      "timestamp": "2025-08-10T20:25:04.196152",
       "details": {}
     },
     {
       "test": "Participant Approval",
       "success": true,
       "message": "Participant approved successfully",
-      "timestamp": "2025-08-10T19:32:54.673842",
+      "timestamp": "2025-08-10T20:25:04.707764",
       "details": {}
     },
     {
       "test": "Poll Creation",
       "success": true,
-      "message": "Poll created with ID: c5dfaff8-f450-4055-8800-8302f3452a20",
-      "timestamp": "2025-08-10T19:32:55.184265",
+      "message": "Poll created with ID: 80c595e6-27fa-4140-a7f1-3c50f627bbe7",
+      "timestamp": "2025-08-10T20:25:05.234454",
       "details": {}
     },
     {
       "test": "Poll Start",
       "success": true,
       "message": "Poll started successfully",
-      "timestamp": "2025-08-10T19:32:55.697260",
+      "timestamp": "2025-08-10T20:25:05.750187",
       "details": {}
     },
     {
       "test": "Voting",
       "success": true,
       "message": "Vote submitted successfully",
-      "timestamp": "2025-08-10T19:32:56.209980",
+      "timestamp": "2025-08-10T20:25:06.296516",
       "details": {}
     },
     {
       "test": "Poll Results",
       "success": true,
       "message": "Results retrieved - Total votes: 1",
-      "timestamp": "2025-08-10T19:32:56.722905",
+      "timestamp": "2025-08-10T20:25:06.809553",
       "details": {}
     },
     {
       "test": "Organizer View",
       "success": true,
       "message": "Organizer view data retrieved successfully",
-      "timestamp": "2025-08-10T19:32:57.234124",
+      "timestamp": "2025-08-10T20:25:07.320392",
       "details": {}
     },
     {
       "test": "PDF Report Request",
       "success": true,
       "message": "Report request processed: Aucun scrutateur approuv\u00e9 - g\u00e9n\u00e9ration directe",
-      "timestamp": "2025-08-10T19:32:57.743263",
+      "timestamp": "2025-08-10T20:25:07.831639",
       "details": {}
     }
   ],
-  "timestamp": "2025-08-10T19:32:58.243649"
+  "timestamp": "2025-08-10T20:25:08.331992"
 }
