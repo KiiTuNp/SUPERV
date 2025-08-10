@@ -23,6 +23,18 @@ backend:
         agent: "testing"
         comment: "Meeting creation, retrieval by code, and organizer view working correctly"
 
+  - task: "Scrutator Management with Automatic Access"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "NEW FEATURE TESTED: Scrutator automatic access system working perfectly. Scrutators get immediate approval without manual intervention. All security checks (unauthorized names, invalid codes) working correctly. Scrutators can access organizer interface immediately upon joining."
+
   - task: "Participant Management"
     implemented: true
     working: true
