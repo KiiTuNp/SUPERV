@@ -2477,12 +2477,12 @@ function App() {
                       <h4 className="font-semibold text-purple-800">Scrutateurs</h4>
                     </div>
                     <ul className="space-y-2 text-sm text-purple-700">
-                      <li>• Observateurs neutres pré-autorisés</li>
+                      <li>• Observateurs neutres avec noms pré-autorisés</li>
+                      <li>• <strong>Accès automatique</strong> avec code scrutateur</li>
                       <li>• Accès complet à l'interface organisateur</li>
-                      <li>• Valident la génération du rapport par vote</li>
-                      <li>• Garantissent l'intégrité du processus</li>
-                      <li>• Autorisation de majorité absolue requise</li>
-                      <li>• Traçabilité de leurs décisions</li>
+                      <li>• Surveillance de l'intégrité du processus</li>
+                      <li>• Rôle consultatif et de transparence</li>
+                      <li>• Notification automatique des actions</li>
                     </ul>
                   </div>
                 </div>
