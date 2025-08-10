@@ -53,20 +53,28 @@ echo
 # Validate Docker configurations
 echo -e "${YELLOW}🐳 Validating Docker configurations...${NC}"
 
-# Check docker-compose syntax
-if docker-compose config >/dev/null 2>&1; then
-    echo -e "${GREEN}✅${NC} docker-compose.yml syntax valid"
+# Check docker-compose syntax (if docker is available)
+if command -v docker-compose >/dev/null 2>&1; then
+    if docker-compose config >/dev/null 2>&1; then
+        echo -e "${GREEN}✅${NC} docker-compose.yml syntax valid"
+    else
+        echo -e "${RED}❌${NC} docker-compose.yml syntax error"
+        exit 1
+    fi
 else
-    echo -e "${RED}❌${NC} docker-compose.yml syntax error"
-    exit 1
+    echo -e "${YELLOW}⚠${NC} docker-compose not available (syntax not checked)"
 fi
 
-# Check development compose
-if docker-compose -f docker-compose.dev.yml config >/dev/null 2>&1; then
-    echo -e "${GREEN}✅${NC} docker-compose.dev.yml syntax valid"
+# Check development compose (if docker is available)
+if command -v docker-compose >/dev/null 2>&1; then
+    if docker-compose -f docker-compose.dev.yml config >/dev/null 2>&1; then
+        echo -e "${GREEN}✅${NC} docker-compose.dev.yml syntax valid"
+    else
+        echo -e "${RED}❌${NC} docker-compose.dev.yml syntax error"
+        exit 1
+    fi
 else
-    echo -e "${RED}❌${NC} docker-compose.dev.yml syntax error"
-    exit 1
+    echo -e "${YELLOW}⚠${NC} Development compose syntax not checked"
 fi
 echo
 
