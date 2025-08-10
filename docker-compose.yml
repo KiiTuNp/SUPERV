@@ -271,10 +271,6 @@ volumes:
   mongodb_data:
     driver: local
     name: vote-secret-mongodb-data
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/data/mongodb
   
   certbot_data:
     driver: local
