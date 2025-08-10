@@ -42,8 +42,10 @@ services:
         condition: service_healthy
     networks:
       - vote-secret-network
+    ports:
+      - "8001:8001"  # Exposé pour les tests de santé directs
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health')"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -66,6 +68,8 @@ services:
       REACT_APP_BACKEND_URL: https://${DOMAIN}
     networks:
       - vote-secret-network
+    ports:
+      - "3000:3000"  # Exposé pour les tests de santé directs
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 30s
@@ -120,20 +124,45 @@ services:
       - letsencrypt_data:/etc/letsencrypt
     networks:
       - vote-secret-network
+    environment:
+      - DOMAIN=${DOMAIN:-vote.example.com}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
     command: >
       sh -c "
-        echo 'Démarrage Certbot pour ${DOMAIN:-vote.example.com}...';
-        if [ ! -f /etc/letsencrypt/live/${DOMAIN:-vote.example.com}/fullchain.pem ]; then
-          echo 'Génération du certificat SSL...';
-          certbot certonly --webroot --webroot-path=/var/www/certbot --email ${ADMIN_EMAIL:-admin@example.com} --agree-tos --no-eff-email -d ${DOMAIN:-vote.example.com};
+        echo 'Démarrage Certbot pour $${DOMAIN}...';
+        
+        # Attendre que Nginx soit prêt
+        sleep 30;
+        
+        # Vérifier si le certificat existe déjà
+        if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
+          echo 'Génération du certificat SSL pour $${DOMAIN}...';
+          
+          # Tentative de génération du certificat
+          certbot certonly \
+            --webroot \
+            --webroot-path=/var/www/certbot \
+            --email $${ADMIN_EMAIL} \
+            --agree-tos \
+            --no-eff-email \
+            --non-interactive \
+            -d $${DOMAIN};
+            
           if [ $$? -eq 0 ]; then
-            echo 'Certificat SSL généré avec succès';
+            echo '✅ Certificat SSL généré avec succès pour $${DOMAIN}';
+            # Créer un lien symbolique pour nginx
+            ln -sf /etc/letsencrypt/live/$${DOMAIN} /etc/letsencrypt/live/default;
           else
-            echo 'Erreur lors de la génération du certificat SSL';
+            echo '❌ Erreur lors de la génération du certificat SSL';
+            echo 'Vérifiez que le domaine $${DOMAIN} pointe vers ce serveur';
           fi
         else
-          echo 'Certificat SSL déjà existant';
+          echo '✅ Certificat SSL déjà existant pour $${DOMAIN}';
+          # S'assurer que le lien symbolique existe
+          ln -sf /etc/letsencrypt/live/$${DOMAIN} /etc/letsencrypt/live/default;
         fi;
+        
+        # Boucle de renouvellement automatique
         while :; do 
           echo 'Vérification du renouvellement SSL...';
           certbot renew --quiet; 
