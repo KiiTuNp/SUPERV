@@ -1138,47 +1138,14 @@ def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_
 
 @api_router.get("/meetings/{meeting_id}/report")
 async def generate_meeting_report(meeting_id: str):
-    """Generate and download PDF report ONLY after scrutator approval if scrutators exist"""
+    """Generate and download PDF report - GÉNÉRATION DIRECTE sans approbation scrutateurs"""
     
     # Get meeting data
     meeting = await db.meetings.find_one({"id": meeting_id})
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
     
-    # Vérifier qu'il y a des scrutateurs approuvés
-    approved_scrutators = await db.scrutators.find({
-        "meeting_id": meeting_id, 
-        "approval_status": "approved"
-    }).to_list(100)
-    
-    # Si il y a des scrutateurs approuvés, vérifier l'approbation
-    if len(approved_scrutators) > 0:
-        # Vérifier si la génération a été approuvée par la majorité
-        if not meeting.get("report_generation_approved", False):
-            # Pas d'approbation - vérifier si une demande est en cours
-            if meeting.get("report_generation_pending", False):
-                raise HTTPException(
-                    status_code=400, 
-                    detail="Génération du rapport en attente d'approbation des scrutateurs. Veuillez attendre leur vote."
-                )
-            else:
-                raise HTTPException(
-                    status_code=400, 
-                    detail="La génération du rapport nécessite l'approbation des scrutateurs. Utilisez l'endpoint /request-report d'abord."
-                )
-        
-        # Vérifier que la majorité a bien approuvé (sécurité supplémentaire)
-        report_votes = meeting.get("report_votes", {})
-        yes_votes = sum(1 for vote in report_votes.values() if vote)
-        majority_needed = (len(approved_scrutators) // 2) + 1
-        
-        if yes_votes < majority_needed:
-            raise HTTPException(
-                status_code=403, 
-                detail=f"Génération du rapport non approuvée par la majorité. {yes_votes}/{len(approved_scrutators)} votes positifs, {majority_needed} requis."
-            )
-    
-    # Procéder à la génération normale
+    # GÉNÉRATION DIRECTE - Plus de vérification d'approbation des scrutateurs
     # Get participants data
     participants = await db.participants.find({"meeting_id": meeting_id}).to_list(1000)
     
