@@ -838,16 +838,16 @@ function App() {
       setDownloadingReport(true);
       
       try {
-        console.log("🔄 Demande de génération du rapport PDF...");
+        console.log("🔄 Génération directe du rapport PDF...");
         
-        // D'abord demander l'approbation des scrutateurs si nécessaire
-        await requestReportGeneration();
+        // GÉNÉRATION DIRECTE - Plus besoin d'approbation des scrutateurs
+        await downloadReportDirect();
         
       } catch (error) {
-        console.error("❌ Erreur lors de la demande:", error);
+        console.error("❌ Erreur lors de la génération:", error);
         setDownloadingReport(false);
         
-        alert("❌ Erreur lors de la demande de génération du rapport:\n\n" + 
+        alert("❌ Erreur lors de la génération du rapport:\n\n" + 
               error.message + 
               "\n\nVeuillez réessayer ou contacter le support technique.");
       }
