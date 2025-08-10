@@ -100,6 +100,13 @@ make update         # Update application
 make backup         # Backup database
 make clean          # Clean Docker resources
 
+# Using Scripts
+./deploy.sh         # Production deployment
+./dev-setup.sh      # Development setup
+./check.sh          # Pre-deployment validation
+./validate-docker.sh # Docker build validation
+./fix-docker.sh     # Auto-fix Docker issues
+
 # Using Docker Compose directly
 docker-compose up -d              # Start services
 docker-compose logs -f            # View logs
@@ -111,6 +118,21 @@ npm run deploy      # Deploy to production
 npm run dev         # Start development
 npm run setup       # Setup development
 npm run check       # Pre-deployment check
+```
+
+## 🔧 Troubleshooting
+
+If you encounter Docker build issues:
+
+```bash
+# Quick fix
+./fix-docker.sh
+
+# Check what's wrong
+./validate-docker.sh
+
+# Manual troubleshooting
+cat DOCKER_TROUBLESHOOTING.md
 ```
 
 ---
