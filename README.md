@@ -1,55 +1,229 @@
-# SUPER Vote Secret 🗳️
+# 🗳️ SUPER Vote Secret
 
-**SUPER moteur de vote secret - Application moderne de vote anonyme pour assemblées**
+**The ultimate anonymous voting platform for assemblies and meetings**
 
-## 🚀 Fonctionnalités
-
-- **Vote anonyme sécurisé** avec suppression automatique des données
-- **Interface moderne** avec design coloré et responsive
-- **Système de scrutateurs** avec approbation majoritaire
-- **Rapports PDF** complets avec suppression automatique
-- **Temps réel** via WebSockets
-
-## 🏗️ Architecture
-
-- **Frontend:** React + Tailwind CSS + Shadcn/UI
-- **Backend:** FastAPI + Uvicorn + WebSockets  
-- **Base de données:** MongoDB
-- **PDF:** ReportLab pour génération de rapports
-- **Production:** Nginx + SSL + SystemD
-
-## ⚡ Installation Rapide
-
-### Développement
-```bash
-# Installer les dépendances
-npm run install:all
-
-# Lancer en mode développement
-npm run dev
-```
-
-### Production
-```bash
-# Déploiement automatique
-python3 deploy_master.py
-```
-
-## 📝 Usage
-
-1. **Organisateur** : Créer une réunion et inviter des participants
-2. **Participants** : Rejoindre avec le code de réunion  
-3. **Scrutateurs** (optionnel) : Surveiller et approuver les rapports
-4. **Votes** : Créer des sondages et voter de façon anonyme
-5. **Rapport PDF** : Télécharger le rapport final (supprime toutes les données)
-
-## 👨‍💻 Auteur
-
-**SimonSB** - Une app de SimonSB
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Domain](https://img.shields.io/badge/Domain-vote.super--csn.ca-orange.svg)](https://vote.super-csn.ca)
 
 ---
 
-*SUPER Vote Secret v2.0 - Système de vote anonyme moderne*
+## ✨ Features
+
+🔒 **Anonymous & Secure**
+- Complete participant anonymity
+- Automatic data deletion after PDF generation
+- Real-time encrypted voting
+
+👥 **Multi-Role Support**
+- **Organizers**: Create meetings, manage participants
+- **Participants**: Join meetings, vote anonymously  
+- **Scrutators**: Oversee process, approve reports
+
+📊 **Professional Reports**
+- Comprehensive PDF reports
+- Real-time results visualization
+- Scrutator approval system
+
+🌐 **Modern & Responsive**
+- Beautiful gradient UI design
+- Mobile-friendly interface
+- Real-time WebSocket updates
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Domain pointing to your server (vote.super-csn.ca)
+
+### One-Command Deploy
+
+```bash
+git clone <repository-url>
+cd super-vote-secret
+./deploy.sh
+```
+
+That's it! 🎉
+
+Your application will be available at: **https://vote.super-csn.ca**
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and customize:
+
+```bash
+# MongoDB Configuration
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=your-secure-password
+MONGO_DB=vote_secret
+
+# Application Configuration
+DOMAIN=vote.super-csn.ca
+ADMIN_EMAIL=admin@super-csn.ca
+
+# Security (IMPORTANT: Change in production!)
+JWT_SECRET=your-super-secret-jwt-key
+ENCRYPTION_KEY=your-32-character-encryption-key
+```
+
+### SSL Certificate
+
+SSL certificates are automatically generated via Let's Encrypt. No manual configuration needed!
+
+---
+
+## 📋 Management Commands
+
+```bash
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Restart services
+docker-compose restart
+
+# Update application
+git pull && docker-compose up -d --build
+
+# Database backup
+docker exec vote-secret-mongodb mongodump --out /backup
+
+# Check service status
+docker-compose ps
+```
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
+│   Nginx Proxy   │────│   Frontend   │    │   Backend   │
+│   (SSL/HTTPS)   │    │   (React)    │────│  (FastAPI)  │
+└─────────────────┘    └──────────────┘    └─────────────┘
+                                                    │
+                                           ┌─────────────┐
+                                           │   MongoDB   │
+                                           │ (Database)  │
+                                           └─────────────┘
+```
+
+**Tech Stack:**
+- **Frontend**: React + Tailwind CSS + Shadcn/UI
+- **Backend**: FastAPI + Uvicorn + WebSockets
+- **Database**: MongoDB
+- **Proxy**: Nginx with SSL/TLS
+- **Containers**: Docker + Docker Compose
+
+---
+
+## 📖 How to Use
+
+### 1. Create a Meeting (Organizer)
+- Visit https://vote.super-csn.ca
+- Click "Créer une nouvelle réunion"
+- Enter meeting details
+- Share the meeting code with participants
+
+### 2. Add Scrutators (Optional)
+- In organizer interface, go to "Scrutators" tab
+- Add scrutator names
+- Share the scrutator code with designated scrutators
+
+### 3. Manage Participants
+- Approve/reject participant requests
+- Monitor real-time participation
+
+### 4. Create & Run Polls
+- Create polls with multiple options
+- Start/stop polls as needed
+- View real-time results
+
+### 5. Generate Report
+- Click "Générer le rapport" 
+- If scrutators exist, they must approve (majority vote)
+- PDF report downloads automatically
+- **All data is permanently deleted** after download
+
+---
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Install dependencies
+npm run install:all
+
+# Start development servers
+npm run dev
+
+# Frontend: http://localhost:3000
+# Backend: http://localhost:8001
+```
+
+### Project Structure
+
+```
+super-vote-secret/
+├── frontend/           # React application
+│   ├── src/
+│   ├── public/
+│   ├── Dockerfile
+│   └── nginx.conf
+├── backend/            # FastAPI application
+│   ├── server.py      # Main application
+│   ├── requirements.txt
+│   └── Dockerfile
+├── nginx/             # Proxy configuration
+│   └── nginx.conf
+├── docker-compose.yml # Docker services
+├── mongo-init.js      # Database initialization
+└── deploy.sh          # Deployment script
+```
+
+---
+
+## 🔐 Security Features
+
+- **Data Ephemerality**: All data deleted after report generation
+- **Anonymous Voting**: No linkage between voters and votes
+- **Encrypted Communications**: HTTPS/WSS encryption
+- **Access Control**: Role-based permissions
+- **Rate Limiting**: API abuse protection
+- **Security Headers**: CSRF, XSS, and clickjacking protection
+
+---
+
+## 📞 Support
+
+- **Domain**: [vote.super-csn.ca](https://vote.super-csn.ca)
+- **Author**: SimonSB
+- **License**: MIT
+
+---
+
+## 🔄 Updates
+
+To update SUPER Vote Secret:
+
+```bash
+git pull
+docker-compose up -d --build
+```
+
+---
+
+**Made with ❤️ by SimonSB** | *Une app de SimonSB*
 - **`deploy_environment.py`** - Configuration environnements et génération configs
 - **`deploy_nginx.py`** - Installation et configuration Nginx + SSL
 - **`deploy_final.py`** - Déploiement final et services SystemD
