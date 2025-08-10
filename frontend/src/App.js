@@ -161,6 +161,16 @@ function App() {
     return () => clearInterval(particleInterval);
   }, []);
 
+  // Demande de permission pour notifications (pour scrutateurs)
+  useEffect(() => {
+    // Demander permission notifications pour les alertes scrutateurs
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then(permission => {
+        console.log("Permission notifications:", permission);
+      });
+    }
+  }, []);
+
   // Home Component - Modern Design
   const Home = () => {
     return (
