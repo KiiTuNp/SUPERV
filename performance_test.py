@@ -174,13 +174,13 @@ class PerformanceTester:
         
         error_tests = [
             # Invalid meeting code
-            ("Invalid Meeting Code", "GET", "/meetings/INVALID", 404),
+            ("Invalid Meeting Code", "GET", "/meetings/INVALID", 404, None),
             # Empty meeting creation
             ("Empty Meeting Data", "POST", "/meetings", 400, {}),
             # Invalid participant join
             ("Invalid Participant Join", "POST", "/participants/join", 400, {"name": "", "meeting_code": ""}),
             # Non-existent poll
-            ("Non-existent Poll", "GET", "/polls/invalid-id/results", 404),
+            ("Non-existent Poll", "GET", "/polls/invalid-id/results", 404, None),
         ]
         
         passed = 0
