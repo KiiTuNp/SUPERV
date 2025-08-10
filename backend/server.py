@@ -719,42 +719,42 @@ async def join_as_scrutator(join_data: ScrutatorJoin):
     })
     
     if existing_scrutator:
-        # Le scrutateur existe - vérifier son statut
-        if existing_scrutator["approval_status"] == "approved":
-            # Déjà approuvé - permettre l'accès
-            return {
-                "meeting": Meeting(**meeting),
-                "scrutator_name": clean_name,
-                "access_type": "scrutator",
-                "status": "approved"
-            }
-        elif existing_scrutator["approval_status"] == "pending":
-            # En attente d'approbation
-            return {
-                "status": "pending_approval",
-                "message": "Votre accès est en attente d'approbation par l'organisateur"
-            }
-        else:
-            # Rejeté
-            raise HTTPException(status_code=403, detail="Votre accès a été rejeté par l'organisateur")
+        # Le scrutateur existe déjà - accès direct (plus d'approbation nécessaire)
+        # Mettre à jour le statut à approved si nécessaire
+        if existing_scrutator["approval_status"] != "approved":
+            await db.scrutators.update_one(
+                {"meeting_id": meeting["id"], "name": clean_name},
+                {"$set": {"approval_status": "approved", "approved_at": datetime.utcnow()}}
+            )
+        
+        return {
+            "meeting": Meeting(**meeting),
+            "scrutator_name": clean_name,
+            "access_type": "scrutator",
+            "status": "approved"
+        }
     else:
-        # Nouveau scrutateur - créer l'entrée en attente d'approbation
+        # Nouveau scrutateur - ACCÈS DIRECT sans approbation
         scrutator = Scrutator(
             name=clean_name, 
             meeting_id=meeting["id"],
-            approval_status=ScrutatorStatus.PENDING
+            approval_status=ScrutatorStatus.APPROVED,  # Approuvé automatiquement
+            approved_at=datetime.utcnow()
         )
         await db.scrutators.insert_one(scrutator.dict())
         
-        # Notifier l'organisateur
+        # Notifier l'organisateur (information seulement, pas de demande d'approbation)
         await manager.send_to_meeting({
-            "type": "scrutator_join_request",
-            "scrutator": scrutator.dict()
+            "type": "scrutator_joined",  # Changé de "join_request" à "joined"
+            "scrutator": scrutator.dict(),
+            "message": f"Le scrutateur {clean_name} a rejoint la réunion"
         }, meeting["id"])
         
         return {
-            "status": "pending_approval",
-            "message": "Demande d'accès envoyée à l'organisateur. Veuillez attendre l'approbation."
+            "meeting": Meeting(**meeting),
+            "scrutator_name": clean_name,
+            "access_type": "scrutator", 
+            "status": "approved"
         }
 
 @api_router.post("/participants/{participant_id}/approve")
