@@ -1825,22 +1825,27 @@ function App() {
           </div>
         )}
 
-        {/* Modal de vote pour les scrutateurs */}
+        {/* Modal de vote pour les scrutateurs - AMÉLIORÉ */}
         {showReportVoteModal && reportVoteData && isScrutator && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-2xl bg-white">
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <Card className="w-full max-w-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
               <CardHeader className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-pulse">
                     <Vote className="w-8 h-8" />
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold text-center">
-                  Autorisation de Génération du Rapport
+                  🔔 ATTENTION SCRUTATEUR 🔔
                 </CardTitle>
                 <CardDescription className="text-amber-100 text-center text-lg">
-                  Votre autorisation est requise pour générer le rapport final
+                  Votre autorisation est REQUISE pour générer le rapport final
                 </CardDescription>
+                <div className="mt-4 p-3 bg-red-600 bg-opacity-20 rounded-lg border border-red-300">
+                  <p className="text-center text-white font-semibold">
+                    ⏰ DÉCISION URGENTE REQUISE
+                  </p>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="space-y-6">
