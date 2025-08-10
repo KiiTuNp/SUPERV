@@ -91,7 +91,7 @@ function App() {
     try {
       const response = await axios.post(`${API}/meetings/recover`, {
         meeting_id: recoveryUrl,
-        password: password
+        password
       });
       
       setMeeting(response.data.meeting);
@@ -762,7 +762,7 @@ function App() {
       try {
         await axios.post(`${API}/scrutators/${scrutatorId}/approve`, {
           scrutator_id: scrutatorId,
-          approved: approved
+          approved
         });
         
         // Recharger la liste des scrutateurs
@@ -801,7 +801,7 @@ function App() {
         const response = await axios.post(`${API}/meetings/${meeting.id}/scrutator-vote`, {
           meeting_id: meeting.id,
           scrutator_name: scrutatorName,
-          approved: approved
+          approved
         });
 
         setShowReportVoteModal(false);
