@@ -203,8 +203,9 @@ elif [ $ERRORS -eq 0 ]; then
     echo "⚠️  Warnings can cause slower builds or minor issues but won't break the build."
     echo ""
     echo "🚀 Ready to build:"
-    echo "  • Test build: docker-compose -f docker-compose.test.yml build"
-    echo "  • Production build: docker-compose build"
+    echo "  • Test build: docker compose -f docker-compose.test.yml build"
+    echo "  • Production build: docker compose build"
+    echo "  • Legacy support: docker-compose build (if using v1)"
     exit 0
 else
     echo "❌ $ERRORS critical error(s) found that will cause build failures."
