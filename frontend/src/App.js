@@ -34,10 +34,8 @@ function App() {
   const [showOrganizerAbsentModal, setShowOrganizerAbsentModal] = useState(false);  // Modal organisateur absent
   const [lastHeartbeat, setLastHeartbeat] = useState(Date.now());  // Dernier heartbeat envoyé
 
-  // Report generation voting states
-  const [showReportVoteModal, setShowReportVoteModal] = useState(false);
-  const [reportVoteData, setReportVoteData] = useState(null);
-  const [reportGenerationInProgress, setReportGenerationInProgress] = useState(false);
+  // Report generation states (simplifiés)
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   // Heartbeat system for organizer presence
   useEffect(() => {
