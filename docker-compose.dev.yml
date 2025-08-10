@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB for Development
   mongodb:
@@ -17,6 +15,12 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - vote-secret-dev
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   # Development Backend (optional - can run locally)
   backend-dev:
@@ -30,12 +34,13 @@ services:
     environment:
       MONGO_URL: mongodb://admin:devpassword123@mongodb:27017/vote_secret_dev?authSource=admin
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./backend:/app
     networks:
       - vote-secret-dev
-    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    command: ["python", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 
 networks:
   vote-secret-dev:
