@@ -1,0 +1,95 @@
+{
+  "summary": {
+    "passed": 12,
+    "failed": 0,
+    "total": 12,
+    "success_rate": 100.0
+  },
+  "results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "API is healthy and responsive",
+      "timestamp": "2025-08-10T19:32:52.117153",
+      "details": {}
+    },
+    {
+      "test": "Database Connectivity",
+      "success": true,
+      "message": "Database connection verified",
+      "timestamp": "2025-08-10T19:32:52.629244",
+      "details": {}
+    },
+    {
+      "test": "Meeting Creation",
+      "success": true,
+      "message": "Meeting created with code: 21F221FE",
+      "timestamp": "2025-08-10T19:32:53.145093",
+      "details": {}
+    },
+    {
+      "test": "Meeting Retrieval",
+      "success": true,
+      "message": "Successfully retrieved meeting: 21F221FE",
+      "timestamp": "2025-08-10T19:32:53.653387",
+      "details": {}
+    },
+    {
+      "test": "Participant Join",
+      "success": true,
+      "message": "Participant joined with ID: 39ac7c45-f8ca-472c-a5dc-7219b1b181ee",
+      "timestamp": "2025-08-10T19:32:54.163697",
+      "details": {}
+    },
+    {
+      "test": "Participant Approval",
+      "success": true,
+      "message": "Participant approved successfully",
+      "timestamp": "2025-08-10T19:32:54.673842",
+      "details": {}
+    },
+    {
+      "test": "Poll Creation",
+      "success": true,
+      "message": "Poll created with ID: c5dfaff8-f450-4055-8800-8302f3452a20",
+      "timestamp": "2025-08-10T19:32:55.184265",
+      "details": {}
+    },
+    {
+      "test": "Poll Start",
+      "success": true,
+      "message": "Poll started successfully",
+      "timestamp": "2025-08-10T19:32:55.697260",
+      "details": {}
+    },
+    {
+      "test": "Voting",
+      "success": true,
+      "message": "Vote submitted successfully",
+      "timestamp": "2025-08-10T19:32:56.209980",
+      "details": {}
+    },
+    {
+      "test": "Poll Results",
+      "success": true,
+      "message": "Results retrieved - Total votes: 1",
+      "timestamp": "2025-08-10T19:32:56.722905",
+      "details": {}
+    },
+    {
+      "test": "Organizer View",
+      "success": true,
+      "message": "Organizer view data retrieved successfully",
+      "timestamp": "2025-08-10T19:32:57.234124",
+      "details": {}
+    },
+    {
+      "test": "PDF Report Request",
+      "success": true,
+      "message": "Report request processed: Aucun scrutateur approuv\u00e9 - g\u00e9n\u00e9ration directe",
+      "timestamp": "2025-08-10T19:32:57.743263",
+      "details": {}
+    }
+  ],
+  "timestamp": "2025-08-10T19:32:58.243649"
+}
