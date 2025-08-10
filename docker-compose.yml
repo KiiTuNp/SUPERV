@@ -35,42 +35,35 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: 1
+      cache_from:
+        - vote-secret-backend:latest
     container_name: vote-secret-backend
     restart: unless-stopped
     environment:
       MONGO_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB:-vote_secret}?authSource=admin
       JWT_SECRET: ${JWT_SECRET}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      PYTHONPATH: /app
       PYTHONUNBUFFERED: 1
     depends_on:
       mongodb:
         condition: service_healthy
     networks:
       - vote-secret-network
+    expose:
+      - "8001"
     ports:
       - "8001:8001"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; r=requests.get('http://localhost:8001/api/health', timeout=5); assert r.status_code==200 and 'healthy' in r.text"]
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
       interval: 30s
-      timeout: 15s
+      timeout: 10s
       retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1.0'
-        reservations:
-          memory: 256M
-          cpus: '0.3'
+      start_period: 45s
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "5m"
+        max-file: "2"
 
   # Frontend
   frontend:
