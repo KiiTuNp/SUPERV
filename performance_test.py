@@ -150,7 +150,7 @@ class PerformanceTester:
             # Test WebSocket connection
             ws_url = f"{WS_URL}/meetings/{meeting_id}"
             
-            async with websockets.connect(ws_url, timeout=10) as websocket:
+            async with websockets.connect(ws_url) as websocket:
                 # Send a test message
                 await websocket.send(json.dumps({"type": "test", "message": "ping"}))
                 
