@@ -128,17 +128,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "API Health Check"
-    - "Meeting Creation and Management"
-    - "Scrutator Management with Automatic Access"
-    - "Participant Management"
-    - "Poll Creation and Management"
-    - "Voting System"
-    - "MongoDB Integration"
-    - "WebSocket Real-time Communication"
+    - "Scrutator Voting System for PDF Report Generation"
   stuck_tasks:
     - "WebSocket Real-time Communication"
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
