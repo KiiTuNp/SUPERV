@@ -110,6 +110,137 @@ class VoteSecretAPITester:
         except Exception as e:
             self.log_test("Create Meeting", False, f"Error: {str(e)}")
             return False
+
+    async def test_create_meeting_with_timezone(self):
+        """Test 25: Create Meeting with Timezone Information"""
+        try:
+            meeting_payload = {
+                "title": "Timezone Test Meeting - Paris",
+                "organizer_name": "Paris Organizer",
+                "organizer_timezone": "Europe/Paris"
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings",
+                json=meeting_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate response structure includes timezone
+                    required_fields = ["id", "title", "organizer_name", "meeting_code", "status", "organizer_timezone"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Create Meeting with Timezone", False, f"Missing fields: {missing_fields}")
+                        return False
+                    
+                    # Validate timezone is stored correctly
+                    if data["organizer_timezone"] != "Europe/Paris":
+                        self.log_test("Create Meeting with Timezone", False, 
+                                    f"Expected timezone 'Europe/Paris', got: {data['organizer_timezone']}")
+                        return False
+                        
+                    # Store timezone meeting data for subsequent tests
+                    self.meeting_data["timezone_meeting"] = data
+                    
+                    self.log_test("Create Meeting with Timezone", True, 
+                                f"Meeting created with timezone: {data['organizer_timezone']}")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Create Meeting with Timezone", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Create Meeting with Timezone", False, f"Error: {str(e)}")
+            return False
+
+    async def test_create_meeting_different_timezone(self):
+        """Test 26: Create Meeting with Different Timezone (New York)"""
+        try:
+            meeting_payload = {
+                "title": "Timezone Test Meeting - New York",
+                "organizer_name": "New York Organizer",
+                "organizer_timezone": "America/New_York"
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings",
+                json=meeting_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Validate timezone is stored correctly
+                    if data["organizer_timezone"] != "America/New_York":
+                        self.log_test("Create Meeting Different Timezone", False, 
+                                    f"Expected timezone 'America/New_York', got: {data['organizer_timezone']}")
+                        return False
+                        
+                    # Store NY timezone meeting data for subsequent tests
+                    self.meeting_data["ny_timezone_meeting"] = data
+                    
+                    self.log_test("Create Meeting Different Timezone", True, 
+                                f"Meeting created with timezone: {data['organizer_timezone']}")
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Create Meeting Different Timezone", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Create Meeting Different Timezone", False, f"Error: {str(e)}")
+            return False
+
+    async def test_backward_compatibility_no_timezone(self):
+        """Test 27: Backward Compatibility - Meeting without Timezone"""
+        try:
+            meeting_payload = {
+                "title": "No Timezone Test Meeting",
+                "organizer_name": "No Timezone Organizer"
+                # No organizer_timezone field
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings",
+                json=meeting_payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Should work without timezone (backward compatibility)
+                    required_fields = ["id", "title", "organizer_name", "meeting_code", "status"]
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        self.log_test("Backward Compatibility No Timezone", False, f"Missing fields: {missing_fields}")
+                        return False
+                    
+                    # organizer_timezone should be null or not present
+                    timezone_value = data.get("organizer_timezone")
+                    if timezone_value is not None:
+                        self.log_test("Backward Compatibility No Timezone", True, 
+                                    f"Meeting created without timezone (timezone field: {timezone_value})")
+                    else:
+                        self.log_test("Backward Compatibility No Timezone", True, 
+                                    "Meeting created without timezone field")
+                        
+                    # Store no-timezone meeting data
+                    self.meeting_data["no_timezone_meeting"] = data
+                    
+                    return True
+                else:
+                    error_data = await response.text()
+                    self.log_test("Backward Compatibility No Timezone", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Backward Compatibility No Timezone", False, f"Error: {str(e)}")
+            return False
             
     async def test_get_meeting_by_code(self):
         """Test 3: Get Meeting by Code"""
