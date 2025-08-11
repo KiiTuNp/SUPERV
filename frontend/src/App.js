@@ -1252,7 +1252,7 @@ function App() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 overflow-y-auto max-h-96">
+              <CardContent className="p-6 overflow-y-auto max-h-[60vh] scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100">
                 <div className="space-y-6">
                   {/* Section Participants */}
                   <div>
