@@ -1681,8 +1681,8 @@ function App() {
                         <ul className="text-sm text-slate-600 space-y-1">
                           <li>• Titre: <strong>{meeting?.title}</strong></li>
                           <li>• Code: <strong>{meeting?.meeting_code}</strong></li>
-                          <li>• Date: <strong>{formatDateOnlyInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)}</strong></li>
-                          <li>• Heure: <strong>{formatTimeInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)}</strong></li>
+                          <li>• Date: <strong>{formatDateOnlyInOrganizerTimezone(getCurrentDateTimeInOrganizerTimezone(meeting?.organizer_timezone), meeting?.organizer_timezone)}</strong></li>
+                          <li>• Heure: <strong>{formatTimeInOrganizerTimezone(getCurrentDateTimeInOrganizerTimezone(meeting?.organizer_timezone), meeting?.organizer_timezone)}</strong></li>
                         </ul>
                       </div>
                       
