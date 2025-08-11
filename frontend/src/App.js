@@ -1673,8 +1673,8 @@ function App() {
                         <ul className="text-sm text-slate-600 space-y-1">
                           <li>• Titre: <strong>{meeting?.title}</strong></li>
                           <li>• Code: <strong>{meeting?.meeting_code}</strong></li>
-                          <li>• Date: <strong>{new Date().toLocaleDateString('fr-FR')}</strong></li>
-                          <li>• Heure: <strong>{new Date().toLocaleTimeString('fr-FR')}</strong></li>
+                          <li>• Date: <strong>{formatDateOnlyInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)}</strong></li>
+                          <li>• Heure: <strong>{formatTimeInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)}</strong></li>
                         </ul>
                       </div>
                       
