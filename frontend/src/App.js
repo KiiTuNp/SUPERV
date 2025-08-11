@@ -1337,7 +1337,7 @@ function App() {
                               <div>
                                 <p className="font-semibold text-slate-800">{scrutator.name}</p>
                                 <p className="text-sm text-slate-500">
-                                  Ajouté le {new Date(scrutator.added_at).toLocaleTimeString()}
+                                  Ajouté le {formatTimeInOrganizerTimezone(scrutator.added_at, meeting?.organizer_timezone)}
                                 </p>
                               </div>
                             </div>
