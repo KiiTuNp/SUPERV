@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import axios from "axios";
+import api from "./services/api";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
@@ -78,9 +78,9 @@ function App() {
       // Envoyer un heartbeat toutes les 60 secondes
       heartbeatInterval = setInterval(async () => {
         try {
-          await axios.post(`${API}/meetings/${meeting.id}/heartbeat`, {
+          await api.heartbeat(meeting.id, {
             meeting_id: meeting.id,
-            organizer_name: meeting.organizer_name
+            organizer_name: meeting.organizer_name,
           });
           setLastHeartbeat(Date.now());
         } catch (error) {
@@ -101,7 +101,7 @@ function App() {
     const checkCanClose = async () => {
       if (meeting && currentView === "organizer" && !isScrutator) {
         try {
-          const response = await axios.get(`${API}/meetings/${meeting.id}/can-close`);
+          const response = await api.canCloseMeeting(meeting.id);
           setCanCloseMeeting(response.data.can_close);
         } catch (error) {
           console.error("Erreur lors de la vérification:", error);
@@ -120,9 +120,9 @@ function App() {
   // Recovery functions
   const handleRecovery = async (recoveryUrl, password) => {
     try {
-      const response = await axios.post(`${API}/meetings/recover`, {
+      const response = await api.recoverMeeting({
         meeting_id: recoveryUrl,
-        password
+        password,
       });
       
       setMeeting(response.data.meeting);
@@ -383,10 +383,10 @@ function App() {
         const organizerTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         console.log("🌍 Detected organizer timezone:", organizerTimezone);
         
-        const response = await axios.post(`${API}/meetings`, {
+        const response = await api.createMeeting({
           title,
           organizer_name: organizerName,
-          organizer_timezone: organizerTimezone  // Envoyer le fuseau horaire détecté
+          organizer_timezone: organizerTimezone, // Envoyer le fuseau horaire détecté
         });
         
         console.log("✅ Meeting created successfully:", response.data);
@@ -502,9 +502,9 @@ function App() {
           console.log("🔍 Tentative de connexion en tant que scrutateur...");
           
           try {
-            const response = await axios.post(`${API}/scrutators/join`, {
+            const response = await api.joinScrutator({
               name,
-              scrutator_code: meetingCode.toUpperCase()
+              scrutator_code: meetingCode.toUpperCase(),
             });
             
             console.log("✅ Successfully joined as scrutator:", response.data);
@@ -538,15 +538,15 @@ function App() {
           }
         } else {
           // Code de réunion normal - rejoindre en tant que participant
-          const response = await axios.post(`${API}/participants/join`, {
+          const response = await api.joinParticipant({
             name,
-            meeting_code: meetingCode.toUpperCase()
+            meeting_code: meetingCode.toUpperCase(),
           });
           console.log("✅ Successfully joined meeting:", response.data);
           setParticipant(response.data);
           
           // Get meeting details
-          const meetingResponse = await axios.get(`${API}/meetings/${meetingCode.toUpperCase()}`);
+          const meetingResponse = await api.getMeeting(meetingCode.toUpperCase());
           setMeeting(meetingResponse.data);
           
           setCurrentView("participant");
@@ -678,7 +678,7 @@ function App() {
 
     const loadOrganizerData = async () => {
       try {
-        const response = await axios.get(`${API}/meetings/${meeting.id}/organizer`);
+        const response = await api.getOrganizer(meeting.id);
         setParticipants(response.data.participants);
         setPolls(response.data.polls);
       } catch (error) {
@@ -688,10 +688,7 @@ function App() {
 
     const approveParticipant = async (participantId, approved) => {
       try {
-        await axios.post(`${API}/participants/${participantId}/approve`, {
-          participant_id: participantId,
-          approved
-        });
+        await api.approveParticipant(participantId, approved);
         loadOrganizerData();
       } catch (error) {
         console.error("Error approving participant:", error);
@@ -702,10 +699,10 @@ function App() {
       if (!newPollQuestion || newPollOptions.some(opt => !opt.trim())) return;
       
       try {
-        await axios.post(`${API}/meetings/${meeting.id}/polls`, {
+        await api.createPoll(meeting.id, {
           question: newPollQuestion,
           options: newPollOptions.filter(opt => opt.trim()),
-          timer_duration: timerDuration ? parseInt(timerDuration) : null
+          timer_duration: timerDuration ? parseInt(timerDuration) : null,
         });
         
         setNewPollQuestion("");
@@ -720,7 +717,7 @@ function App() {
 
     const startPoll = async (pollId) => {
       try {
-        await axios.post(`${API}/polls/${pollId}/start`);
+        await api.startPoll(pollId);
         loadOrganizerData();
       } catch (error) {
         console.error("Error starting poll:", error);
@@ -729,7 +726,7 @@ function App() {
 
     const closePoll = async (pollId) => {
       try {
-        await axios.post(`${API}/polls/${pollId}/close`);
+        await api.closePoll(pollId);
         loadOrganizerData();
       } catch (error) {
         console.error("Error closing poll:", error);
@@ -767,8 +764,8 @@ function App() {
           return;
         }
 
-        const response = await axios.post(`${API}/meetings/${meeting.id}/scrutators`, {
-          names: validNames
+        const response = await api.addScrutator(meeting.id, {
+          names: validNames,
         });
 
         setScrutatorCode(response.data.scrutator_code);
@@ -784,7 +781,7 @@ function App() {
 
     const loadScrutators = async () => {
       try {
-        const response = await axios.get(`${API}/meetings/${meeting.id}/scrutators`);
+        const response = await api.listScrutators(meeting.id);
         setScrutators(response.data.scrutators);
         setScrutatorCode(response.data.scrutator_code || '');
         setScrutatorCodeGenerated(!!response.data.scrutator_code);
@@ -795,7 +792,7 @@ function App() {
 
     const generateRecoveryUrl = async () => {
       try {
-        const response = await axios.post(`${API}/meetings/${meeting.id}/generate-recovery`);
+        const response = await api.generateRecovery(meeting.id);
         setRecoveryUrl(response.data.recovery_url);
         setRecoveryPassword(response.data.recovery_password);
         
@@ -1868,7 +1865,7 @@ function App() {
 
     const checkParticipantStatus = async () => {
       try {
-        const response = await axios.get(`${API}/participants/${participant.id}/status`);
+        const response = await api.getParticipantStatus(participant.id);
         setStatus(response.data.status);
       } catch (error) {
         console.error("Error checking status:", error);
@@ -1883,7 +1880,7 @@ function App() {
     const loadPolls = async () => {
       if (!meeting) return;
       try {
-        const response = await axios.get(`${API}/meetings/${meeting.id}/polls/participant`);
+        const response = await api.getParticipantPolls(meeting.id);
         // Use participant-specific endpoint that hides results for active polls
         setPolls(response.data);
       } catch (error) {
@@ -1910,9 +1907,9 @@ function App() {
 
     const submitVote = async (pollId, optionId) => {
       try {
-        await axios.post(`${API}/votes`, {
+        await api.submitVote({
           poll_id: pollId,
-          option_id: optionId
+          option_id: optionId,
         });
         
         // Marquer ce sondage comme voté
