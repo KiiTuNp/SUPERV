@@ -110,6 +110,7 @@ class Meeting(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     organizer_name: str
+    organizer_timezone: Optional[str] = None  # Fuseau horaire de l'organisateur (ex: "Europe/Paris")
     meeting_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8].upper())
     scrutator_code: Optional[str] = None  # Code spécial pour les scrutateurs
     scrutators: List[str] = Field(default_factory=list)  # Liste des noms de scrutateurs
