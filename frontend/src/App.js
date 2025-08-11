@@ -2574,8 +2574,8 @@ function App() {
                 </div>
               </div>
 
-              {/* Footer du modal */}
-              <div className="border-t border-slate-200 pt-6">
+              {/* Footer du modal - fixe en bas */}
+              <div className="border-t border-slate-200 p-6 bg-gray-50 flex-shrink-0">
                 <div className="text-center">
                   <p className="text-sm text-slate-500 mb-4">
                     Simple, sécurisé et transparent - participez en toute confiance ! 
