@@ -1654,7 +1654,7 @@ function App() {
                   ⚠️ Action irréversible - Toutes les données seront supprimées après téléchargement
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6 overflow-y-auto max-h-[70vh]">
+              <CardContent className="p-6 overflow-y-auto max-h-[65vh] scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
                 {/* Résumé des données qui seront dans le rapport */}
                 <div className="space-y-6">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
