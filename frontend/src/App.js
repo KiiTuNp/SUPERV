@@ -1269,9 +1269,6 @@ function App() {
                             </div>
                             <div>
                               <p className="font-semibold text-slate-800">{participant.name}</p>
-                              <p className="text-sm text-slate-500">
-                                Rejoint le {formatTimeInOrganizerTimezone(participant.joined_at, meeting?.organizer_timezone)}
-                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
