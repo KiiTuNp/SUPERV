@@ -55,6 +55,14 @@ function App() {
       day: '2-digit'
     });
   };
+
+  const getCurrentDateTimeInOrganizerTimezone = (organizerTimezone) => {
+    const now = new Date();
+    if (!organizerTimezone) {
+      return now.toISOString();
+    }
+    return now.toISOString(); // JavaScript Date handles timezone conversion in toLocaleString
+  };
   const [closedMeetingInfo, setClosedMeetingInfo] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(10);
   const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
