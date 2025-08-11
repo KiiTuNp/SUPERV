@@ -20,6 +20,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+import pytz  # Pour la gestion des fuseaux horaires
 
 # Global lock for vote operations
 vote_locks = {}
