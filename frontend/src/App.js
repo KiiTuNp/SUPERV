@@ -1482,7 +1482,7 @@ function App() {
                   🔐 Fonction sécurisée - Les scrutateurs auront accès à l'interface organisateur
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6 overflow-y-auto max-h-[70vh]">
+              <CardContent className="p-6 overflow-y-auto max-h-[65vh] scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
                 <div className="space-y-6">
                   
                   {/* Explication et mise en garde */}
