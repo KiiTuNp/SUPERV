@@ -2393,12 +2393,13 @@ function App() {
             </div>
 
             {/* Contenu du modal */}
-            <div className="p-8 space-y-8">
-              {/* Section: Principe général */}
+            <div className="p-8 space-y-6">
+              
+              {/* Section: Qu'est-ce que c'est ? */}
               <div>
                 <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
                   <Vote className="w-6 h-6 text-blue-600" />
-                  Principe du système
+                  Qu'est-ce que SUPER Vote Secret ?
                 </h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <p className="text-slate-700 leading-relaxed mb-4">
