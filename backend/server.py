@@ -1041,10 +1041,24 @@ def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_
     story.append(Spacer(1, 20))
     
     # Meeting info
+    organizer_timezone = meeting_data.get('organizer_timezone')
+    
     story.append(Paragraph(f"<b>Réunion:</b> {meeting_data['title']}", styles['Normal']))
     story.append(Paragraph(f"<b>Organisateur:</b> {meeting_data['organizer_name']}", styles['Normal']))
     story.append(Paragraph(f"<b>Code de réunion:</b> {meeting_data['meeting_code']}", styles['Normal']))
-    story.append(Paragraph(f"<b>Date de génération:</b> {datetime.now().strftime('%d/%m/%Y à %H:%M')}", styles['Normal']))
+    
+    # Format creation date in organizer's timezone
+    if meeting_data.get('created_at'):
+        if isinstance(meeting_data['created_at'], str):
+            created_at = datetime.fromisoformat(meeting_data['created_at'].replace('Z', '+00:00'))
+        else:
+            created_at = meeting_data['created_at']
+        formatted_created_at = format_datetime_in_organizer_timezone(created_at, organizer_timezone)
+        story.append(Paragraph(f"<b>Date de création:</b> {formatted_created_at}", styles['Normal']))
+    
+    # Format generation date in organizer's timezone
+    current_time = get_current_time_in_organizer_timezone(organizer_timezone)
+    story.append(Paragraph(f"<b>Date de génération:</b> {current_time.strftime('%d/%m/%Y à %H:%M')}", styles['Normal']))
     story.append(Spacer(1, 30))
     
     # Scrutators section (if any)
