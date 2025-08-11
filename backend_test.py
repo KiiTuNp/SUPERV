@@ -1385,16 +1385,21 @@ class VoteSecretAPITester:
         print("🚀 Starting Vote Secret Backend API Tests")
         print(f"📡 Testing API at: {API_BASE_URL}")
         print("🔍 Testing NEW FEATURE: Automatic Scrutator Access System")
+        print("🌍 Testing NEW FEATURE: Timezone Support for PDF Reports")
         print("=" * 60)
         
         await self.setup_session()
         
         try:
-            # Core API Tests + New Scrutator Tests
+            # Core API Tests + New Scrutator Tests + Timezone Tests
             tests = [
                 self.test_health_check,
                 self.test_mongodb_connectivity,
                 self.test_create_meeting,
+                # NEW TIMEZONE TESTS
+                self.test_create_meeting_with_timezone,
+                self.test_create_meeting_different_timezone,
+                self.test_backward_compatibility_no_timezone,
                 self.test_get_meeting_by_code,
                 # NEW SCRUTATOR TESTS
                 self.test_add_scrutators,
@@ -1418,6 +1423,10 @@ class VoteSecretAPITester:
                 self.test_scrutator_vote_approve,
                 self.test_scrutator_vote_majority,
                 self.test_generate_report_after_approval,
+                # NEW TIMEZONE PDF REPORT TESTS
+                self.test_timezone_pdf_report_generation,
+                self.test_different_timezone_pdf_report,
+                self.test_no_timezone_pdf_report,
                 self.test_websocket_report_notifications,
                 # WEBSOCKET TEST
                 self.test_websocket_connection,
