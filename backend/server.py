@@ -1068,11 +1068,13 @@ def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_
         # Create scrutators table
         scrutators_table_data = [['#', 'Nom du scrutateur', 'Ajouté le']]
         for i, scrutator in enumerate(scrutators_data, 1):
-            # Handle both datetime objects and ISO strings
+            # Handle both datetime objects and ISO strings, convert to organizer timezone
             if isinstance(scrutator['added_at'], str):
-                added_time = datetime.fromisoformat(scrutator['added_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+                added_datetime = datetime.fromisoformat(scrutator['added_at'].replace('Z', '+00:00'))
             else:
-                added_time = scrutator['added_at'].strftime('%d/%m/%Y à %H:%M')
+                added_datetime = scrutator['added_at']
+            
+            added_time = format_datetime_in_organizer_timezone(added_datetime, organizer_timezone)
             scrutators_table_data.append([str(i), scrutator['name'], added_time])
         
         scrutators_table = Table(scrutators_table_data, colWidths=[0.5*inch, 3*inch, 1.5*inch])
