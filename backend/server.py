@@ -1103,11 +1103,13 @@ def generate_pdf_report(meeting_data, participants_data, polls_data, scrutators_
     if approved_participants:
         participants_table_data = [['#', 'Nom', 'Heure de participation']]
         for i, participant in enumerate(approved_participants, 1):
-            # Handle both datetime objects and ISO strings
+            # Handle both datetime objects and ISO strings, convert to organizer timezone
             if isinstance(participant['joined_at'], str):
-                joined_time = datetime.fromisoformat(participant['joined_at'].replace('Z', '+00:00')).strftime('%H:%M')
+                joined_datetime = datetime.fromisoformat(participant['joined_at'].replace('Z', '+00:00'))
             else:
-                joined_time = participant['joined_at'].strftime('%H:%M')
+                joined_datetime = participant['joined_at']
+            
+            joined_time = format_datetime_in_organizer_timezone(joined_datetime, organizer_timezone, '%H:%M')
             participants_table_data.append([str(i), participant['name'], joined_time])
         
         participants_table = Table(participants_table_data, colWidths=[0.5*inch, 3*inch, 1.5*inch])
