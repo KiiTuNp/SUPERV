@@ -2402,31 +2402,135 @@ function App() {
                   Qu'est-ce que SUPER Vote Secret ?
                 </h3>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <p className="text-slate-700 leading-relaxed mb-4">
-                    <strong>Vote Secret</strong> est un système de vote anonyme conçu pour les assemblées, réunions et consultations nécessitant la <strong>confidentialité absolue des votes</strong> et la <strong>transparence des résultats</strong>. 
-                    Le système garantit l'<strong>immutabilité des données</strong> et l'<strong>intégrité du processus électoral</strong>.
+                  <p className="text-slate-700 text-lg leading-relaxed">
+                    Une plateforme simple pour <strong>voter de façon totalement anonyme</strong> lors de réunions, 
+                    assemblées ou consultations. Votre identité ne peut jamais être liée à votre vote.
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div className="bg-white p-4 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Shield className="w-5 h-5 text-green-600" />
-                        <span className="font-semibold text-green-800">100% Anonyme</span>
+                </div>
+              </div>
+
+              {/* Section: Comment participer ? */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <UserPlus className="w-6 h-6 text-green-600" />
+                  Comment participer ?
+                </h3>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-green-600 font-bold text-xl">1</span>
                       </div>
-                      <p className="text-sm text-slate-600">Dissociation cryptographique identité/vote</p>
+                      <h4 className="font-semibold text-green-800 mb-2">Rejoignez</h4>
+                      <p className="text-sm text-green-700">Entrez le code de réunion que vous a donné l'organisateur</p>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Eye className="w-5 h-5 text-blue-600" />
-                        <span className="font-semibold text-blue-800">Transparence</span>
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-green-600 font-bold text-xl">2</span>
                       </div>
-                      <p className="text-sm text-slate-600">Résultats vérifiables et auditables</p>
+                      <h4 className="font-semibold text-green-800 mb-2">Votez</h4>
+                      <p className="text-sm text-green-700">Répondez aux sondages en toute confidentialité</p>
                     </div>
-                    <div className="bg-white p-4 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Trash2 className="w-5 h-5 text-red-600" />
-                        <span className="font-semibold text-red-800">Éphémère</span>
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-green-600 font-bold text-xl">3</span>
                       </div>
-                      <p className="text-sm text-slate-600">Suppression cryptographique post-rapport</p>
+                      <h4 className="font-semibold text-green-800 mb-2">Résultats</h4>
+                      <p className="text-sm text-green-700">Consultez les résultats une fois les votes fermés</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Vos garanties */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-purple-600" />
+                  Vos garanties
+                </h3>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Eye className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-purple-800">Anonymat total</h4>
+                          <p className="text-sm text-purple-700">Personne ne peut savoir comment vous avez voté</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Lock className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-purple-800">Sécurité</h4>
+                          <p className="text-sm text-purple-700">Impossible de modifier votre vote une fois envoyé</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Trash2 className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-purple-800">Suppression automatique</h4>
+                          <p className="text-sm text-purple-700">Toutes les données sont effacées après le rapport</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-purple-800">Transparence</h4>
+                          <p className="text-sm text-purple-700">Les résultats sont vérifiables par tous</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Important à savoir */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-6 h-6 text-orange-600" />
+                  Important à savoir
+                </h3>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-orange-800">
+                          <strong>Une fois votre vote envoyé, vous ne pouvez plus le changer.</strong> 
+                          Réfléchissez bien avant de valider !
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-orange-800">
+                          Les résultats ne sont visibles qu'une fois les votes fermés par l'organisateur.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <FileText className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm text-orange-800">
+                          À la fin, un rapport PDF sera généré puis toutes les données seront supprimées définitivement.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
