@@ -210,7 +210,8 @@ async def create_meeting(meeting_data: MeetingCreate):
     
     meeting = Meeting(
         title=meeting_data.title.strip(),
-        organizer_name=meeting_data.organizer_name.strip()
+        organizer_name=meeting_data.organizer_name.strip(),
+        organizer_timezone=meeting_data.organizer_timezone  # Stocker le fuseau horaire
     )
     await db.meetings.insert_one(meeting.dict())
     return meeting
