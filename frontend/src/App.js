@@ -2405,32 +2405,33 @@ function App() {
       {/* Modal d'information détaillé */}
       {showInfoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            {/* Header du modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                    <Shield className="w-6 h-6" />
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="flex flex-col h-full">
+              {/* Header du modal */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                      <Shield className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">SUPER Vote Secret v4.0 - Comment ça marche ?</h2>
+                      <p className="text-blue-100">Système de vote anonyme moderne - Workflow simplifié et sécurisé</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">SUPER Vote Secret v4.0 - Comment ça marche ?</h2>
-                    <p className="text-blue-100">Système de vote anonyme moderne - Workflow simplifié et sécurisé</p>
-                  </div>
+                  <Button
+                    onClick={() => setShowInfoModal(false)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => setShowInfoModal(false)}
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
               </div>
-            </div>
 
-            {/* Contenu du modal */}
-            <div className="p-8 space-y-6">
+              {/* Contenu scrollable */}
+              <div className="p-8 space-y-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100">
               
               {/* Section: Qu'est-ce que c'est ? */}
               <div>
