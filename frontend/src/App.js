@@ -10,6 +10,7 @@ import { Separator } from "./components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Switch } from "./components/ui/switch";
 import { CheckCircle, Clock, Users, Vote, AlertCircle, Play, Square, Download, FileText, Settings, UserPlus, Sparkles, Shield, BarChart3, Timer, Info, X, Lock, Trash2, Eye, UserCheck } from "lucide-react";
+import { useMeeting } from "./MeetingContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -18,10 +19,16 @@ console.log("🔍 Environment loaded:", { BACKEND_URL, API });
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
-  const [meeting, setMeeting] = useState(null);
-  const [participant, setParticipant] = useState(null);
-  const [ws, setWs] = useState(null);
-  const [meetingClosed, setMeetingClosed] = useState(false);
+  const {
+    meeting,
+    setMeeting,
+    participant,
+    setParticipant,
+    ws,
+    connectWebSocket,
+    meetingClosed,
+    setMeetingClosed,
+  } = useMeeting();
 
   // Timezone utility functions
   const formatDateInOrganizerTimezone = (dateString, organizerTimezone, options = {}) => {
@@ -65,36 +72,9 @@ function App() {
   const [recoveryUrl, setRecoveryUrl] = useState('');  // URL de récupération
   const [recoveryPassword, setRecoveryPassword] = useState('');  // Mot de passe de récupération
   const [showOrganizerAbsentModal, setShowOrganizerAbsentModal] = useState(false);  // Modal organisateur absent
-  const [lastHeartbeat, setLastHeartbeat] = useState(Date.now());  // Dernier heartbeat envoyé
 
   // Report generation states (simplifiés)
   const [downloadingReport, setDownloadingReport] = useState(false);
-
-  // Heartbeat system for organizer presence
-  useEffect(() => {
-    let heartbeatInterval;
-    
-    if (currentView === "organizer" && meeting && !isScrutator) {
-      // Envoyer un heartbeat toutes les 60 secondes
-      heartbeatInterval = setInterval(async () => {
-        try {
-          await axios.post(`${API}/meetings/${meeting.id}/heartbeat`, {
-            meeting_id: meeting.id,
-            organizer_name: meeting.organizer_name
-          });
-          setLastHeartbeat(Date.now());
-        } catch (error) {
-          console.error("Erreur lors de l'envoi du heartbeat:", error);
-        }
-      }, 60000); // 60 secondes
-    }
-    
-    return () => {
-      if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-      }
-    };
-  }, [currentView, meeting, isScrutator]);
 
   // Check if meeting can be closed
   useEffect(() => {
@@ -2289,96 +2269,6 @@ function App() {
   };
 
   // WebSocket connection
-  const connectWebSocket = (meetingId) => {
-    const wsUrl = `${BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://')}/ws/meetings/${meetingId}`;
-    const websocket = new WebSocket(wsUrl);
-    
-    websocket.onopen = () => {
-      console.log("WebSocket connected");
-      setWs(websocket);
-    };
-    
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("WebSocket message:", data);
-      
-      // Handle real-time updates based on message type
-      if (data.type === "participant_joined" || data.type === "participant_approved") {
-        // Refresh participant list for organizer
-        if (currentView === "organizer") {
-          window.location.reload(); // Simple refresh for now
-        }
-      }
-      
-      if (data.type === "scrutator_join_request" || data.type === "scrutator_approved") {
-        // Refresh scrutator list for organizer
-        if (currentView === "organizer" && !isScrutator) {
-          window.location.reload(); // Simple refresh for now
-        }
-      }
-      
-      // Suppression de toute la logique WebSocket des votes scrutateurs
-      // Plus nécessaire avec génération directe des rapports
-      
-      if (data.type === "poll_started" || data.type === "poll_closed" || data.type === "vote_submitted") {
-        // Refresh polls for both organizer and participants
-        window.location.reload(); // Simple refresh for now
-      }
-      
-      if (data.type === "leadership_transferred") {
-        // Leadership transferred to scrutator
-        if (isScrutator && scrutatorName === data.new_leader) {
-          alert(`🔄 Leadership transféré à vous !\n\nVous êtes maintenant responsable de cette réunion suite à l'absence de l'organisateur.`);
-          // Recharger pour obtenir les nouvelles permissions
-          window.location.reload();
-        } else if (isScrutator) {
-          alert(`🔄 Leadership transféré à ${data.new_leader} suite à l'absence de l'organisateur.`);
-        }
-      }
-      
-      if (data.type === "organizer_absent") {
-        // Organizer is absent - show modal for participants
-        if (currentView === "participant") {
-          setShowOrganizerAbsentModal(true);
-        }
-      }
-      
-      if (data.type === "meeting_auto_deleted") {
-        // Meeting automatically deleted
-        alert(`🗑️ Réunion supprimée automatiquement\n\nRaison: ${data.reason}\n\n${data.message}`);
-        setCurrentView("home");
-        setMeeting(null);
-        setParticipant(null);
-      }
-      
-      if (data.type === "meeting_closed") {
-        // Meeting has been closed - notify participants and redirect
-        if (currentView === "participant") {
-          console.log("Meeting closed notification received:", data);
-          setClosedMeetingInfo({
-            title: data.meeting_title,
-            organizerName: data.organizer_name,
-            reason: data.reason,
-            message: data.message
-          });
-          setMeetingClosed(true);
-          // Ne démarrer le countdown que s'il n'est pas déjà en cours
-          if (redirectCountdown === 10) {
-            setRedirectCountdown(10);
-          }
-        }
-      }
-    };
-    
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-    
-    websocket.onclose = () => {
-      console.log("WebSocket disconnected");
-      setWs(null);
-    };
-  };
 
   // Render current view
   const renderCurrentView = () => {
