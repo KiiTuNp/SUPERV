@@ -130,6 +130,7 @@ class Meeting(BaseModel):
 class MeetingCreate(BaseModel):
     title: str
     organizer_name: str
+    organizer_timezone: Optional[str] = None  # Fuseau horaire détecté automatiquement
 
 class RecoveryRequest(BaseModel):
     meeting_id: str
