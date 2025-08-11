@@ -1097,6 +1097,195 @@ class VoteSecretAPITester:
             self.log_test("Generate Report After Approval", False, f"Error: {str(e)}")
             return False
 
+    async def test_timezone_pdf_report_generation(self):
+        """Test 28: PDF Report Generation with Timezone (Paris)"""
+        if not self.meeting_data.get("timezone_meeting"):
+            self.log_test("Timezone PDF Report Generation", False, "No timezone meeting data available")
+            return False
+            
+        try:
+            timezone_meeting = self.meeting_data["timezone_meeting"]
+            
+            # Create a poll for the timezone meeting to have data in the report
+            poll_payload = {
+                "question": "Timezone test poll - What time zone are you in?",
+                "options": ["Europe/Paris", "America/New_York", "Asia/Tokyo", "UTC"],
+                "timer_duration": 60
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{timezone_meeting['id']}/polls",
+                json=poll_payload
+            ) as response:
+                if response.status != 200:
+                    self.log_test("Timezone PDF Report Generation", False, "Failed to create poll for timezone meeting")
+                    return False
+                
+                poll_data = await response.json()
+            
+            # Start and close the poll
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/start")
+            await asyncio.sleep(0.5)
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/close")
+            
+            # Generate PDF report
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{timezone_meeting['id']}/report"
+            ) as response:
+                if response.status == 200:
+                    # Check if we get a PDF file
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        # Read the PDF content to verify it's not empty
+                        pdf_content = await response.read()
+                        if len(pdf_content) > 1000:  # PDF should be at least 1KB
+                            self.log_test("Timezone PDF Report Generation", True, 
+                                        f"PDF report with timezone generated successfully ({len(pdf_content)} bytes)")
+                            return True
+                        else:
+                            self.log_test("Timezone PDF Report Generation", False, 
+                                        f"PDF too small ({len(pdf_content)} bytes)")
+                            return False
+                    else:
+                        self.log_test("Timezone PDF Report Generation", False, 
+                                    f"Expected PDF, got content-type: {content_type}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Timezone PDF Report Generation", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Timezone PDF Report Generation", False, f"Error: {str(e)}")
+            return False
+
+    async def test_different_timezone_pdf_report(self):
+        """Test 29: PDF Report Generation with Different Timezone (New York)"""
+        if not self.meeting_data.get("ny_timezone_meeting"):
+            self.log_test("Different Timezone PDF Report", False, "No NY timezone meeting data available")
+            return False
+            
+        try:
+            ny_meeting = self.meeting_data["ny_timezone_meeting"]
+            
+            # Create a poll for the NY timezone meeting
+            poll_payload = {
+                "question": "New York timezone test poll - Preferred meeting time?",
+                "options": ["9 AM EST", "12 PM EST", "3 PM EST", "6 PM EST"],
+                "timer_duration": 60
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{ny_meeting['id']}/polls",
+                json=poll_payload
+            ) as response:
+                if response.status != 200:
+                    self.log_test("Different Timezone PDF Report", False, "Failed to create poll for NY timezone meeting")
+                    return False
+                
+                poll_data = await response.json()
+            
+            # Start and close the poll
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/start")
+            await asyncio.sleep(0.5)
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/close")
+            
+            # Generate PDF report
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{ny_meeting['id']}/report"
+            ) as response:
+                if response.status == 200:
+                    # Check if we get a PDF file
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        # Read the PDF content to verify it's not empty
+                        pdf_content = await response.read()
+                        if len(pdf_content) > 1000:  # PDF should be at least 1KB
+                            self.log_test("Different Timezone PDF Report", True, 
+                                        f"PDF report with NY timezone generated successfully ({len(pdf_content)} bytes)")
+                            return True
+                        else:
+                            self.log_test("Different Timezone PDF Report", False, 
+                                        f"PDF too small ({len(pdf_content)} bytes)")
+                            return False
+                    else:
+                        self.log_test("Different Timezone PDF Report", False, 
+                                    f"Expected PDF, got content-type: {content_type}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("Different Timezone PDF Report", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Different Timezone PDF Report", False, f"Error: {str(e)}")
+            return False
+
+    async def test_no_timezone_pdf_report(self):
+        """Test 30: PDF Report Generation without Timezone (Backward Compatibility)"""
+        if not self.meeting_data.get("no_timezone_meeting"):
+            self.log_test("No Timezone PDF Report", False, "No no-timezone meeting data available")
+            return False
+            
+        try:
+            no_tz_meeting = self.meeting_data["no_timezone_meeting"]
+            
+            # Create a poll for the no-timezone meeting
+            poll_payload = {
+                "question": "No timezone test poll - Default time handling?",
+                "options": ["Server time", "UTC time", "Local time", "No preference"],
+                "timer_duration": 60
+            }
+            
+            async with self.session.post(
+                f"{API_BASE_URL}/meetings/{no_tz_meeting['id']}/polls",
+                json=poll_payload
+            ) as response:
+                if response.status != 200:
+                    self.log_test("No Timezone PDF Report", False, "Failed to create poll for no-timezone meeting")
+                    return False
+                
+                poll_data = await response.json()
+            
+            # Start and close the poll
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/start")
+            await asyncio.sleep(0.5)
+            await self.session.post(f"{API_BASE_URL}/polls/{poll_data['id']}/close")
+            
+            # Generate PDF report
+            async with self.session.get(
+                f"{API_BASE_URL}/meetings/{no_tz_meeting['id']}/report"
+            ) as response:
+                if response.status == 200:
+                    # Check if we get a PDF file
+                    content_type = response.headers.get('content-type', '')
+                    if 'application/pdf' in content_type:
+                        # Read the PDF content to verify it's not empty
+                        pdf_content = await response.read()
+                        if len(pdf_content) > 1000:  # PDF should be at least 1KB
+                            self.log_test("No Timezone PDF Report", True, 
+                                        f"PDF report without timezone generated successfully ({len(pdf_content)} bytes)")
+                            return True
+                        else:
+                            self.log_test("No Timezone PDF Report", False, 
+                                        f"PDF too small ({len(pdf_content)} bytes)")
+                            return False
+                    else:
+                        self.log_test("No Timezone PDF Report", False, 
+                                    f"Expected PDF, got content-type: {content_type}")
+                        return False
+                else:
+                    error_data = await response.text()
+                    self.log_test("No Timezone PDF Report", False, 
+                                f"HTTP {response.status}: {error_data}")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("No Timezone PDF Report", False, f"Error: {str(e)}")
+            return False
+
     async def test_websocket_report_notifications(self):
         """Test 24: WebSocket Notifications for Report Generation"""
         if not self.meeting_data:
