@@ -980,7 +980,7 @@ function App() {
                     </div>
                     
                     <CardDescription className="text-blue-100">
-                      Par {meeting?.organizer_name || "Organisateur"} à {meeting?.created_at ? formatTimeInOrganizerTimezone(meeting.created_at, meeting.organizer_timezone) : "00:00"} le {meeting?.created_at ? formatDateOnlyInOrganizerTimezone(meeting.created_at, meeting.organizer_timezone) : formatDateOnlyInOrganizerTimezone(getCurrentDateTimeInOrganizerTimezone(meeting?.organizer_timezone), meeting?.organizer_timezone)}
+                      Par {meeting?.organizer_name || "Organisateur"} à {meeting?.created_at ? formatTimeInOrganizerTimezone(meeting.created_at, meeting.organizer_timezone) : formatTimeInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)} le {meeting?.created_at ? formatDateOnlyInOrganizerTimezone(meeting.created_at, meeting.organizer_timezone) : formatDateOnlyInOrganizerTimezone(new Date().toISOString(), meeting?.organizer_timezone)}
                     </CardDescription>
                   </div>
                 </div>
