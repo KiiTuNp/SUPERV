@@ -345,10 +345,17 @@ function App() {
       setLoading(true);
       try {
         console.log("🚀 Making API call to create meeting...");
+        
+        // Détecter automatiquement le fuseau horaire de l'organisateur
+        const organizerTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        console.log("🌍 Detected organizer timezone:", organizerTimezone);
+        
         const response = await axios.post(`${API}/meetings`, {
           title,
-          organizer_name: organizerName
+          organizer_name: organizerName,
+          organizer_timezone: organizerTimezone  // Envoyer le fuseau horaire détecté
         });
+        
         console.log("✅ Meeting created successfully:", response.data);
         setMeeting(response.data);
         setCurrentView("organizer");
