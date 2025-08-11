@@ -22,6 +22,39 @@ function App() {
   const [participant, setParticipant] = useState(null);
   const [ws, setWs] = useState(null);
   const [meetingClosed, setMeetingClosed] = useState(false);
+
+  // Timezone utility functions
+  const formatDateInOrganizerTimezone = (dateString, organizerTimezone, options = {}) => {
+    if (!dateString || !organizerTimezone) {
+      return new Date(dateString).toLocaleString('fr-FR', options);
+    }
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('fr-FR', {
+        timeZone: organizerTimezone,
+        ...options
+      });
+    } catch (error) {
+      console.warn("Error formatting date with timezone:", error);
+      return new Date(dateString).toLocaleString('fr-FR', options);
+    }
+  };
+
+  const formatTimeInOrganizerTimezone = (dateString, organizerTimezone) => {
+    return formatDateInOrganizerTimezone(dateString, organizerTimezone, {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatDateOnlyInOrganizerTimezone = (dateString, organizerTimezone) => {
+    return formatDateInOrganizerTimezone(dateString, organizerTimezone, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
   const [closedMeetingInfo, setClosedMeetingInfo] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(10);
   const [isScrutator, setIsScrutator] = useState(false);  // Indique si l'utilisateur connecté est un scrutateur
